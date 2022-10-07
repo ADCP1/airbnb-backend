@@ -8,7 +8,20 @@
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@shared": ["shared"],
+      "@shared/*": ["shared/*"],
+      "@services": ["services"],
+      "@services/*": ["services/*"],
+      "@domain": ["domain"],
+      "@domain/*": ["domain/*"],
+      "@infra": ["infra"],
+      "@infra/*": ["infra/*"],
+      "@config": ["config"],
+      "@config/*": ["config/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"],
