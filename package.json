@@ -37,10 +37,5 @@
   },
   "dependencies": {
     "express": "^4.18.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run prettier && npm run lint"
-    }
   }
 }
