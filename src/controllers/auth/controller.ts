@@ -1,8 +1,9 @@
-import { Request, Response } from '@shared';
+import { Request } from '@shared';
 import { IAuthService, authService } from '@services';
+import { CreateTokenDto, TokenDto } from './dtos';
 
 interface IAuthController {
-  generateNewToken(rq: Request, res: Response): Promise<void>;
+  generateNewToken(req: Request<CreateTokenDto>): Promise<TokenDto>;
 }
 
 class AuthController implements IAuthController {
@@ -12,14 +13,12 @@ class AuthController implements IAuthController {
     this.authService = authService;
   }
 
-  public async generateNewToken(req: Request, res: Response) {
-    try {
-      res.json({
-        jwtString: await this.authService.generateJWT(req.body.refreshToken),
-      });
-    } catch (error) {
-      res.status(401).send('Invalid refresh token');
-    }
+  public async generateNewToken(
+    req: Request<CreateTokenDto>,
+  ): Promise<TokenDto> {
+    return {
+      token: await this.authService.generateJWT(req.body.refreshToken),
+    };
   }
 }
 

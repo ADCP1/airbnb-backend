@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@shared/exceptions';
 import { NextFunction, Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
 export function exceptionToHttpError(
   error: Error,
@@ -12,30 +13,26 @@ export function exceptionToHttpError(
   res: Response,
   next: NextFunction,
 ) {
+  let code: number;
+  let description: string;
+
   if (error instanceof DomainException) {
-    res.status(409).json({
-      error: error.message,
-      statusCode: 409,
-      description: 'Invalid operation',
-    });
+    code = StatusCodes.CONFLICT;
+    description = 'Invalid operation';
   } else if (error instanceof NotFoundException) {
-    res.status(404).json({
-      error: error.message,
-      statusCode: 404,
-      description: 'Not found',
-    });
+    code = StatusCodes.NOT_FOUND;
+    description = 'Not found';
   } else if (error instanceof UnauthorizedException) {
-    res.status(401).json({
-      error: error.message,
-      statusCode: 401,
-      description: 'Unauthorized',
-    });
+    code = StatusCodes.UNAUTHORIZED;
+    description = 'Unauthorized';
   } else if (error instanceof InternalServerException) {
-    res.status(500).json({
-      error: error.message,
-      statusCode: 500,
-      description: 'Internal server error',
-    });
+    code = StatusCodes.INTERNAL_SERVER_ERROR;
+    description = 'Internal server error';
   }
-  next(error);
+  if (!code) next(error);
+  res.status(code).json({
+    error: error.message,
+    statusCode: code,
+    description,
+  });
 }
