@@ -3,16 +3,13 @@ import { TokenDoc } from './token.doc';
 
 class TokenRepository implements ITokenRepository {
   public async save(token: Token) {
-    const tokenId = (
-      await TokenDoc.findOne({
+    await TokenDoc.updateOne(
+      {
         key: token.key,
-      })
-    )?._id;
-
-    await new TokenDoc({
-      _id: tokenId,
-      ...token,
-    });
+      },
+      { $set: token },
+      { upsert: true },
+    );
   }
 
   public async findOneByKey(key: string): Promise<Token | undefined> {

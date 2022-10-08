@@ -1,16 +1,18 @@
 import {
   DomainException,
-  InternalServerException,
   NotFoundException,
   UnauthorizedException,
 } from '@shared/exceptions';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
+// Don't remove the next parameter, otherwise the middleware is ignored by Express
+
 export function exceptionToHttpError(
   error: Error,
   req: Request,
   res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) {
   let code: number;
@@ -25,11 +27,11 @@ export function exceptionToHttpError(
   } else if (error instanceof UnauthorizedException) {
     code = StatusCodes.UNAUTHORIZED;
     description = 'Unauthorized';
-  } else if (error instanceof InternalServerException) {
+  } else {
     code = StatusCodes.INTERNAL_SERVER_ERROR;
     description = 'Internal server error';
   }
-  if (!code) next(error);
+
   res.status(code).json({
     error: error.message,
     statusCode: code,
