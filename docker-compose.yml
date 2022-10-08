@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: airbnb-app
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    networks:
+      - airbnb
+
+networks:
+  airbnb:
