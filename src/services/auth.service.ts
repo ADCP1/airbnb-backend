@@ -1,13 +1,15 @@
 import { ITokenRepository, Token } from '@domain/token';
-import { tokenRepository } from '@infra';
+import { tokenRepository } from '@infra/token';
 import jwt from 'jsonwebtoken';
 import { v1 } from 'uuid';
 import { config } from '@config';
 
 interface IAuthService {
-  generateJWT(receivedRefreshToken: string): string;
-  generateTokens(username: string): { token: string; refreshToken: string };
-  deleteRefreshToken(username: string): void;
+  generateJWT(receivedRefreshToken: string): Promise<string>;
+  generateTokens(
+    username: string,
+  ): Promise<{ token: string; refreshToken: string }>;
+  deleteRefreshToken(username: string): Promise<void>;
   hashPassword(password: string): string;
 }
 
@@ -18,7 +20,7 @@ class AuthService {
     this.tokenRepository = tokenRepository;
   }
 
-  public generateJWT(receivedRefreshToken: string): string {
+  public async generateJWT(receivedRefreshToken: string): Promise<string> {
     const refreshTokenData = jwt.verify(
       receivedRefreshToken,
       config.refreshTokenKey,
@@ -26,7 +28,7 @@ class AuthService {
     if (!refreshTokenData) {
       throw new Error('Invalid refresh token');
     }
-    const storedRefreshToken = this.tokenRepository.findOneByKey(
+    const storedRefreshToken = await this.tokenRepository.findOneByKey(
       refreshTokenData.username,
     );
     if (!storedRefreshToken) {
@@ -44,10 +46,10 @@ class AuthService {
     );
   }
 
-  public generateTokens(username: string): {
+  public async generateTokens(username: string): Promise<{
     token: string;
     refreshToken: string;
-  } {
+  }> {
     const token = jwt.sign({ username, uuid: v1() }, config.tokenKey, {
       expiresIn: `${config.tokenLifeMinutes * 60}s`,
     });
@@ -62,12 +64,12 @@ class AuthService {
       key: username,
       value: refreshTokenValue,
     });
-    this.tokenRepository.save(refreshToken);
+    await this.tokenRepository.save(refreshToken);
     return { token, refreshToken: refreshTokenValue };
   }
 
-  public deleteRefreshToken(username: string) {
-    this.tokenRepository.deleteOneByKey(username);
+  public async deleteRefreshToken(username: string) {
+    return this.tokenRepository.deleteOneByKey(username);
   }
 
   public hashPassword(password: string): string {

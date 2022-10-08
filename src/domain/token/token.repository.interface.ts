@@ -1,7 +1,7 @@
 import { Token } from './token.entity';
 
 export interface ITokenRepository {
-  save(token: Token): void;
-  findOneByKey(key: string): Token | undefined;
-  deleteOneByKey(key: string): void;
+  save(token: Token): Promise<void>;
+  findOneByKey(key: string): Promise<Token | undefined>;
+  deleteOneByKey(key: string): Promise<void>;
 }

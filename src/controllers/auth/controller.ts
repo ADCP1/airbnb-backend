@@ -12,10 +12,10 @@ class AuthController implements IAuthController {
     this.authService = authService;
   }
 
-  public generateNewToken(req: Request, res: Response) {
+  public async generateNewToken(req: Request, res: Response) {
     try {
       res.json({
-        jwtString: this.authService.generateJWT(req.body.refreshToken),
+        jwtString: await this.authService.generateJWT(req.body.refreshToken),
       });
     } catch (error) {
       res.status(401).send('Invalid refresh token');

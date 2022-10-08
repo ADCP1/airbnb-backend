@@ -1,6 +1,6 @@
 import { User } from './user.entity';
 
 export interface IUserRepository {
-  save(user: User): void;
-  findOneByUsername(username: string): User | undefined;
+  save(user: User): Promise<void>;
+  findOneByUsername(username: string): Promise<User | undefined>;
 }

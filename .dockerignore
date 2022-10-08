@@ -1,5 +1,6 @@
 node_modules
 target
 .husky
+.env
 docker-compose.yml
 Dockerfile
