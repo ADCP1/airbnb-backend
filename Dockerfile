@@ -10,6 +10,4 @@ COPY . .
 EXPOSE 8080
 ENV PORT=8080
 
-USER node
-
 CMD ["npm", "start"]
