@@ -1,4 +1,5 @@
 import { User, IUserRepository } from '@domain/user';
+import { DomainException } from '@shared';
 import { UserDoc } from './user.doc';
 
 class UserRepository implements IUserRepository {
@@ -6,7 +7,7 @@ class UserRepository implements IUserRepository {
     if (!(await this.findOneByUsername(user.username))) {
       await new UserDoc({ ...user }).save();
     } else {
-      throw new Error('A user with that username already exists');
+      throw new DomainException('A user with that username already exists');
     }
   }
 

@@ -1,5 +1,6 @@
 import { IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
+import { NotFoundException } from '@shared';
 import { authService, IAuthService } from './auth.service';
 
 interface IUserService {
@@ -30,7 +31,9 @@ class UserService implements IUserService {
     const hashedPassword = this.authService.hashPassword(password);
     const user = await this.userRepository.findOneByUsername(username);
     if (!user || hashedPassword !== user.password) {
-      throw new Error('Credentials are incorrect or user does not exist');
+      throw new NotFoundException(
+        'Credentials are incorrect or user does not exist',
+      );
     }
     return this.authService.generateTokens(username);
   }

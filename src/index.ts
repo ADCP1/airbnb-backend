@@ -4,7 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import pino from 'express-pino-logger';
-import { snakeToCamelcaseKeys } from './shared';
+import { exceptionToHttpError, snakeToCamelcaseKeys } from './shared';
 import { config } from './config';
 import { registerRouters } from './controllers';
 
@@ -17,8 +17,8 @@ async function main() {
   app.use(cors());
   app.use(express.json());
   app.use(snakeToCamelcaseKeys());
-
   registerRouters(app);
+  app.use(exceptionToHttpError);
 
   app.listen(config.port, () => {
     console.log(`App listening on port ${config.port}`);

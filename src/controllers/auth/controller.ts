@@ -2,7 +2,7 @@ import { Request, Response } from '@shared';
 import { IAuthService, authService } from '@services';
 
 interface IAuthController {
-  generateNewToken(rq: Request, res: Response): void;
+  generateNewToken(rq: Request, res: Response): Promise<void>;
 }
 
 class AuthController implements IAuthController {

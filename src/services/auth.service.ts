@@ -3,6 +3,7 @@ import { tokenRepository } from '@infra/token';
 import jwt from 'jsonwebtoken';
 import { v1 } from 'uuid';
 import { config } from '@config';
+import { UnauthorizedException } from '@shared';
 
 interface IAuthService {
   generateJWT(receivedRefreshToken: string): Promise<string>;
@@ -26,16 +27,16 @@ class AuthService {
       config.refreshTokenKey,
     ) as { username: string; uuid: string };
     if (!refreshTokenData) {
-      throw new Error('Invalid refresh token');
+      throw new UnauthorizedException('Invalid refresh token');
     }
     const storedRefreshToken = await this.tokenRepository.findOneByKey(
       refreshTokenData.username,
     );
     if (!storedRefreshToken) {
-      throw new Error('Refresh token does not exist');
+      throw new UnauthorizedException('Refresh token does not exist');
     }
     if (storedRefreshToken.value !== receivedRefreshToken) {
-      throw new Error('Refresh token not related to user');
+      throw new UnauthorizedException('Refresh token not related to user');
     }
     return jwt.sign(
       { username: refreshTokenData.username, uuid: v1() },

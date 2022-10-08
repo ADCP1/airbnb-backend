@@ -3,9 +3,9 @@ import { Request, Response } from '@shared';
 import { CreateUserDto } from './dtos';
 
 interface IUserController {
-  login(req: Request, res: Response): void;
-  logout(req: Request, res: Response): void;
-  register(req: Request<CreateUserDto>, res: Response): void;
+  login(req: Request, res: Response): Promise<void>;
+  logout(req: Request, res: Response): Promise<void>;
+  register(req: Request<CreateUserDto>, res: Response): Promise<void>;
 }
 
 class UserController {
@@ -16,32 +16,20 @@ class UserController {
   }
 
   public async login(req: Request, res: Response) {
-    try {
-      res.json(
-        await this.userService.login(req.body.username, req.body.password),
-      );
-    } catch (error) {
-      res.status(409).send('Incorrect username or password');
-    }
+    res.json(
+      await this.userService.login(req.body.username, req.body.password),
+    );
   }
 
   public async logout(req: Request, res: Response) {
-    try {
-      await this.userService.logout(req.user.username);
-      res.status(200).send();
-    } catch (error) {
-      res.status(500).send('Internal server error');
-    }
+    await this.userService.logout(req.user.username);
+    res.status(200).send();
   }
 
   public async register(req: Request<CreateUserDto>, res: Response) {
-    try {
-      res.json(
-        await this.userService.register(req.body.username, req.body.password),
-      );
-    } catch (error) {
-      res.status(409).send('Account already exists');
-    }
+    res.json(
+      await this.userService.register(req.body.username, req.body.password),
+    );
   }
 }
 
