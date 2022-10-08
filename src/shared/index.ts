@@ -1,2 +1,2 @@
-export * as Middleware from './middleware';
-export * as HTTP from './http';
+export * from './middleware';
+export * from './http';

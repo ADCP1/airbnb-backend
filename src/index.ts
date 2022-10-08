@@ -1,14 +1,19 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
+import cors from 'cors';
+import { snakeToCamelcaseKeys } from './shared';
+import { config } from './config';
+import { registerRouters } from './controllers';
 
 const app = express();
-const port = process.env.PORT;
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+app.use(cors());
+app.use(express.json());
+app.use(snakeToCamelcaseKeys());
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+registerRouters(app);
+
+app.listen(config.port, () => {
+  console.log(`App listening on port ${config.port}`);
 });

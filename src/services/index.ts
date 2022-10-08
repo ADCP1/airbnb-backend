@@ -1,1 +1,1 @@
-export {}; // TODO
+export * from './auth.service';
