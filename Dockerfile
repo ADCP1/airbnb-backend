@@ -12,4 +12,4 @@ ENV PORT=8080
 
 USER node
 
-CMD npm start
+CMD ["npm", "start"]
