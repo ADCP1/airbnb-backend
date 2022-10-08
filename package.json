@@ -4,7 +4,7 @@
   "description": "Airbnb Backend",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && TS_NODE_BASEURL=./target node -r tsconfig-paths/register target",
+    "start": "tsc && TS_NODE_BASEURL=./target node -r tsconfig-paths/register --inspect=0.0.0.0:9229 target",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts",

@@ -4,14 +4,14 @@ import jwt from 'jsonwebtoken';
 import { v1 } from 'uuid';
 import { config } from '@config';
 
-interface AuthService {
+interface IAuthService {
   generateJWT(receivedRefreshToken: string): string;
-  generateTokens(username: string): void;
+  generateTokens(username: string): { token: string; refreshToken: string };
   deleteRefreshToken(username: string): void;
   hashPassword(password: string): string;
 }
 
-class CAuthService {
+class AuthService {
   private tokenRepository: ITokenRepository;
 
   constructor(tokenRepository: ITokenRepository) {
@@ -44,7 +44,10 @@ class CAuthService {
     );
   }
 
-  public generateTokens(username: string) {
+  public generateTokens(username: string): {
+    token: string;
+    refreshToken: string;
+  } {
     const token = jwt.sign({ username, uuid: v1() }, config.tokenKey, {
       expiresIn: `${config.tokenLifeMinutes * 60}s`,
     });
@@ -60,7 +63,7 @@ class CAuthService {
       value: refreshTokenValue,
     });
     this.tokenRepository.save(refreshToken);
-    return { token, refreshTokenValue };
+    return { token, refreshToken: refreshTokenValue };
   }
 
   public deleteRefreshToken(username: string) {
@@ -72,6 +75,6 @@ class CAuthService {
   }
 }
 
-const authService: AuthService = new CAuthService(tokenRepository);
+const authService: IAuthService = new AuthService(tokenRepository);
 
-export { AuthService, authService };
+export { IAuthService, authService };

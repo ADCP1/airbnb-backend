@@ -1,14 +1,14 @@
 import { Request, Response } from '@shared';
-import { AuthService, authService } from '@services';
+import { IAuthService, authService } from '@services';
 
-interface AuthController {
+interface IAuthController {
   generateNewToken(rq: Request, res: Response): void;
 }
 
-class CAuthController implements AuthController {
-  private authService: AuthService;
+class AuthController implements IAuthController {
+  private authService: IAuthService;
 
-  constructor() {
+  constructor(authService: IAuthService) {
     this.authService = authService;
   }
 
@@ -23,6 +23,6 @@ class CAuthController implements AuthController {
   }
 }
 
-const authController: AuthController = new CAuthController();
+const authController: IAuthController = new AuthController(authService);
 
-export { AuthController, authController };
+export { IAuthController as AuthController, authController };
