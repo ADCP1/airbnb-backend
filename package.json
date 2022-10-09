@@ -4,7 +4,8 @@
   "description": "Airbnb Backend",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && TS_NODE_BASEURL=./target node -r tsconfig-paths/register --inspect=0.0.0.0:9229 target",
+    "start": "tsc && TS_NODE_BASEURL=./target node -r tsconfig-paths/register target",
+    "start:debug": "nodemon -e ts --exec \"node --inspect=0.0.0.0:9229 -r tsconfig-paths/register -r ts-node/register src/index.ts\"",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts",
@@ -39,6 +40,7 @@
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
+    "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.0",
     "typescript": "^4.8.4"
   },
@@ -53,6 +55,7 @@
     "http-status-codes": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.6.5",
+    "nodemon": "^2.0.20",
     "uuid": "^9.0.0"
   },
   "lint-staged": {

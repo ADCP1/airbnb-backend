@@ -2,4 +2,4 @@
 
 source "$(pwd)/scripts/wait-for-mongo.sh"
 
-exec npm start # Responds to SIGTERM signal
+exec npm run start${DEBUG+:debug} # Responds to SIGTERM signal

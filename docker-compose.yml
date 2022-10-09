@@ -23,8 +23,13 @@ services:
     image: mongo
     ports:
       - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - airbnb-mongo-db:/var/lib/mongo
     networks:
       - airbnb
 
 networks:
   airbnb:
+
+volumes:
+  airbnb-mongo-db:
