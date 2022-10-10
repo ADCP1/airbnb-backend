@@ -5,7 +5,7 @@ import { UserDoc } from './user.doc';
 class UserRepository implements IUserRepository {
   public async save(user: User) {
     const userAlreadyExists =
-      (await this.findOneByEmail(user.name)) !== undefined;
+      (await this.findOneByEmail(user.email)) !== undefined;
     if (!userAlreadyExists) {
       await new UserDoc({ ...user }).save();
     } else {

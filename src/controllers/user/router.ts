@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { registerHandler, validateDto, validateJWT } from '@shared';
-import { UserCredentialsDto } from './dtos';
+import { LoginUserDto } from './dtos';
 import { userController } from './controller';
 import { StatusCodes } from 'http-status-codes';
-import { UserRegisterDto } from './dtos/request/user-register.dto';
+import { RegisterUserDto } from './dtos';
 
 export function UserRouter() {
   const router = Router();
 
   router.post(
     '/',
-    validateDto(UserCredentialsDto),
+    validateDto(LoginUserDto),
     registerHandler((req) => userController.login(req)),
   );
   router.delete(
@@ -20,7 +20,7 @@ export function UserRouter() {
   );
   router.post(
     '/register',
-    validateDto(UserRegisterDto),
+    validateDto(RegisterUserDto),
     registerHandler((req) => userController.register(req), StatusCodes.CREATED),
   );
 
