@@ -6,7 +6,7 @@ import { authService, IAuthService } from './auth.service';
 
 interface IUserService {
   login(
-    username: string,
+    email: string,
     password: string,
   ): Promise<{ token: string; refreshToken: string }>;
   logout(username: string): Promise<void>;
@@ -19,23 +19,23 @@ class UserService implements IUserService {
   private userRepository: IUserRepository;
   private authService: IAuthService;
 
-  constructor(userRespository: IUserRepository, authService: IAuthService) {
-    this.userRepository = userRespository;
+  constructor(userRepository: IUserRepository, authService: IAuthService) {
+    this.userRepository = userRepository;
     this.authService = authService;
   }
 
   public async login(
-    username: string,
+    email: string,
     password: string,
   ): Promise<{ token: string; refreshToken: string }> {
     const hashedPassword = this.authService.hashPassword(password);
-    const user = await this.userRepository.findOneByUsername(username);
+    const user = await this.userRepository.findOneByEmail(email);
     if (!user || hashedPassword !== user.password) {
       throw new NotFoundException(
         'Credentials are incorrect or user does not exist',
       );
     }
-    return this.authService.generateTokens(username);
+    return this.authService.generateTokens(email);
   }
 
   public async logout(username: string): Promise<void> {
@@ -60,7 +60,7 @@ class UserService implements IUserService {
         password,
       }),
     );
-    return this.authService.generateTokens(name);
+    return this.authService.generateTokens(email);
   }
 }
 

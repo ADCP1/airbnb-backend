@@ -19,7 +19,7 @@ class UserController {
   public async login(
     req: Request<UserCredentialsDto>,
   ): Promise<TokenCredentialsDto> {
-    return this.userService.login(req.body.username, req.body.password);
+    return this.userService.login(req.body.email, req.body.password);
   }
 
   public async logout(req: Request) {
