@@ -1,4 +1,13 @@
-import { IsUrl, IsString, MaxLength, IsMobilePhone, IsCreditCard, IsDate, IsOptional } from 'class-validator';
+import {
+  IsUrl,
+  IsEmail,
+  IsString,
+  MaxLength,
+  IsMobilePhone,
+  IsCreditCard,
+  IsDateString,
+  IsOptional,
+} from 'class-validator';
 
 export class UserProfileDto {
   @IsString()

@@ -2,9 +2,12 @@ import { RequestDtos } from '@application/dtos';
 import { IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
 import { NotFoundException } from '@shared';
-
+import {
+  LoginUserDto,
+  RegisterUserDto,
+  UserProfileDto,
+} from 'controllers/user/dtos';
 import { authService, IAuthService } from './auth.service';
-import { UserProfileDto } from 'controllers/user/dtos';
 
 interface IUserService {
   login(
@@ -14,9 +17,7 @@ interface IUserService {
   register(
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
-  update(
-    userDto: UserProfileDto
-  ): Promise<User>;
+  update(userDto: UserProfileDto): Promise<User>;
 }
 
 class UserService implements IUserService {
