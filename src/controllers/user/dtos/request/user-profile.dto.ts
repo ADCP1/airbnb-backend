@@ -1,15 +1,15 @@
-import { IsUrl, IsString, MaxLength, IsMobilePhone, IsCreditCard, IsDate, IsOptional } from 'class-validator';
+import { IsUrl, IsEmail, IsString, MaxLength, IsMobilePhone, IsCreditCard, IsDateString, IsOptional } from 'class-validator';
 
 export class UserProfileDto {
-  @IsString()
-  username: string;
+  @IsEmail()
+  email: string;
 
   @IsString()
   @MaxLength(50)
   @IsOptional()
   location: string;
 
-  @IsString({each: true})
+  @IsString({ each: true })
   @IsOptional()
   languages: string[];
 
@@ -34,7 +34,7 @@ export class UserProfileDto {
   @IsOptional()
   creditCardNumber: string;
 
-  @IsString()
+  @IsDateString()
   @IsOptional()
   creditCardExpirationDate: Date;
 

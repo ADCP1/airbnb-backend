@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { registerHandler, validateDto, validateJWT } from '@shared';
-import { UserCredentialsDto, UserProfileDto } from './dtos';
+import { LoginUserDto, RegisterUserDto, UserProfileDto } from './dtos';
 import { userController } from './controller';
 import { StatusCodes } from 'http-status-codes';
 
@@ -9,7 +9,7 @@ export function UserRouter() {
 
   router.post(
     '/',
-    validateDto(UserCredentialsDto),
+    validateDto(LoginUserDto),
     registerHandler((req) => userController.login(req)),
   );
   router.delete(
@@ -19,7 +19,7 @@ export function UserRouter() {
   );
   router.post(
     '/register',
-    validateDto(UserCredentialsDto),
+    validateDto(RegisterUserDto),
     registerHandler((req) => userController.register(req), StatusCodes.CREATED),
   );
   router.patch(

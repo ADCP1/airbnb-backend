@@ -1,18 +1,16 @@
 import { IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
 import { NotFoundException } from '@shared';
+import { LoginUserDto, RegisterUserDto, UserProfileDto } from 'controllers/user/dtos';
 import { authService, IAuthService } from './auth.service';
-import { UserProfileDto } from 'controllers/user/dtos';
 
 interface IUserService {
   login(
-    username: string,
-    password: string,
+    userDto: LoginUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
   logout(username: string): Promise<void>;
   register(
-    username: string,
-    password: string,
+    userDto: RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
   update(
     userDto: UserProfileDto
@@ -23,23 +21,22 @@ class UserService implements IUserService {
   private userRepository: IUserRepository;
   private authService: IAuthService;
 
-  constructor(userRespository: IUserRepository, authService: IAuthService) {
-    this.userRepository = userRespository;
+  constructor(userRepository: IUserRepository, authService: IAuthService) {
+    this.userRepository = userRepository;
     this.authService = authService;
   }
 
   public async login(
-    username: string,
-    password: string,
+    userDto: LoginUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
-    const hashedPassword = this.authService.hashPassword(password);
-    const user = await this.userRepository.findOneByUsername(username);
+    const hashedPassword = this.authService.hashPassword(userDto.password);
+    const user = await this.userRepository.findOneByEmail(userDto.email);
     if (!user || hashedPassword !== user.password) {
       throw new NotFoundException(
         'Credentials are incorrect or user does not exist',
       );
     }
-    return this.authService.generateTokens(username);
+    return this.authService.generateTokens(userDto.email);
   }
 
   public async logout(username: string): Promise<void> {
@@ -47,16 +44,10 @@ class UserService implements IUserService {
   }
 
   public async register(
-    username: string,
-    password: string,
+    userDto: RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
-    await this.userRepository.save(
-      new User({
-        username,
-        password,
-      }),
-    );
-    return this.authService.generateTokens(username);
+    await this.userRepository.save(new User(userDto));
+    return this.authService.generateTokens(userDto.email);
   }
 
   public async update(userDto: UserProfileDto): Promise<User> {

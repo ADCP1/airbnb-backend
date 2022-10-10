@@ -6,28 +6,24 @@ import { UserDoc } from './user.doc';
 class UserRepository implements IUserRepository {
   public async save(user: User) {
     const userAlreadyExists =
-      (await this.findOneByUsername(user.username)) !== undefined;
+      (await this.findOneByEmail(user.email)) !== undefined;
     if (!userAlreadyExists) {
       await new UserDoc({ ...user }).save();
     } else {
-      throw new DomainException('A user with that username already exists');
+      throw new DomainException('A user with that email already exists');
     }
   }
 
-  public async findOneByUsername(username: string): Promise<User | undefined> {
+  public async findOneByEmail(email: string): Promise<User | undefined> {
     const user = await UserDoc.findOne({
-      username,
+      email,
     });
     if (!user) return undefined;
-    return new User({
-      id: user.id,
-      username: user.username,
-      password: user.password,
-    });
+    return new User(user);
   }
 
   public async update(user: UserProfileDto): Promise<User> {
-    const filter = { username: user.username };
+    const filter = { email: user.email };
     return UserDoc.findOneAndUpdate(filter, user, {
       new: true
     });
