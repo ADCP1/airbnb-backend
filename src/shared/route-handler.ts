@@ -1,7 +1,8 @@
 import { NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { Request, Response } from './http';
 import snakecaseKeys from 'snakecase-keys';
+
+import { Request, Response } from './http';
 
 type ResBody = Record<string, unknown> | void;
 

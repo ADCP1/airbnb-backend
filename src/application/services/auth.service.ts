@@ -1,10 +1,10 @@
+import { config } from '@config';
 import { ITokenRepository, Token } from '@domain/token';
 import { tokenRepository } from '@infra/token';
-import jwt from 'jsonwebtoken';
-import { v1 } from 'uuid';
-import { config } from '@config';
 import { UnauthorizedException } from '@shared';
+import jwt from 'jsonwebtoken';
 import passwordHash from 'password-hash';
+import { v1 } from 'uuid';
 
 interface IAuthService {
   generateJWT(receivedRefreshToken: string): Promise<string>;
@@ -90,4 +90,4 @@ class AuthService {
 
 const authService: IAuthService = new AuthService(tokenRepository);
 
-export { IAuthService, authService };
+export { authService, IAuthService };

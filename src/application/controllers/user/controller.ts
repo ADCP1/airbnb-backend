@@ -1,11 +1,15 @@
-import { IUserService, userService } from '@services';
+import { IUserService, userService } from '@application';
+import { RequestDtos, ResponseDtos } from '@application/dtos';
 import { Request } from '@shared';
-import { LoginUserDto, TokenCredentialsDto, RegisterUserDto } from './dtos';
 
 interface IUserController {
-  login(req: Request<LoginUserDto>): Promise<TokenCredentialsDto>;
+  login(
+    req: Request<RequestDtos.LoginUserDto>,
+  ): Promise<ResponseDtos.TokenCredentialsDto>;
   logout(req: Request): Promise<void>;
-  register(req: Request<RegisterUserDto>): Promise<TokenCredentialsDto>;
+  register(
+    req: Request<RequestDtos.RegisterUserDto>,
+  ): Promise<ResponseDtos.TokenCredentialsDto>;
 }
 
 class UserController {
@@ -15,7 +19,9 @@ class UserController {
     this.userService = userService;
   }
 
-  public async login(req: Request<LoginUserDto>): Promise<TokenCredentialsDto> {
+  public async login(
+    req: Request<RequestDtos.LoginUserDto>,
+  ): Promise<ResponseDtos.TokenCredentialsDto> {
     return this.userService.login(req.body);
   }
 
@@ -24,8 +30,8 @@ class UserController {
   }
 
   public async register(
-    req: Request<RegisterUserDto>,
-  ): Promise<TokenCredentialsDto> {
+    req: Request<RequestDtos.RegisterUserDto>,
+  ): Promise<ResponseDtos.TokenCredentialsDto> {
     return this.userService.register(req.body);
   }
 }

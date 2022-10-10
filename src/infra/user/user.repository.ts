@@ -1,5 +1,6 @@
-import { User, IUserRepository } from '@domain/user';
+import { IUserRepository, User } from '@domain/user';
 import { DomainException } from '@shared';
+
 import { UserDoc } from './user.doc';
 
 class UserRepository implements IUserRepository {

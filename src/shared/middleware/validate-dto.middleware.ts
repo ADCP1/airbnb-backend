@@ -1,6 +1,6 @@
-import { RequestHandler } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
+import { RequestHandler } from 'express';
 
 const camelToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);

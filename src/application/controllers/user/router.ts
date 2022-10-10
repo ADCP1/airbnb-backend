@@ -1,8 +1,9 @@
-import { Router } from 'express';
+import { LoginUserDto, RegisterUserDto } from '@application/dtos/request';
 import { registerHandler, validateDto, validateJWT } from '@shared';
-import { LoginUserDto, RegisterUserDto } from './dtos';
-import { userController } from './controller';
+import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
+
+import { userController } from './controller';
 
 export function UserRouter() {
   const router = Router();

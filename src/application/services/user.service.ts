@@ -1,16 +1,17 @@
+import { RequestDtos } from '@application/dtos';
 import { IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
 import { NotFoundException } from '@shared';
-import { LoginUserDto, RegisterUserDto } from 'controllers/user/dtos';
+
 import { authService, IAuthService } from './auth.service';
 
 interface IUserService {
   login(
-    userDto: LoginUserDto,
+    userDto: RequestDtos.LoginUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
   logout(username: string): Promise<void>;
   register(
-    userDto: RegisterUserDto,
+    userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
 }
 
@@ -24,7 +25,7 @@ class UserService implements IUserService {
   }
 
   public async login(
-    userDto: LoginUserDto,
+    userDto: RequestDtos.LoginUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
     const user = await this.userRepository.findOneByEmail(userDto.email);
     const isValidLogin =
@@ -40,7 +41,7 @@ class UserService implements IUserService {
   }
 
   public async register(
-    userDto: RegisterUserDto,
+    userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
     const hashedPassword = this.authService.hashPassword(userDto.password);
     await this.userRepository.save(

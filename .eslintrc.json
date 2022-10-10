@@ -3,7 +3,8 @@
   "parser": "@typescript-eslint/parser",
   "plugins": [
     "@typescript-eslint",
-    "prettier"
+    "prettier",
+    "simple-import-sort"
   ],
   "extends": [
     "eslint:recommended",
@@ -13,6 +14,8 @@
   ],
   "rules": {
     "prettier/prettier": 2,
-    "@typescript-eslint/no-explicit-any": 0
+    "@typescript-eslint/no-explicit-any": 0,
+    "simple-import-sort/imports": 2,
+    "simple-import-sort/exports": 2
   }
 }

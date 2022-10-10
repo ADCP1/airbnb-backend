@@ -1,9 +1,11 @@
+import { authService, IAuthService } from '@application';
+import { RequestDtos, ResponseDtos } from '@application/dtos';
 import { Request } from '@shared';
-import { IAuthService, authService } from '@services';
-import { CreateTokenDto, TokenDto } from './dtos';
 
 interface IAuthController {
-  generateNewToken(req: Request<CreateTokenDto>): Promise<TokenDto>;
+  generateNewToken(
+    req: Request<RequestDtos.CreateTokenDto>,
+  ): Promise<ResponseDtos.TokenDto>;
 }
 
 class AuthController implements IAuthController {
@@ -14,8 +16,8 @@ class AuthController implements IAuthController {
   }
 
   public async generateNewToken(
-    req: Request<CreateTokenDto>,
-  ): Promise<TokenDto> {
+    req: Request<RequestDtos.CreateTokenDto>,
+  ): Promise<ResponseDtos.TokenDto> {
     return {
       token: await this.authService.generateJWT(req.body.refreshToken),
     };

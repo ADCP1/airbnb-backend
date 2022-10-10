@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
 import { config } from '@config';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 export function validateJWT(req: Request, res: Response, next: NextFunction) {
