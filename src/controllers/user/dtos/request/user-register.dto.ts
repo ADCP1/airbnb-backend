@@ -1,5 +1,6 @@
 import {
   IsDate,
+  isDateString,
   IsDateString,
   IsEmail,
   IsMobilePhone,
@@ -24,7 +25,7 @@ export class RegisterUserDto {
   @IsNotEmpty()
   phone: string;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
   dateOfBirth: Date;
 
