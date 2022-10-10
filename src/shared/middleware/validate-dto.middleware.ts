@@ -2,6 +2,9 @@ import { RequestHandler } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 
+const camelToSnakeCase = (str: string) =>
+  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
 export function validateDto(
   type: any,
   skipMissingProperties = false,
@@ -15,9 +18,9 @@ export function validateDto(
           const dtoErrors: Record<string, unknown> = {};
           errors.map(
             (error) =>
-              (dtoErrors[error.property] = (Object as any).values(
-                error.constraints,
-              )),
+              (dtoErrors[camelToSnakeCase(error.property)] = (
+                Object as any
+              ).values(error.constraints)),
           );
 
           res.setHeader('Content-Type', 'application/json');
