@@ -1,7 +1,12 @@
 import { User } from '@domain/user';
 import { IUserService, userService } from '@services';
 import { Request } from '@shared';
-import { LoginUserDto, TokenCredentialsDto, RegisterUserDto, UserProfileDto } from './dtos';
+import {
+  LoginUserDto,
+  TokenCredentialsDto,
+  RegisterUserDto,
+  UserProfileDto,
+} from './dtos';
 
 interface IUserController {
   login(req: Request<LoginUserDto>): Promise<TokenCredentialsDto>;
@@ -31,9 +36,7 @@ class UserController {
     return this.userService.register(req.body);
   }
 
-  public async update(
-    req: Request<UserProfileDto>,
-  ): Promise<User> {
+  public async update(req: Request<UserProfileDto>): Promise<User> {
     return this.userService.update(req.body);
   }
 }

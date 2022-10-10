@@ -46,10 +46,10 @@ const userSchema = new mongoose.Schema({
   },
   creditCardExpirationDate: {
     type: Date,
-  }, 
+  },
   creditCardUsername: {
     type: String,
-  }
+  },
 });
 
 export const UserDoc = mongoose.model('User', userSchema);

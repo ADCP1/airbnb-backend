@@ -25,7 +25,7 @@ class UserRepository implements IUserRepository {
   public async update(user: UserProfileDto): Promise<User> {
     const filter = { email: user.email };
     return UserDoc.findOneAndUpdate(filter, user, {
-      new: true
+      new: true,
     });
   }
 }
