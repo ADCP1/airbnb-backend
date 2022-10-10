@@ -5,6 +5,7 @@ import {
   LoginUserDto,
   RegisterUserDto,
   UserProfileDto,
+  UserDto,
 } from 'controllers/user/dtos';
 import { authService, IAuthService } from './auth.service';
 
@@ -16,8 +17,11 @@ interface IUserService {
   register(
     userDto: RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
-  update(userDto: UserProfileDto): Promise<User>;
+  update(userEmail: string, userDto: UserProfileDto): Promise<UserDto>;
 }
+
+const SHOWABLE_DIGITS = 4;
+const FILLER_CHAR = 'X';
 
 class UserService implements IUserService {
   private userRepository: IUserRepository;
@@ -48,12 +52,33 @@ class UserService implements IUserService {
   public async register(
     userDto: RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
+    const userAlreadyExists = await this.userRepository.findOneByEmail(
+      userDto.email,
+    );
+    if (userAlreadyExists) {
+      throw new NotFoundException('A user with that email already exists');
+    }
     await this.userRepository.save(new User(userDto));
     return this.authService.generateTokens(userDto.email);
   }
 
-  public async update(userDto: UserProfileDto): Promise<User> {
-    return this.userRepository.update(userDto);
+  public async update(
+    userEmail: string,
+    userDto: UserProfileDto,
+  ): Promise<UserDto> {
+    const user = await this.userRepository.findOneByEmail(userEmail);
+    if (!user) {
+      throw new NotFoundException('Could not identify user with given email');
+    }
+    const newUser = new User({ ...user, ...userDto });
+    const updatedUser: UserDto = await this.userRepository.save(newUser);
+    if (updatedUser.creditCardInfo?.creditCardNumber) {
+      const cardNumber = updatedUser.creditCardInfo.creditCardNumber;
+      const fillerLength = cardNumber.length - SHOWABLE_DIGITS;
+      updatedUser.creditCardInfo.creditCardNumber =
+        FILLER_CHAR.repeat(fillerLength) + cardNumber.slice(fillerLength);
+    }
+    return updatedUser;
   }
 }
 

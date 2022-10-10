@@ -1,5 +1,17 @@
 import mongoose from 'mongoose';
 
+const CreditCardSchema = new mongoose.Schema({
+  creditCardNumber: {
+    type: String,
+  },
+  creditCardExpirationDate: {
+    type: Date,
+  },
+  creditCardUsername: {
+    type: String,
+  },
+});
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -41,14 +53,8 @@ const userSchema = new mongoose.Schema({
   profession: {
     type: String,
   },
-  creditCardNumber: {
-    type: String,
-  },
-  creditCardExpirationDate: {
-    type: Date,
-  },
-  creditCardUsername: {
-    type: String,
+  creditCardInfo: {
+    type: CreditCardSchema,
   },
 });
 

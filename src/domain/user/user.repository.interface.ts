@@ -1,8 +1,6 @@
-import { UserProfileDto } from 'controllers/user/dtos';
 import { User } from './user.entity';
 
 export interface IUserRepository {
-  save(user: User): Promise<void>;
+  save(user: User): Promise<User>;
   findOneByEmail(email: string): Promise<User | undefined>;
-  update(userDto: UserProfileDto): Promise<User>;
 }

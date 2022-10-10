@@ -1,4 +1,3 @@
-import { User } from '@domain/user';
 import { IUserService, userService } from '@services';
 import { Request } from '@shared';
 import {
@@ -6,13 +5,14 @@ import {
   TokenCredentialsDto,
   RegisterUserDto,
   UserProfileDto,
+  UserDto,
 } from './dtos';
 
 interface IUserController {
   login(req: Request<LoginUserDto>): Promise<TokenCredentialsDto>;
   logout(req: Request): Promise<void>;
   register(req: Request<RegisterUserDto>): Promise<TokenCredentialsDto>;
-  update(req: Request<UserProfileDto>): Promise<User>;
+  update(req: Request<UserProfileDto>): Promise<UserDto>;
 }
 
 class UserController {
@@ -36,8 +36,8 @@ class UserController {
     return this.userService.register(req.body);
   }
 
-  public async update(req: Request<UserProfileDto>): Promise<User> {
-    return this.userService.update(req.body);
+  public async update(req: Request<UserProfileDto>): Promise<UserDto> {
+    return this.userService.update(req.query.email as string, req.body);
   }
 }
 

@@ -1,5 +1,11 @@
 import { Entity } from '@domain';
 
+export type CreditCardInfo = {
+  creditCardNumber?: string;
+  creditCardExpirationDate?: Date;
+  creditCardUsername?: string;
+};
+
 export type UserArgs = {
   id?: string;
   name: string;
@@ -13,9 +19,7 @@ export type UserArgs = {
   description?: string;
   pictureUrl?: string;
   profession?: string;
-  creditCardNumber?: string;
-  creditCardExpirationDate?: Date;
-  creditCardUsername?: string;
+  creditCardInfo?: CreditCardInfo;
 };
 
 export class User extends Entity {
@@ -30,9 +34,7 @@ export class User extends Entity {
   public readonly description: string;
   public readonly pictureUrl: string;
   public readonly profession: string;
-  public readonly creditCardNumber: string;
-  public readonly creditCardExpirationDate: Date;
-  public readonly creditCardUsername: string;
+  public readonly creditCardInfo: CreditCardInfo;
 
   constructor(args: UserArgs) {
     super(args.id);
@@ -47,8 +49,6 @@ export class User extends Entity {
     this.description = args.description;
     this.pictureUrl = args.pictureUrl;
     this.profession = args.profession;
-    this.creditCardNumber = args.creditCardNumber;
-    this.creditCardExpirationDate = args.creditCardExpirationDate;
-    this.creditCardUsername = args.creditCardUsername;
+    this.creditCardInfo = args.creditCardInfo;
   }
 }
