@@ -16,8 +16,6 @@ class UserController {
   }
 
   public async login(req: Request<LoginUserDto>): Promise<TokenCredentialsDto> {
-    const date = new Date();
-    console.log(date.toISOString());
     return this.userService.login(req.body);
   }
 
