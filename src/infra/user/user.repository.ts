@@ -1,5 +1,6 @@
 import { User, IUserRepository } from '@domain/user';
 import { DomainException } from '@shared';
+import { UserProfileDto } from 'controllers/user/dtos';
 import { UserDoc } from './user.doc';
 
 class UserRepository implements IUserRepository {
@@ -22,6 +23,13 @@ class UserRepository implements IUserRepository {
       id: user.id,
       username: user.username,
       password: user.password,
+    });
+  }
+
+  public async update(user: UserProfileDto): Promise<User> {
+    const filter = { username: user.username };
+    return UserDoc.findOneAndUpdate(filter, user, {
+      new: true
     });
   }
 }

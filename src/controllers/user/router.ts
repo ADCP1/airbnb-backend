@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { registerHandler, validateDto, validateJWT } from '@shared';
-import { UserCredentialsDto } from './dtos';
+import { UserCredentialsDto, UserProfileDto } from './dtos';
 import { userController } from './controller';
 import { StatusCodes } from 'http-status-codes';
 
@@ -21,6 +21,11 @@ export function UserRouter() {
     '/register',
     validateDto(UserCredentialsDto),
     registerHandler((req) => userController.register(req), StatusCodes.CREATED),
+  );
+  router.patch(
+    '/',
+    validateDto(UserProfileDto),
+    registerHandler((req) => userController.update(req)),
   );
 
   return router;
