@@ -4,6 +4,7 @@ import { userRepository } from '@infra/user';
 import { NotFoundException } from '@shared';
 
 import { authService, IAuthService } from './auth.service';
+import { UserProfileDto } from 'controllers/user/dtos';
 
 interface IUserService {
   login(
@@ -13,6 +14,9 @@ interface IUserService {
   register(
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
+  update(
+    userDto: UserProfileDto
+  ): Promise<User>;
 }
 
 class UserService implements IUserService {
@@ -51,6 +55,10 @@ class UserService implements IUserService {
       }),
     );
     return this.authService.generateTokens(userDto.email);
+  }
+
+  public async update(userDto: UserProfileDto): Promise<User> {
+    return this.userRepository.update(userDto);
   }
 }
 
