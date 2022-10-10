@@ -1,4 +1,8 @@
-import { LoginUserDto, RegisterUserDto, UserProfileDto } from '@application/dtos/request';
+import {
+  LoginUserDto,
+  RegisterUserDto,
+  UserProfileDto,
+} from 'application/dtos/request';
 import { registerHandler, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';

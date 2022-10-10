@@ -1,4 +1,4 @@
-import { RequestDtos, ResponseDtos } from '@application/dtos';
+import { RequestDtos, ResponseDtos } from 'application/dtos';
 import { IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
 import { NotFoundException } from '@shared';
@@ -12,7 +12,10 @@ interface IUserService {
   register(
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
-  update(userEmail: string, userDto: RequestDtos.UserProfileDto): Promise<ResponseDtos.UserDto>;
+  update(
+    userEmail: string,
+    userDto: RequestDtos.UserProfileDto,
+  ): Promise<ResponseDtos.UserDto>;
 }
 
 const SHOWABLE_DIGITS = 4;
@@ -54,10 +57,12 @@ class UserService implements IUserService {
     }
 
     const hashedPassword = this.authService.hashPassword(userDto.password);
-    await this.userRepository.save(new User({
-      ...userDto,
-      password: hashedPassword,
-    }));
+    await this.userRepository.save(
+      new User({
+        ...userDto,
+        password: hashedPassword,
+      }),
+    );
 
     return this.authService.generateTokens(userDto.email);
   }
@@ -71,7 +76,9 @@ class UserService implements IUserService {
       throw new NotFoundException('Could not identify user with given email');
     }
     const newUser = new User({ ...user, ...userDto });
-    const updatedUser: ResponseDtos.UserDto = await this.userRepository.save(newUser);
+    const updatedUser: ResponseDtos.UserDto = await this.userRepository.save(
+      newUser,
+    );
     if (updatedUser.creditCardInfo?.creditCardNumber) {
       const cardNumber = updatedUser.creditCardInfo.creditCardNumber;
       const fillerLength = cardNumber.length - SHOWABLE_DIGITS;

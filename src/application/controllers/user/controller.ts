@@ -1,5 +1,5 @@
-import { IUserService, userService } from '@application';
-import { RequestDtos, ResponseDtos } from '@application/dtos';
+import { IUserService, userService } from 'application';
+import { RequestDtos, ResponseDtos } from 'application/dtos';
 import { Request } from '@shared';
 
 interface IUserController {
@@ -7,8 +7,12 @@ interface IUserController {
     req: Request<RequestDtos.LoginUserDto>,
   ): Promise<ResponseDtos.TokenCredentialsDto>;
   logout(req: Request): Promise<void>;
-  register(req: Request<RequestDtos.RegisterUserDto>): Promise<ResponseDtos.TokenCredentialsDto>;
-  update(req: Request<RequestDtos.UserProfileDto>): Promise<ResponseDtos.UserDto>;
+  register(
+    req: Request<RequestDtos.RegisterUserDto>,
+  ): Promise<ResponseDtos.TokenCredentialsDto>;
+  update(
+    req: Request<RequestDtos.UserProfileDto>,
+  ): Promise<ResponseDtos.UserDto>;
 }
 
 class UserController {
@@ -34,7 +38,9 @@ class UserController {
     return this.userService.register(req.body);
   }
 
-  public async update(req: Request<RequestDtos.UserProfileDto>): Promise<ResponseDtos.UserDto> {
+  public async update(
+    req: Request<RequestDtos.UserProfileDto>,
+  ): Promise<ResponseDtos.UserDto> {
     return this.userService.update(req.query.email as string, req.body);
   }
 }

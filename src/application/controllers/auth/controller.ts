@@ -1,5 +1,5 @@
-import { authService, IAuthService } from '@application';
-import { RequestDtos, ResponseDtos } from '@application/dtos';
+import { authService, IAuthService } from 'application';
+import { RequestDtos, ResponseDtos } from 'application/dtos';
 import { Request } from '@shared';
 
 interface IAuthController {

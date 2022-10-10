@@ -1,4 +1,4 @@
-import { CreateTokenDto } from '@application/dtos/request';
+import { CreateTokenDto } from 'application/dtos/request';
 import { registerHandler, validateDto } from '@shared';
 import { Router } from 'express';
 
