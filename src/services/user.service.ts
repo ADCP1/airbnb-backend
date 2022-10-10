@@ -26,12 +26,11 @@ class UserService implements IUserService {
   public async login(
     userDto: LoginUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
-    const hashedPassword = this.authService.hashPassword(userDto.password);
     const user = await this.userRepository.findOneByEmail(userDto.email);
-    if (!user || hashedPassword !== user.password) {
-      throw new NotFoundException(
-        'Credentials are incorrect or user does not exist',
-      );
+    const isValidLogin =
+      user && this.authService.isValidPassword(userDto.password, user.password);
+    if (!isValidLogin) {
+      throw new NotFoundException('Invalid credentials');
     }
     return this.authService.generateTokens(userDto.email);
   }
@@ -43,7 +42,13 @@ class UserService implements IUserService {
   public async register(
     userDto: RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
-    await this.userRepository.save(new User(userDto));
+    const hashedPassword = this.authService.hashPassword(userDto.password);
+    await this.userRepository.save(
+      new User({
+        ...userDto,
+        password: hashedPassword,
+      }),
+    );
     return this.authService.generateTokens(userDto.email);
   }
 }

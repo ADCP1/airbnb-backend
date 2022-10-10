@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { v1 } from 'uuid';
 import { config } from '@config';
 import { UnauthorizedException } from '@shared';
+import passwordHash from 'password-hash';
 
 interface IAuthService {
   generateJWT(receivedRefreshToken: string): Promise<string>;
@@ -12,6 +13,7 @@ interface IAuthService {
   ): Promise<{ token: string; refreshToken: string }>;
   deleteRefreshToken(username: string): Promise<void>;
   hashPassword(password: string): string;
+  isValidPassword(password: string, hashedPassword: string): boolean;
 }
 
 class AuthService {
@@ -74,7 +76,15 @@ class AuthService {
   }
 
   public hashPassword(password: string): string {
-    return password;
+    return passwordHash.generate(password, {
+      algorithm: 'sha256',
+      iterations: 5,
+      saltLength: 10,
+    });
+  }
+
+  public isValidPassword(password: string, hashedPassword: string): boolean {
+    return passwordHash.verify(password, hashedPassword);
   }
 }
 
