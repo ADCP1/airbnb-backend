@@ -3,6 +3,7 @@ import { registerHandler, validateDto, validateJWT } from '@shared';
 import { UserCredentialsDto } from './dtos';
 import { userController } from './controller';
 import { StatusCodes } from 'http-status-codes';
+import { UserRegisterDto } from './dtos/request/user-register.dto';
 
 export function UserRouter() {
   const router = Router();
@@ -19,7 +20,7 @@ export function UserRouter() {
   );
   router.post(
     '/register',
-    validateDto(UserCredentialsDto),
+    validateDto(UserRegisterDto),
     registerHandler((req) => userController.register(req), StatusCodes.CREATED),
   );
 

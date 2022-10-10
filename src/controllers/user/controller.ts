@@ -1,11 +1,12 @@
 import { IUserService, userService } from '@services';
 import { Request } from '@shared';
 import { UserCredentialsDto, TokenCredentialsDto } from './dtos';
+import { UserRegisterDto } from './dtos/request/user-register.dto';
 
 interface IUserController {
   login(req: Request<UserCredentialsDto>): Promise<TokenCredentialsDto>;
   logout(req: Request): Promise<void>;
-  register(req: Request<UserCredentialsDto>): Promise<TokenCredentialsDto>;
+  register(req: Request<UserRegisterDto>): Promise<TokenCredentialsDto>;
 }
 
 class UserController {
@@ -26,9 +27,9 @@ class UserController {
   }
 
   public async register(
-    req: Request<UserCredentialsDto>,
+    req: Request<UserRegisterDto>,
   ): Promise<TokenCredentialsDto> {
-    return this.userService.register(req.body.username, req.body.password);
+    return this.userService.register(req.body);
   }
 }
 

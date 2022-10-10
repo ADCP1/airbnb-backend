@@ -1,6 +1,7 @@
 import { IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
 import { NotFoundException } from '@shared';
+import { UserRegisterDto } from 'controllers/user/dtos/request/user-register.dto';
 import { authService, IAuthService } from './auth.service';
 
 interface IUserService {
@@ -10,8 +11,7 @@ interface IUserService {
   ): Promise<{ token: string; refreshToken: string }>;
   logout(username: string): Promise<void>;
   register(
-    username: string,
-    password: string,
+    user: UserRegisterDto,
   ): Promise<{ token: string; refreshToken: string }>;
 }
 
@@ -42,17 +42,25 @@ class UserService implements IUserService {
     return this.authService.deleteRefreshToken(username);
   }
 
-  public async register(
-    username: string,
-    password: string,
-  ): Promise<{ token: string; refreshToken: string }> {
+  public async register({
+    name,
+    lastName,
+    email,
+    phone,
+    dateOfBirth,
+    password,
+  }: UserRegisterDto): Promise<{ token: string; refreshToken: string }> {
     await this.userRepository.save(
       new User({
-        username,
+        name,
+        lastName,
+        email,
+        phone,
+        dateOfBirth,
         password,
       }),
     );
-    return this.authService.generateTokens(username);
+    return this.authService.generateTokens(name);
   }
 }
 
