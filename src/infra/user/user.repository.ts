@@ -1,6 +1,7 @@
+import { UserProfileDto } from '@application/dtos/request';
 import { IUserRepository, User } from '@domain/user';
 import { DomainException } from '@shared';
-import { UserProfileDto } from 'controllers/user/dtos';
+
 import { UserDoc } from './user.doc';
 
 class UserRepository implements IUserRepository {

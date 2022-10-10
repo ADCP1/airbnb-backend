@@ -2,11 +2,7 @@ import { RequestDtos } from '@application/dtos';
 import { IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
 import { NotFoundException } from '@shared';
-import {
-  LoginUserDto,
-  RegisterUserDto,
-  UserProfileDto,
-} from 'controllers/user/dtos';
+
 import { authService, IAuthService } from './auth.service';
 
 interface IUserService {
@@ -17,7 +13,7 @@ interface IUserService {
   register(
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
-  update(userDto: UserProfileDto): Promise<User>;
+  update(userDto: RequestDtos.UserProfileDto): Promise<User>;
 }
 
 class UserService implements IUserService {
@@ -58,7 +54,7 @@ class UserService implements IUserService {
     return this.authService.generateTokens(userDto.email);
   }
 
-  public async update(userDto: UserProfileDto): Promise<User> {
+  public async update(userDto: RequestDtos.UserProfileDto): Promise<User> {
     return this.userRepository.update(userDto);
   }
 }

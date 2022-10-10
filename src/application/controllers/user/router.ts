@@ -1,8 +1,7 @@
 import { LoginUserDto, RegisterUserDto } from '@application/dtos/request';
+import { UserProfileDto } from '@application/dtos/request';
 import { registerHandler, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
-import { UserCredentialsDto, UserProfileDto } from './dtos';
-import { userController } from './controller';
 import { StatusCodes } from 'http-status-codes';
 
 import { userController } from './controller';
