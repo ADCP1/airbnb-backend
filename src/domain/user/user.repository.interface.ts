@@ -1,3 +1,5 @@
+import { UserProfileDto } from 'application/dtos/request';
+
 import { User } from './user.entity';
 
 export interface IUserRepository {
