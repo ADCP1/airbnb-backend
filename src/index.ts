@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import pino from 'express-pino-logger';
+import pinoLogger from 'pino';
 import { exceptionToHttpError, snakeToCamelcaseKeys } from './shared';
 import { config } from './config';
 import { registerRouters } from './controllers';
@@ -21,7 +22,8 @@ async function main() {
   app.use(exceptionToHttpError);
 
   app.listen(config.port, () => {
-    console.log(`App listening on port ${config.port}`);
+    const logger = pinoLogger();
+    logger.info(`App listening on port ${config.port}`);
   });
 }
 
