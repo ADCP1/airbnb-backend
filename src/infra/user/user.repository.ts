@@ -9,7 +9,7 @@ class UserRepository implements IUserRepository {
     if (!userAlreadyExists) {
       await new UserDoc({ ...user }).save();
     } else {
-      throw new DomainException('A user with that username already exists');
+      throw new DomainException('A user with that email already exists');
     }
   }
 
