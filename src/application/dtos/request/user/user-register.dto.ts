@@ -1,5 +1,6 @@
+import { Transform } from 'class-transformer';
 import {
-  IsDateString,
+  IsDate,
   IsEmail,
   IsMobilePhone,
   IsNotEmpty,
@@ -23,8 +24,9 @@ export class RegisterUserDto {
   @IsNotEmpty()
   phone: string;
 
-  @IsDateString()
+  @IsDate()
   @IsNotEmpty()
+  @Transform(({ value }: { value: string }) => new Date(value))
   dateOfBirth: Date;
 
   @IsString()

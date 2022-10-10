@@ -14,8 +14,8 @@
     "paths": {
       "@shared": ["shared"],
       "@shared/*": ["shared/*"],
-      "@services": ["services"],
-      "@services/*": ["services/*"],
+      "@application": ["application"],
+      "@application/*": ["application/*"],
       "@domain": ["domain"],
       "@domain/*": ["domain/*"],
       "@infra": ["infra"],

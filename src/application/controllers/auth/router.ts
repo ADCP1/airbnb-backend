@@ -1,7 +1,8 @@
-import { Router } from 'express';
+import { CreateTokenDto } from '@application/dtos/request';
 import { registerHandler, validateDto } from '@shared';
+import { Router } from 'express';
+
 import { authController } from './controller';
-import { CreateTokenDto } from './dtos';
 
 export function AuthRouter() {
   const router = Router();

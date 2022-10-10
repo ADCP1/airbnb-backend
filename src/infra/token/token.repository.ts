@@ -1,4 +1,5 @@
 import { ITokenRepository, Token } from '@domain/token';
+
 import { TokenDoc } from './token.doc';
 
 class TokenRepository implements ITokenRepository {

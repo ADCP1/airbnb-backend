@@ -1,9 +1,10 @@
+import { config } from '@config';
 import { ITokenRepository, Token } from '@domain/token';
 import { tokenRepository } from '@infra/token';
-import jwt from 'jsonwebtoken';
-import { v1 } from 'uuid';
-import { config } from '@config';
 import { UnauthorizedException } from '@shared';
+import jwt from 'jsonwebtoken';
+import passwordHash from 'password-hash';
+import { v1 } from 'uuid';
 
 interface IAuthService {
   generateJWT(receivedRefreshToken: string): Promise<string>;
@@ -12,6 +13,7 @@ interface IAuthService {
   ): Promise<{ token: string; refreshToken: string }>;
   deleteRefreshToken(username: string): Promise<void>;
   hashPassword(password: string): string;
+  isValidPassword(password: string, hashedPassword: string): boolean;
 }
 
 class AuthService {
@@ -74,10 +76,18 @@ class AuthService {
   }
 
   public hashPassword(password: string): string {
-    return password;
+    return passwordHash.generate(password, {
+      algorithm: 'sha256',
+      iterations: 5,
+      saltLength: 10,
+    });
+  }
+
+  public isValidPassword(password: string, hashedPassword: string): boolean {
+    return passwordHash.verify(password, hashedPassword);
   }
 }
 
 const authService: IAuthService = new AuthService(tokenRepository);
 
-export { IAuthService, authService };
+export { authService, IAuthService };
