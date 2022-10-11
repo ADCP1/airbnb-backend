@@ -31,7 +31,7 @@ export function UserRouter() {
     '/',
     validateJWT,
     validateDto(UpdateUserDto),
-    registerHandler(async (req) => ({ x: 3 })),
+    registerHandler((req) => userController.partialUpdate(req)),
   );
 
   return router;

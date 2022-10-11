@@ -1,6 +1,7 @@
 import { plainToInstance } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 import { RequestHandler } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
 const camelToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -35,7 +36,7 @@ export function validateDto(
           const dtoErrors: Record<string, unknown> = {};
           errors.forEach((error) => mapError(error, dtoErrors));
           res.setHeader('Content-Type', 'application/json');
-          res.status(400).send(JSON.stringify(dtoErrors));
+          res.status(StatusCodes.BAD_REQUEST).send(JSON.stringify(dtoErrors));
         } else {
           req.body = dtoObject;
           next();

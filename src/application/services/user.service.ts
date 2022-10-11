@@ -1,7 +1,7 @@
-import { RequestDtos } from '@application/dtos';
+import { RequestDtos, ResponseDtos } from '@application/dtos';
 import { IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
-import { NotFoundException } from '@shared';
+import { DomainException, NotFoundException } from '@shared';
 
 import { authService, IAuthService } from './auth.service';
 
@@ -13,6 +13,10 @@ interface IUserService {
   register(
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
+  partialUpdate(
+    userEmail: string,
+    userDto: RequestDtos.UpdateUserDto,
+  ): Promise<ResponseDtos.UserDto>;
 }
 
 class UserService implements IUserService {
@@ -43,6 +47,11 @@ class UserService implements IUserService {
   public async register(
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
+    const userAlreadyExists =
+      (await this.userRepository.findOneByEmail(userDto.email)) !== undefined;
+    if (userAlreadyExists) {
+      throw new DomainException('A user with that email already exists');
+    }
     const hashedPassword = this.authService.hashPassword(userDto.password);
     await this.userRepository.save(
       new User({
@@ -51,6 +60,23 @@ class UserService implements IUserService {
       }),
     );
     return this.authService.generateTokens(userDto.email);
+  }
+
+  public async partialUpdate(
+    userEmail: string,
+    userDto: RequestDtos.UpdateUserDto,
+  ): Promise<ResponseDtos.UserDto> {
+    const user = await this.userRepository.findOneByEmail(userEmail);
+    if (!user) throw new NotFoundException('User not found');
+    const updatedUser = new User({
+      ...user,
+      ...userDto,
+    });
+    await this.userRepository.save(updatedUser);
+    return {
+      ...user,
+      dateOfBirth: user.dateOfBirth.toISOString(),
+    };
   }
 }
 

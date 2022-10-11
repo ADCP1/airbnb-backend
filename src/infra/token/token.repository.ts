@@ -5,9 +5,7 @@ import { TokenDoc } from './token.doc';
 class TokenRepository implements ITokenRepository {
   public async save(token: Token) {
     await TokenDoc.updateOne(
-      {
-        key: token.key,
-      },
+      { key: token.key },
       { $set: token },
       { upsert: true },
     );

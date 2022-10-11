@@ -15,6 +15,6 @@ export function validateJWT(req: Request, res: Response, next: NextFunction) {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).send('Invalid auth token');
+    throw new UnauthorizedException('Invalid auth token');
   }
 }
