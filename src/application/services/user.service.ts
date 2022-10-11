@@ -9,7 +9,7 @@ interface IUserService {
   login(
     userDto: RequestDtos.LoginUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
-  logout(username: string): Promise<void>;
+  logout(email: string): Promise<void>;
   register(
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }>;
@@ -36,8 +36,8 @@ class UserService implements IUserService {
     return this.authService.generateTokens(userDto.email);
   }
 
-  public async logout(username: string): Promise<void> {
-    return this.authService.deleteRefreshToken(username);
+  public async logout(email: string): Promise<void> {
+    return this.authService.deleteRefreshToken(email);
   }
 
   public async register(

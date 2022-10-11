@@ -26,7 +26,7 @@ class UserController {
   }
 
   public async logout(req: Request) {
-    return this.userService.logout(req.user.username);
+    return this.userService.logout(req.user.email);
   }
 
   public async register(

@@ -11,7 +11,7 @@ interface IAuthService {
   generateTokens(
     username: string,
   ): Promise<{ token: string; refreshToken: string }>;
-  deleteRefreshToken(username: string): Promise<void>;
+  deleteRefreshToken(email: string): Promise<void>;
   hashPassword(password: string): string;
   isValidPassword(password: string, hashedPassword: string): boolean;
 }
@@ -71,8 +71,8 @@ class AuthService {
     return { token, refreshToken: refreshTokenValue };
   }
 
-  public async deleteRefreshToken(username: string) {
-    return this.tokenRepository.deleteOneByKey(username);
+  public async deleteRefreshToken(email: string) {
+    return this.tokenRepository.deleteOneByKey(email);
   }
 
   public hashPassword(password: string): string {
