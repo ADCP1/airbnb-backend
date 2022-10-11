@@ -1,5 +1,7 @@
 import { Entity } from '@domain';
 
+import { CreditCardInfo } from './credit-card-info.vo';
+
 export type UserArgs = {
   id?: string;
   email: string;
@@ -13,20 +15,22 @@ export type UserArgs = {
   description?: string;
   profession?: string;
   pictureUrl?: string;
+  creditCardInfo?: CreditCardInfo;
 };
 
 export class User extends Entity {
-  public readonly name: string;
-  public readonly lastName: string;
-  public readonly email: string;
-  public readonly phone: string;
-  public readonly dateOfBirth: Date;
-  public readonly password: string;
-  public readonly location?: string;
-  public readonly languages?: string[];
-  public readonly description?: string;
-  public readonly profession?: string;
-  public readonly pictureUrl?: string;
+  public name: string;
+  public lastName: string;
+  public email: string;
+  public phone: string;
+  public dateOfBirth: Date;
+  public password: string;
+  public location?: string;
+  public languages?: string[];
+  public description?: string;
+  public profession?: string;
+  public pictureUrl?: string;
+  public creditCardInfo?: CreditCardInfo;
 
   constructor(args: UserArgs) {
     super(args.id);
@@ -41,5 +45,6 @@ export class User extends Entity {
     this.description = args.description;
     this.profession = args.profession;
     this.pictureUrl = args.pictureUrl;
+    this.creditCardInfo = args.creditCardInfo;
   }
 }

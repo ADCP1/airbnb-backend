@@ -1,5 +1,5 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
-import { IUserRepository, User } from '@domain/user';
+import { CreditCardInfo, IUserRepository, User } from '@domain/user';
 import { userRepository } from '@infra/user';
 import { DomainException, NotFoundException } from '@shared';
 
@@ -72,6 +72,7 @@ class UserService implements IUserService {
     const updatedUser = new User({
       ...user,
       ...userDto,
+      creditCardInfo: new CreditCardInfo(userDto.creditCardInfo),
     });
     await this.userRepository.save(updatedUser);
     return UserFactory.toUserDto(updatedUser);

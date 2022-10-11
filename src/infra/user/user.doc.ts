@@ -31,6 +31,20 @@ const userSchema = new mongoose.Schema({
   description: String,
   profession: String,
   pictureUrl: String,
+  creditCardInfo: {
+    number: {
+      type: String,
+      required: true,
+    },
+    expirationDate: {
+      type: String,
+      required: true,
+    },
+    code: {
+      type: String,
+      required: true,
+    },
+  },
 });
 
 export const UserDoc = mongoose.model('User', userSchema);
