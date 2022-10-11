@@ -16,9 +16,7 @@ class UserRepository implements IUserRepository {
       email,
     });
     if (!user) return undefined;
-    return new User({
-      ...user,
-    });
+    return new User(user.toObject());
   }
 }
 

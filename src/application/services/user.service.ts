@@ -4,6 +4,7 @@ import { userRepository } from '@infra/user';
 import { DomainException, NotFoundException } from '@shared';
 
 import { authService, IAuthService } from './auth.service';
+import { UserFactory } from './user.factory';
 
 interface IUserService {
   login(
@@ -73,10 +74,7 @@ class UserService implements IUserService {
       ...userDto,
     });
     await this.userRepository.save(updatedUser);
-    return {
-      ...user,
-      dateOfBirth: user.dateOfBirth.toISOString(),
-    };
+    return UserFactory.toUserDto(updatedUser);
   }
 }
 
