@@ -3,8 +3,8 @@ import {
   IsCreditCard,
   IsDateString,
   IsMobilePhone,
-  IsNotEmptyObject,
   IsNumberString,
+  IsOptional,
   IsString,
   IsUrl,
   MaxLength,
@@ -24,25 +24,32 @@ class CreditCardInfoDto {
 }
 
 export class UpdateUserDto {
+  @IsOptional()
   @IsString()
-  location: string;
+  location?: string;
 
+  @IsOptional()
   @IsString({ each: true })
-  languages: string[];
+  languages?: string[];
 
+  @IsOptional()
   @MaxLength(500)
-  description: string;
+  description?: string;
 
+  @IsOptional()
   @IsString()
-  profession: string;
+  profession?: string;
 
+  @IsOptional()
   @IsMobilePhone()
-  phone: string;
+  phone?: string;
 
+  @IsOptional()
   @IsUrl()
-  pictureUrl: string;
+  pictureUrl?: string;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => CreditCardInfoDto)
-  creditCardInfo: CreditCardInfoDto;
+  creditCardInfo?: CreditCardInfoDto;
 }

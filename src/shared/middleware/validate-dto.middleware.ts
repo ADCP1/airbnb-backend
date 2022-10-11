@@ -10,14 +10,12 @@ function mapError(
   dtoErrors: Record<string, unknown>,
   prefix?: string,
 ) {
+  const errorProperty = prefix ? `${prefix}.${error.property}` : error.property;
   if (error.children?.length > 0) {
     error.children.forEach((childError) =>
-      mapError(childError, dtoErrors, error.property),
+      mapError(childError, dtoErrors, errorProperty),
     );
   } else {
-    const errorProperty = prefix
-      ? `${prefix}.${error.property}`
-      : error.property;
     dtoErrors[camelToSnakeCase(errorProperty)] = (Object as any).values(
       error.constraints,
     );
