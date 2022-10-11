@@ -75,7 +75,7 @@ class UserService implements IUserService {
       creditCardInfo: new CreditCardInfo(userDto.creditCardInfo),
     });
     await this.userRepository.save(updatedUser);
-    return UserFactory.toUserDto(updatedUser);
+    return UserFactory.toDto(updatedUser);
   }
 }
 
