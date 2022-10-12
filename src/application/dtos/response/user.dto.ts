@@ -1,3 +1,5 @@
+import { CreditCardType } from '@domain/user';
+
 export type UserDto = {
   email: string;
   name: string;
@@ -9,4 +11,8 @@ export type UserDto = {
   description?: string;
   profession?: string;
   pictureUrl?: string;
+  creditCardInfo?: {
+    type: CreditCardType;
+    lastDigits: string;
+  };
 };

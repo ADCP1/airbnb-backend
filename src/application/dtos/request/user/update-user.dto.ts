@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsCreditCard,
   IsDateString,
@@ -13,6 +13,9 @@ import {
 
 class CreditCardInfoDto {
   @IsCreditCard()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.replace(/\s+/g, '') : value,
+  )
   number: string;
 
   @IsDateString()

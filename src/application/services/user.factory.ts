@@ -1,5 +1,5 @@
 import { ResponseDtos } from '@application/dtos';
-import { User } from '@domain/user';
+import { getCreditCardType, User } from '@domain/user';
 
 export class UserFactory {
   public static toDto(user: User): ResponseDtos.UserDto {
@@ -14,6 +14,12 @@ export class UserFactory {
       location: user.location,
       profession: user.profession,
       pictureUrl: user.pictureUrl,
+      creditCardInfo: user.creditCardInfo
+        ? {
+            type: getCreditCardType(user.creditCardInfo.number),
+            lastDigits: user.creditCardInfo.number.slice(-4),
+          }
+        : undefined,
     };
   }
 }
