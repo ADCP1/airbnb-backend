@@ -10,6 +10,9 @@ interface IUserController {
   register(
     req: Request<RequestDtos.RegisterUserDto>,
   ): Promise<ResponseDtos.TokenCredentialsDto>;
+  partialUpdate(
+    req: Request<RequestDtos.UpdateUserDto>,
+  ): Promise<ResponseDtos.UserDto>;
 }
 
 class UserController {
@@ -26,13 +29,19 @@ class UserController {
   }
 
   public async logout(req: Request) {
-    return this.userService.logout(req.user.username);
+    return this.userService.logout(req.user.email);
   }
 
   public async register(
     req: Request<RequestDtos.RegisterUserDto>,
   ): Promise<ResponseDtos.TokenCredentialsDto> {
     return this.userService.register(req.body);
+  }
+
+  public async partialUpdate(
+    req: Request<RequestDtos.UpdateUserDto>,
+  ): Promise<ResponseDtos.UserDto> {
+    return this.userService.partialUpdate(req.user.email, req.body);
   }
 }
 

@@ -9,9 +9,9 @@ import { v1 } from 'uuid';
 interface IAuthService {
   generateJWT(receivedRefreshToken: string): Promise<string>;
   generateTokens(
-    username: string,
+    email: string,
   ): Promise<{ token: string; refreshToken: string }>;
-  deleteRefreshToken(username: string): Promise<void>;
+  deleteRefreshToken(email: string): Promise<void>;
   hashPassword(password: string): string;
   isValidPassword(password: string, hashedPassword: string): boolean;
 }
@@ -27,12 +27,12 @@ class AuthService {
     const refreshTokenData = jwt.verify(
       receivedRefreshToken,
       config.refreshTokenKey,
-    ) as { username: string; uuid: string };
+    ) as { email: string; uuid: string };
     if (!refreshTokenData) {
       throw new UnauthorizedException('Invalid refresh token');
     }
     const storedRefreshToken = await this.tokenRepository.findOneByKey(
-      refreshTokenData.username,
+      refreshTokenData.email,
     );
     if (!storedRefreshToken) {
       throw new UnauthorizedException('Refresh token does not exist');
@@ -41,7 +41,7 @@ class AuthService {
       throw new UnauthorizedException('Refresh token not related to user');
     }
     return jwt.sign(
-      { username: refreshTokenData.username, uuid: v1() },
+      { email: refreshTokenData.email, uuid: v1() },
       config.tokenKey,
       {
         expiresIn: `${config.tokenLifeMinutes * 60}s`,
@@ -49,30 +49,30 @@ class AuthService {
     );
   }
 
-  public async generateTokens(username: string): Promise<{
+  public async generateTokens(email: string): Promise<{
     token: string;
     refreshToken: string;
   }> {
-    const token = jwt.sign({ username, uuid: v1() }, config.tokenKey, {
+    const token = jwt.sign({ email, uuid: v1() }, config.tokenKey, {
       expiresIn: `${config.tokenLifeMinutes * 60}s`,
     });
     const refreshTokenValue = jwt.sign(
-      { username, uuid: v1() },
+      { email, uuid: v1() },
       config.refreshTokenKey,
       {
         expiresIn: `${config.refreshTokenLifeMinutes * 60}s`,
       },
     );
     const refreshToken = new Token({
-      key: username,
+      key: email,
       value: refreshTokenValue,
     });
     await this.tokenRepository.save(refreshToken);
     return { token, refreshToken: refreshTokenValue };
   }
 
-  public async deleteRefreshToken(username: string) {
-    return this.tokenRepository.deleteOneByKey(username);
+  public async deleteRefreshToken(email: string) {
+    return this.tokenRepository.deleteOneByKey(email);
   }
 
   public hashPassword(password: string): string {

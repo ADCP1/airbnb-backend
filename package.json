@@ -59,6 +59,7 @@
     "mongoose": "^6.6.5",
     "nodemon": "^2.0.20",
     "password-hash": "^1.2.2",
+    "reflect-metadata": "^0.1.13",
     "snakecase-keys": "^5.4.4",
     "uuid": "^9.0.0"
   },

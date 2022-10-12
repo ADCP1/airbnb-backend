@@ -1,4 +1,8 @@
-import { LoginUserDto, RegisterUserDto } from '@application/dtos/request';
+import {
+  LoginUserDto,
+  RegisterUserDto,
+  UpdateUserDto,
+} from '@application/dtos/request';
 import { registerHandler, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -22,6 +26,12 @@ export function UserRouter() {
     '/register',
     validateDto(RegisterUserDto),
     registerHandler((req) => userController.register(req), StatusCodes.CREATED),
+  );
+  router.patch(
+    '/',
+    validateJWT,
+    validateDto(UpdateUserDto),
+    registerHandler((req) => userController.partialUpdate(req)),
   );
 
   return router;

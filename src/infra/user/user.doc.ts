@@ -1,6 +1,15 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
@@ -8,11 +17,6 @@ const userSchema = new mongoose.Schema({
   lastName: {
     type: String,
     required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
   },
   phone: {
     type: String,
@@ -22,9 +26,24 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  password: {
-    type: String,
-    required: true,
+  location: String,
+  languages: [String],
+  description: String,
+  profession: String,
+  pictureUrl: String,
+  creditCardInfo: {
+    number: {
+      type: String,
+      required: true,
+    },
+    expirationDate: {
+      type: String,
+      required: true,
+    },
+    code: {
+      type: String,
+      required: true,
+    },
   },
 });
 

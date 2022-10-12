@@ -1,5 +1,7 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
+import 'reflect-metadata';
+
 import cors from 'cors';
 import express from 'express';
 import pino from 'express-pino-logger';
