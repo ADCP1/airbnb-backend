@@ -7,7 +7,7 @@ class PropertyRepository implements IPropertyRepository {
   public async save(property: Property) {
     await this.validateOwner(property);
     await PropertyDoc.updateOne(
-      { _id: property.id },
+      { _id: property.id }, // TODO This leaves the id as null on creation
       { $set: property },
       { upsert: true },
     );

@@ -14,7 +14,7 @@ export type PropertyArgs = {
   surfaceArea: number;
   imagesUrls: string[];
   description?: string;
-  services?: PropertyAmenity[];
+  amenities?: PropertyAmenity[];
   /**
    * In squared meters
    */
@@ -33,7 +33,7 @@ export class Property extends Entity {
   public surfaceArea: number;
   public imagesUrls: string[];
   public description?: string;
-  public services?: PropertyAmenity[];
+  public amenities?: PropertyAmenity[];
   /**
    * In squared meters
    */
@@ -52,7 +52,7 @@ export class Property extends Entity {
     this.surfaceArea = args.surfaceArea;
     this.imagesUrls = args.imagesUrls;
     this.description = args.description;
-    this.services = args.services;
+    this.amenities = args.amenities;
     this.rules = args.rules;
     this.isPetFriendly = args.isPetFriendly;
   }

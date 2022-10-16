@@ -1,6 +1,7 @@
 import { getPropertyAmenityValues, PropertyAmenity } from '@domain/property';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsIn,
   IsNotEmpty,
@@ -53,7 +54,7 @@ export class UpdatePropertyDto {
 
   @IsIn(propertyAmenityValues, { each: true })
   @IsOptional()
-  services?: PropertyAmenity[];
+  amenities?: PropertyAmenity[];
 
   @IsString({ each: true })
   @IsOptional()

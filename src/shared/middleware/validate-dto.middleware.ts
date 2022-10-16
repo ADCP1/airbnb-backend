@@ -30,7 +30,7 @@ export function validateDto(
   return (req, res, next) => {
     const dtoObject = plainToInstance(type, req.body);
 
-    validate(dtoObject, { skipMissingProperties }).then(
+    validate(dtoObject, { skipMissingProperties, whitelist: true }).then(
       (errors: ValidationError[]) => {
         if (errors.length > 0) {
           const dtoErrors: Record<string, unknown> = {};
