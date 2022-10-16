@@ -1,23 +1,29 @@
 import { IPropertyRepository, Property } from '@domain/property';
+import { DomainException } from '@shared';
 
 import { PropertyDoc } from './property.doc';
 
 class PropertyRepository implements IPropertyRepository {
-  public async save(user: User) {
-    await UserDoc.updateOne(
-      { email: user.email },
-      { $set: user },
+  public async save(property: Property) {
+    await this.validateOwner(property);
+    await PropertyDoc.updateOne(
+      { _id: property.id },
+      { $set: property },
       { upsert: true },
     );
   }
 
-  public async findOneByEmail(email: string): Promise<User | undefined> {
-    const user = await UserDoc.findOne({
-      email,
-    });
-    if (!user) return undefined;
-    return new User(user.toObject());
+  public async findById(id: string): Promise<Property | null> {
+    return PropertyDoc.findById(id);
+  }
+
+  private async validateOwner(property: Property) {
+    if (!property.id) return;
+    const propertyDoc = await PropertyDoc.findById(property.id);
+    if (propertyDoc.ownerId !== property.ownerId) {
+      throw new DomainException("Cannot reassign a property's owner");
+    }
   }
 }
 
-export const userRepository: IUserRepository = new PropertyRepository();
+export const propertyRepository: IPropertyRepository = new PropertyRepository();

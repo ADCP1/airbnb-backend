@@ -11,11 +11,11 @@ class TokenRepository implements ITokenRepository {
     );
   }
 
-  public async findOneByKey(key: string): Promise<Token | undefined> {
+  public async findOneByKey(key: string): Promise<Token | null> {
     const token = await TokenDoc.findOne({
       key,
     });
-    if (!token) return undefined;
+    if (!token) return null;
     return new Token({
       key: token.key,
       value: token.value,

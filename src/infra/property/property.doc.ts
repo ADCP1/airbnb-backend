@@ -1,7 +1,11 @@
-import { PropertyAmenity } from '@domain/property';
+import { getPropertyAmenityValues, PropertyAmenity } from '@domain/property';
 import mongoose from 'mongoose';
 
 const propertySchema = new mongoose.Schema({
+  ownerId: {
+    type: String,
+    required: true,
+  },
   imagesUrls: [
     {
       type: String,
@@ -21,7 +25,10 @@ const propertySchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  services: [PropertyAmenity],
+  services: {
+    type: String,
+    enum: getPropertyAmenityValues(),
+  },
   capacity: {
     type: Number,
     required: true,

@@ -11,11 +11,11 @@ class UserRepository implements IUserRepository {
     );
   }
 
-  public async findOneByEmail(email: string): Promise<User | undefined> {
+  public async findOneByEmail(email: string): Promise<User | null> {
     const user = await UserDoc.findOne({
       email,
     });
-    if (!user) return undefined;
+    if (!user) return null;
     return new User(user.toObject());
   }
 }

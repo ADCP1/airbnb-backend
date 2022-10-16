@@ -5,3 +5,7 @@ export enum PropertyAmenity {
   Backyard = 'backyard',
   Kitchen = 'kitchen',
 }
+
+export function getPropertyAmenityValues(): PropertyAmenity[] {
+  return Object.values(PropertyAmenity);
+}

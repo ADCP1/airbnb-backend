@@ -13,4 +13,8 @@ declare global {
   }
 }
 
-export type Request<T = any> = express.Request<core.ParamsDictionary, any, T>;
+export type Request<T = any, U = core.ParamsDictionary> = express.Request<
+  U,
+  any,
+  T
+>;

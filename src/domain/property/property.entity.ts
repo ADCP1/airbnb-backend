@@ -4,6 +4,7 @@ import { PropertyAmenity } from './property-amenity.enum';
 
 export type PropertyArgs = {
   id?: string;
+  ownerId: string;
   location: string;
   title: string;
   price: number;
@@ -22,6 +23,7 @@ export type PropertyArgs = {
 };
 
 export class Property extends Entity {
+  public ownerId: string;
   public location: string;
   public title: string;
   public price: number;
@@ -40,6 +42,7 @@ export class Property extends Entity {
 
   constructor(args: PropertyArgs) {
     super(args.id);
+    this.ownerId = args.ownerId;
     this.location = args.location;
     this.title = args.title;
     this.price = args.price;

@@ -18,6 +18,7 @@ interface IUserService {
     userEmail: string,
     userDto: RequestDtos.UpdateUserDto,
   ): Promise<ResponseDtos.UserDto>;
+  findFromEmail(email: string): Promise<User | null>;
 }
 
 class UserService implements IUserService {
@@ -76,6 +77,10 @@ class UserService implements IUserService {
     });
     await this.userRepository.save(updatedUser);
     return UserFactory.toDto(updatedUser);
+  }
+
+  public async findFromEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOneByEmail(email);
   }
 }
 
