@@ -30,18 +30,20 @@ export function validateDto(
   return (req, res, next) => {
     const dtoObject = plainToInstance(type, req.body);
 
-    validate(dtoObject, { skipMissingProperties, whitelist: true }).then(
-      (errors: ValidationError[]) => {
-        if (errors.length > 0) {
-          const dtoErrors: Record<string, unknown> = {};
-          errors.forEach((error) => mapError(error, dtoErrors));
-          res.setHeader('Content-Type', 'application/json');
-          res.status(StatusCodes.BAD_REQUEST).send(JSON.stringify(dtoErrors));
-        } else {
-          req.body = dtoObject;
-          next();
-        }
-      },
-    );
+    validate(dtoObject, {
+      skipMissingProperties,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }).then((errors: ValidationError[]) => {
+      if (errors.length > 0) {
+        const dtoErrors: Record<string, unknown> = {};
+        errors.forEach((error) => mapError(error, dtoErrors));
+        res.setHeader('Content-Type', 'application/json');
+        res.status(StatusCodes.BAD_REQUEST).send(JSON.stringify(dtoErrors));
+      } else {
+        req.body = dtoObject;
+        next();
+      }
+    });
   };
 }

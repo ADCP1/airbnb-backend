@@ -6,12 +6,7 @@ const propertySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  imagesUrls: [
-    {
-      type: String,
-      required: true,
-    },
-  ], // TODO verify that this array syntax is right
+  imagesUrls: [String],
   location: {
     type: String,
     required: true,
@@ -25,12 +20,10 @@ const propertySchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  amenities: [
-    {
-      type: String,
-      enum: getPropertyAmenityValues(),
-    },
-  ],
+  amenities: {
+    type: [String],
+    enum: getPropertyAmenityValues(),
+  },
   capacity: {
     type: Number,
     required: true,

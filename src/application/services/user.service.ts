@@ -50,7 +50,7 @@ class UserService implements IUserService {
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
     const userAlreadyExists =
-      (await this.userRepository.findOneByEmail(userDto.email)) !== undefined;
+      (await this.userRepository.findOneByEmail(userDto.email)) !== null;
     if (userAlreadyExists) {
       throw new DomainException('A user with that email already exists');
     }
