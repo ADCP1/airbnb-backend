@@ -33,6 +33,11 @@ export function UserRouter() {
     validateDto(UpdateUserDto),
     registerHandler((req) => userController.partialUpdate(req)),
   );
+  router.get(
+    '/user/{userId}',
+    validateDto(RegisterUserDto),
+    registerHandler((req) => userController.profile(req)),
+  );
 
   return router;
 }

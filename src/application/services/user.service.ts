@@ -18,6 +18,7 @@ interface IUserService {
     userEmail: string,
     userDto: RequestDtos.UpdateUserDto,
   ): Promise<ResponseDtos.UserDto>;
+  profile(userEmail: string): Promise<ResponseDtos.UserDto>;
 }
 
 class UserService implements IUserService {
@@ -76,6 +77,12 @@ class UserService implements IUserService {
     });
     await this.userRepository.save(updatedUser);
     return UserFactory.toDto(updatedUser);
+  }
+
+  public async profile(userEmail: string): Promise<ResponseDtos.UserDto> {
+    const user = await this.userRepository.findOneByEmail(userEmail);
+    if (!user) throw new NotFoundException('User not found');
+    return UserFactory.toDto(user);
   }
 }
 
