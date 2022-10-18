@@ -12,7 +12,7 @@ export type PropertyDto = {
   surfaceArea: number;
   imagesUrls: string[];
   description?: string;
-  services?: PropertyAmenity[];
+  amenities?: PropertyAmenity[];
   rules?: string[];
   isPetFriendly?: boolean;
 };

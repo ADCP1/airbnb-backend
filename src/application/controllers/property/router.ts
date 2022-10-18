@@ -3,6 +3,7 @@ import {
   UpdatePropertyDto,
 } from '@application/dtos/request';
 import { registerHandler, validateDto, validateJWT } from '@shared';
+import { Request } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -25,6 +26,12 @@ export function PropertyRouter() {
     validateJWT,
     validateDto(UpdatePropertyDto),
     registerHandler((req) => propertyController.partialUpdate(req)),
+  );
+  router.get(
+    '/:propertyId',
+    registerHandler((req: Request<void, { propertyId: string }>) =>
+      propertyController.get(req),
+    ),
   );
 
   return router;

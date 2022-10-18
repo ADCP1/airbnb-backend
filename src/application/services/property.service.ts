@@ -4,6 +4,7 @@ import { User } from '@domain/user';
 import { propertyRepository } from '@infra/property';
 import { DomainException, NotFoundException } from '@shared';
 
+import { PropertyFactory } from './property.factory';
 import { IUserService, userService } from './user.service';
 
 interface IPropertyService {
@@ -16,6 +17,7 @@ interface IPropertyService {
     propertyDto: RequestDtos.UpdatePropertyDto,
     ownerEmail: string,
   ): Promise<ResponseDtos.PropertyDto>;
+  getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
 }
 
 class PropertyService implements IPropertyService {
@@ -40,7 +42,7 @@ class PropertyService implements IPropertyService {
       ownerId: owner.id,
     });
     await this.propertyRepository.save(property);
-    return property;
+    return PropertyFactory.toDto(property);
   }
 
   public async partialUpdate(
@@ -61,7 +63,15 @@ class PropertyService implements IPropertyService {
       ...propertyDto,
     });
     await this.propertyRepository.save(updatedProperty);
-    return updatedProperty;
+    return PropertyFactory.toDto(property);
+  }
+
+  public async getById(propertyId: string): Promise<ResponseDtos.PropertyDto> {
+    const property = await this.propertyRepository.findById(propertyId);
+    if (!property) {
+      throw new NotFoundException('Property does not exist');
+    }
+    return PropertyFactory.toDto(property);
   }
 
   private async getOwnerFromEmail(email: string): Promise<User> {

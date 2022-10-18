@@ -9,6 +9,9 @@ interface IPropertyController {
   partialUpdate(
     req: Request<RequestDtos.UpdatePropertyDto>,
   ): Promise<ResponseDtos.PropertyDto>;
+  get(
+    req: Request<void, { propertyId: string }>,
+  ): Promise<ResponseDtos.PropertyDto>;
 }
 
 class PropertyController implements IPropertyController {
@@ -32,6 +35,12 @@ class PropertyController implements IPropertyController {
       req.body,
       req.user.email,
     );
+  }
+
+  public async get(
+    req: Request<void, { propertyId: string }>,
+  ): Promise<ResponseDtos.PropertyDto> {
+    return this.propertyService.getById(req.params.propertyId);
   }
 }
 
