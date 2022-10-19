@@ -18,6 +18,7 @@ interface IUserService {
     userEmail: string,
     userDto: RequestDtos.UpdateUserDto,
   ): Promise<ResponseDtos.UserDto>;
+  findFromEmail(email: string): Promise<User | null>;
 }
 
 class UserService implements IUserService {
@@ -49,7 +50,7 @@ class UserService implements IUserService {
     userDto: RequestDtos.RegisterUserDto,
   ): Promise<{ token: string; refreshToken: string }> {
     const userAlreadyExists =
-      (await this.userRepository.findOneByEmail(userDto.email)) !== undefined;
+      (await this.userRepository.findOneByEmail(userDto.email)) !== null;
     if (userAlreadyExists) {
       throw new DomainException('A user with that email already exists');
     }
@@ -76,6 +77,10 @@ class UserService implements IUserService {
     });
     await this.userRepository.save(updatedUser);
     return UserFactory.toDto(updatedUser);
+  }
+
+  public async findFromEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOneByEmail(email);
   }
 }
 

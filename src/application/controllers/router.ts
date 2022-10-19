@@ -1,10 +1,13 @@
 import { Express } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
 import { AuthRouter } from './auth';
+import { PropertyRouter } from './property';
 import { UserRouter } from './user';
 
 export function registerRouters(app: Express) {
-  app.get('/health', (_, res) => res.status(200).send());
+  app.get('/health', (_, res) => res.status(StatusCodes.OK).send());
   app.use('/auth', AuthRouter());
   app.use('/user', UserRouter());
+  app.use('/property', PropertyRouter());
 }
