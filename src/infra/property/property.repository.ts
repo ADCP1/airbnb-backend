@@ -30,6 +30,21 @@ class PropertyRepository implements IPropertyRepository {
     });
   }
 
+  public async findByOwnerId(ownerId: string): Promise<Property[]> {
+    const properties = await PropertyDoc.find({ ownerId }).lean();
+    return properties.map((property) => {
+      return new Property({
+        id: property._id.toString(),
+        ...property,
+        amenities: property.amenities as PropertyAmenity[],
+      });
+    });
+  }
+
+  public async deleteById(id: string) {
+    await PropertyDoc.deleteOne({ _id: id });
+  }
+
   private async validateOwner(property: Property) {
     if (!property.id) return;
     const propertyDoc = await PropertyDoc.findById(property.id).lean();
