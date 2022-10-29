@@ -3,6 +3,7 @@ import {
   IsCreditCard,
   IsDateString,
   IsMobilePhone,
+  IsNotEmpty,
   IsNumberString,
   IsOptional,
   IsString,
@@ -29,6 +30,7 @@ class CreditCardInfoDto {
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   location?: string;
 
   @IsOptional()
@@ -41,6 +43,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   profession?: string;
 
   @IsOptional()

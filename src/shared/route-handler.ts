@@ -6,7 +6,7 @@ import { Request, Response } from './http';
 
 type ResBody = Record<string, unknown> | void;
 
-export function registerHandler<T extends Record<string, unknown>>(
+export function registerHandler<T = Record<string, unknown>>(
   handler: (req: Request<T>) => Promise<ResBody>,
   statusCode = StatusCodes.OK,
 ): (

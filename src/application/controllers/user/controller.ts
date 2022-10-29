@@ -16,7 +16,7 @@ interface IUserController {
   profile(req: Request): Promise<ResponseDtos.UserDto>;
 }
 
-class UserController {
+class UserController implements IUserController {
   private userService: IUserService;
 
   constructor(userService: IUserService) {
