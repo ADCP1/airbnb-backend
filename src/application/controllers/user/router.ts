@@ -34,8 +34,8 @@ export function UserRouter() {
     registerHandler((req) => userController.partialUpdate(req)),
   );
   router.get(
-    '/user/{userId}',
-    validateDto(RegisterUserDto),
+    '/',
+    validateJWT,
     registerHandler((req) => userController.profile(req)),
   );
 
