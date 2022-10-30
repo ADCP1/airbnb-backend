@@ -6,16 +6,14 @@ interface IPropertyController {
   create(
     req: Request<RequestDtos.CreatePropertyDto>,
   ): Promise<ResponseDtos.PropertyDto>;
-  getMyProperties(req: Request<void>): Promise<ResponseDtos.PropertiesDto>;
+  getUserProperties(req: Request<void>): Promise<ResponseDtos.PropertiesDto>;
   partialUpdate(
     req: Request<RequestDtos.UpdatePropertyDto>,
   ): Promise<ResponseDtos.PropertyDto>;
   get(
     req: Request<void, { propertyId: string }>,
   ): Promise<ResponseDtos.PropertyDto>;
-  delete(
-    req: Request<void, { propertyId: string }>,
-  ): Promise<ResponseDtos.PropertyDto>;
+  delete(req: Request<void, { propertyId: string }>): Promise<undefined>;
 }
 
 class PropertyController implements IPropertyController {
@@ -41,7 +39,7 @@ class PropertyController implements IPropertyController {
     );
   }
 
-  public async getMyProperties(
+  public async getUserProperties(
     req: Request<void>,
   ): Promise<ResponseDtos.PropertiesDto> {
     return this.propertyService.getMyProperties(req.user.email);
@@ -55,7 +53,7 @@ class PropertyController implements IPropertyController {
 
   public async delete(
     req: Request<void, { propertyId: string }>,
-  ): Promise<ResponseDtos.PropertyDto> {
+  ): Promise<undefined> {
     return this.propertyService.delete(req.params.propertyId, req.user.email);
   }
 }

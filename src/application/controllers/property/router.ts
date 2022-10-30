@@ -22,9 +22,9 @@ export function PropertyRouter() {
     ),
   );
   router.get(
-    '/myProperties',
+    '/owned',
     validateJWT,
-    registerHandler((req) => propertyController.getMyProperties(req)),
+    registerHandler((req) => propertyController.getUserProperties(req)),
   );
   router.patch(
     '/:propertyId',

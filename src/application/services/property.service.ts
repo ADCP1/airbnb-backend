@@ -19,10 +19,7 @@ interface IPropertyService {
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
-  delete(
-    propertyId: string,
-    ownerEmail: string,
-  ): Promise<ResponseDtos.PropertyDto>;
+  delete(propertyId: string, ownerEmail: string): Promise<undefined>;
 }
 
 class PropertyService implements IPropertyService {
@@ -92,13 +89,15 @@ class PropertyService implements IPropertyService {
   ): Promise<ResponseDtos.PropertiesDto> {
     const owner = await this.getOwnerFromEmail(ownerEmail);
     const properties = await this.propertyRepository.findByOwnerId(owner.id);
-    return { properties: properties.map(PropertyFactory.toDto) };
+    return {
+      properties: properties.map((property) => PropertyFactory.toDto(property)),
+    };
   }
 
   public async delete(
     propertyId: string,
     ownerEmail: string,
-  ): Promise<ResponseDtos.PropertyDto> {
+  ): Promise<undefined> {
     const owner = await this.getOwnerFromEmail(ownerEmail);
     const property = await this.propertyRepository.findById(propertyId);
     if (!property) {
@@ -108,7 +107,7 @@ class PropertyService implements IPropertyService {
       throw new DomainException('Property does not belong to the user');
     }
     await this.propertyRepository.deleteById(propertyId);
-    return PropertyFactory.toDto(property);
+    return;
   }
 }
 
