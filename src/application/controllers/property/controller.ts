@@ -13,7 +13,7 @@ interface IPropertyController {
   get(
     req: Request<void, { propertyId: string }>,
   ): Promise<ResponseDtos.PropertyDto>;
-  delete(req: Request<void, { propertyId: string }>): Promise<undefined>;
+  delete(req: Request<void, { propertyId: string }>): Promise<void>;
 }
 
 class PropertyController implements IPropertyController {
@@ -53,7 +53,7 @@ class PropertyController implements IPropertyController {
 
   public async delete(
     req: Request<void, { propertyId: string }>,
-  ): Promise<undefined> {
+  ): Promise<void> {
     return this.propertyService.delete(req.params.propertyId, req.user.email);
   }
 }

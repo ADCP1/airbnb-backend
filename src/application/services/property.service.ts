@@ -19,7 +19,7 @@ interface IPropertyService {
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
-  delete(propertyId: string, ownerEmail: string): Promise<undefined>;
+  delete(propertyId: string, ownerEmail: string): Promise<void>;
 }
 
 class PropertyService implements IPropertyService {
@@ -94,10 +94,7 @@ class PropertyService implements IPropertyService {
     };
   }
 
-  public async delete(
-    propertyId: string,
-    ownerEmail: string,
-  ): Promise<undefined> {
+  public async delete(propertyId: string, ownerEmail: string): Promise<void> {
     const owner = await this.getOwnerFromEmail(ownerEmail);
     const property = await this.propertyRepository.findById(propertyId);
     if (!property) {
