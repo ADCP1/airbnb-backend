@@ -39,7 +39,7 @@ class PropertyService implements IPropertyService {
     const owner = await this.getOwnerFromEmail(ownerEmail);
     const property = new Property({
       ...propertyDto,
-      ownerId: owner.id,
+      ownerId: owner.id!,
     });
     await this.propertyRepository.save(property);
     return PropertyFactory.toDto(property);

@@ -15,6 +15,7 @@
   "rules": {
     "prettier/prettier": 2,
     "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/no-non-null-assertion": 0,
     "simple-import-sort/imports": 2,
     "simple-import-sort/exports": 2
   }

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 source "$(pwd)/scripts/wait-for-mongo.sh"
 

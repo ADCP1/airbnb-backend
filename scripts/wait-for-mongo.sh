@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 term() { 
   exit 1

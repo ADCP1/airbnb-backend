@@ -4,7 +4,7 @@ import {
   PropertyAmenity,
 } from '@domain/property';
 import { loadObjectIdentification } from '@infra/identification';
-import { DomainException } from '@shared';
+import { DomainException, InternalServerException } from '@shared';
 import cloneDeep from 'clone-deep';
 
 import { PropertyDoc } from './property.doc';
@@ -33,6 +33,11 @@ class PropertyRepository implements IPropertyRepository {
   private async validateOwner(property: Property) {
     if (!property.id) return;
     const propertyDoc = await PropertyDoc.findById(property.id).lean();
+    if (!propertyDoc) {
+      throw new InternalServerException(
+        `Tried to save a property with an invalid id ${property.id}`,
+      );
+    }
     if (propertyDoc.ownerId !== property.ownerId) {
       throw new DomainException("Cannot reassign a property's owner");
     }
