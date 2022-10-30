@@ -18,6 +18,8 @@ interface IPropertyService {
     ownerEmail: string,
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
+  getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
+  delete(propertyId: string, ownerEmail: string): Promise<void>;
 }
 
 class PropertyService implements IPropertyService {
@@ -80,6 +82,29 @@ class PropertyService implements IPropertyService {
       throw new NotFoundException('User creating the property does not exist');
     }
     return owner;
+  }
+
+  public async getMyProperties(
+    ownerEmail: string,
+  ): Promise<ResponseDtos.PropertiesDto> {
+    const owner = await this.getOwnerFromEmail(ownerEmail);
+    const properties = await this.propertyRepository.findByOwnerId(owner.id);
+    return {
+      properties: properties.map((property) => PropertyFactory.toDto(property)),
+    };
+  }
+
+  public async delete(propertyId: string, ownerEmail: string): Promise<void> {
+    const owner = await this.getOwnerFromEmail(ownerEmail);
+    const property = await this.propertyRepository.findById(propertyId);
+    if (!property) {
+      throw new NotFoundException('Property does not exist');
+    }
+    if (owner.id !== property.ownerId) {
+      throw new DomainException('Property does not belong to the user');
+    }
+    await this.propertyRepository.deleteById(propertyId);
+    return;
   }
 }
 

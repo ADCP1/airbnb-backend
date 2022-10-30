@@ -16,3 +16,7 @@ export type PropertyDto = {
   rules?: string[];
   isPetFriendly?: boolean;
 };
+
+export type PropertiesDto = {
+  properties: PropertyDto[];
+};
