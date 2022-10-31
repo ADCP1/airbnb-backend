@@ -1,5 +1,6 @@
 import { Entity } from '@domain';
 
+import { PaymentType } from './payment-type';
 import { ReservationStatus } from './reservation-status';
 
 export type ReservationArgs = {
@@ -10,6 +11,7 @@ export type ReservationArgs = {
   endDate: Date;
   status: ReservationStatus;
   amountOfGuests: number;
+  paymentType: PaymentType;
 };
 
 export class Reservation extends Entity {
@@ -19,7 +21,7 @@ export class Reservation extends Entity {
   public endDate: Date;
   public status: ReservationStatus;
   public amountOfGuests: number;
-  // public paymentType: PaymentType;
+  public paymentType: PaymentType;
 
   constructor(args: ReservationArgs) {
     super(args.id);
@@ -28,5 +30,7 @@ export class Reservation extends Entity {
     this.startDate = args.startDate;
     this.endDate = args.endDate;
     this.status = args.status;
+    this.amountOfGuests = args.amountOfGuests;
+    this.paymentType = args.paymentType;
   }
 }

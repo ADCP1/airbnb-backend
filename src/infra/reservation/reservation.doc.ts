@@ -1,4 +1,7 @@
-import { getReservationStatusValues } from '@domain/reservation';
+import {
+  getPaymentTypeValues,
+  getReservationStatusValues,
+} from '@domain/reservation';
 import mongoose from 'mongoose';
 
 const reservationSchema = new mongoose.Schema({
@@ -25,6 +28,11 @@ const reservationSchema = new mongoose.Schema({
   },
   amountOfGuests: {
     type: Number,
+    required: true,
+  },
+  paymentType: {
+    type: String,
+    enum: getPaymentTypeValues(),
     required: true,
   },
 });

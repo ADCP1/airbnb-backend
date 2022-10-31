@@ -11,6 +11,7 @@ export class ReservationFactory {
       endDate: reservation.endDate,
       status: reservation.status,
       amountOfGuests: reservation.amountOfGuests,
+      paymentType: reservation.paymentType,
     };
   }
 }

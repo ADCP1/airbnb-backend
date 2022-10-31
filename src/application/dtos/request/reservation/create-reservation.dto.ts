@@ -1,5 +1,7 @@
 import {
+  getPaymentTypeValues,
   getReservationStatusValues,
+  PaymentType,
   ReservationStatus,
 } from '@domain/reservation';
 import {
@@ -17,6 +19,7 @@ import {
 } from 'class-validator';
 
 const reservationStatusValues = getReservationStatusValues();
+const paymentTypeValues = getPaymentTypeValues();
 
 export class CreateReservationDto {
   @IsMongoId()
@@ -42,4 +45,7 @@ export class CreateReservationDto {
 
   @IsIn(reservationStatusValues)
   public status: ReservationStatus;
+
+  @IsIn(paymentTypeValues)
+  public paymentType: PaymentType;
 }
