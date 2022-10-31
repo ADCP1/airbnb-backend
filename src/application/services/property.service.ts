@@ -88,7 +88,7 @@ class PropertyService implements IPropertyService {
     ownerEmail: string,
   ): Promise<ResponseDtos.PropertiesDto> {
     const owner = await this.getOwnerFromEmail(ownerEmail);
-    const properties = await this.propertyRepository.findByOwnerId(owner.id);
+    const properties = await this.propertyRepository.findByOwnerId(owner.id!);
     return {
       properties: properties.map((property) => PropertyFactory.toDto(property)),
     };
