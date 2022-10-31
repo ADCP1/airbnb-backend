@@ -4,6 +4,7 @@ import { User } from '@domain/user';
 import { reservationRepository } from '@infra/reservation';
 import { NotFoundException } from '@shared';
 
+import { IPropertyService, propertyService } from './property.service';
 import { ReservationFactory } from './reservation.factory';
 import { IUserService, userService } from './user.service';
 
@@ -17,13 +18,16 @@ interface IReservationService {
 class ReservationService implements IReservationService {
   private reservationRepository: IReservationRepository;
   private userService: IUserService;
+  private propertyService: IPropertyService;
 
   constructor(
     reservationRepository: IReservationRepository,
     userService: IUserService,
+    propertyService: IPropertyService,
   ) {
     this.reservationRepository = reservationRepository;
     this.userService = userService;
+    this.propertyService = propertyService;
   }
 
   public async create(
@@ -35,8 +39,7 @@ class ReservationService implements IReservationService {
       ...reservationDto,
       guestId: guest.id!,
     });
-    //TODO: validar si la propiedad esta en uso esas fechas
-
+    await propertyService.getById(reservation.propertyId);
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation);
   }
@@ -53,6 +56,7 @@ class ReservationService implements IReservationService {
 const reservationService: IReservationService = new ReservationService(
   reservationRepository,
   userService,
+  propertyService,
 );
 
 export { IReservationService, reservationService };
