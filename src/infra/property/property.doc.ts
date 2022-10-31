@@ -45,4 +45,9 @@ const propertySchema = new mongoose.Schema({
   isPetFriendly: Boolean,
 });
 
+propertySchema.index(
+  { location: 1, title: 1, description: 1 },
+  { unique: true, name: 'searchableProperties' },
+);
+
 export const PropertyDoc = mongoose.model('Property', propertySchema);

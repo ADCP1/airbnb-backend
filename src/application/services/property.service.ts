@@ -18,6 +18,7 @@ interface IPropertyService {
     ownerEmail: string,
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
+  search(searchText: string | string[]): Promise<ResponseDtos.PropertyDto[]>;
 }
 
 class PropertyService implements IPropertyService {
@@ -72,6 +73,15 @@ class PropertyService implements IPropertyService {
       throw new NotFoundException('Property does not exist');
     }
     return PropertyFactory.toDto(property);
+  }
+
+  public async search(
+    searchText: string | string[],
+  ): Promise<ResponseDtos.PropertyDto[]> {
+    console.log('LIO_2*********************************: ', searchText);
+    const properties = await this.propertyRepository.searchBy(searchText);
+    console.log('LIO_3*********************************', properties);
+    return properties.map((property) => PropertyFactory.toDto(property));
   }
 
   private async getOwnerFromEmail(email: string): Promise<User> {

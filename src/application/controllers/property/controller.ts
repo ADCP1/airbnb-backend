@@ -12,6 +12,7 @@ interface IPropertyController {
   get(
     req: Request<void, { propertyId: string }>,
   ): Promise<ResponseDtos.PropertyDto>;
+  search(req: Request): Promise<ResponseDtos.PropertyDto[]>;
 }
 
 class PropertyController implements IPropertyController {
@@ -41,6 +42,12 @@ class PropertyController implements IPropertyController {
     req: Request<void, { propertyId: string }>,
   ): Promise<ResponseDtos.PropertyDto> {
     return this.propertyService.getById(req.params.propertyId);
+  }
+  //LIO
+
+  public async search(req: Request): Promise<ResponseDtos.PropertyDto[]> {
+    console.log('LIO_1 *********************** - req: ', req);
+    return this.propertyService.search(req.query.searchText as string);
   }
 }
 
