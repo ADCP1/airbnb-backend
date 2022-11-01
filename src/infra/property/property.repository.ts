@@ -41,10 +41,13 @@ class PropertyRepository implements IPropertyRepository {
   public async searchBy(searchText: string | string[]): Promise<Property[]> {
     // {$text: {$search: `${search}`}}
     const properties = await PropertyDoc.find({
-      searchableProperties: searchText,
+      $text: {
+        $search: 'depto',
+        $caseSensitive: false,
+      },
     })
       .sort('_id')
-      .skip(2)
+      .skip(0)
       .limit(2)
       .lean();
     return properties.map(
