@@ -22,7 +22,10 @@ export function exceptionToHttpError(
   let code: number;
   let description: string;
 
-  if (error instanceof DomainException) {
+  if (error instanceof SyntaxError) {
+    code = StatusCodes.BAD_REQUEST;
+    description = 'Invalid body format';
+  } else if (error instanceof DomainException) {
     code = StatusCodes.CONFLICT;
     description = 'Invalid operation';
   } else if (error instanceof NotFoundException) {
