@@ -40,7 +40,6 @@ export function PropertyRouter() {
       propertyController.get(req),
     ),
   );
-  //LIO
   router.get(
     '/',
     validateJWT,
