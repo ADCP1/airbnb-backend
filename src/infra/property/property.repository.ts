@@ -58,6 +58,40 @@ class PropertyRepository implements IPropertyRepository {
       throw new DomainException("Cannot reassign a property's owner");
     }
   }
+
+  public async searchAll(): Promise<Property[]> {
+    const properties = await PropertyDoc.find({}).sort('_id').skip(0).lean();
+
+    return properties.map(
+      (property) =>
+        new Property({
+          id: property._id.toString(),
+          ...property,
+          amenities: property.amenities as PropertyAmenity[],
+        }),
+    );
+  }
+
+  public async searchBy(searchText: string): Promise<Property[]> {
+    const properties = await PropertyDoc.find({
+      $text: {
+        $search: `${searchText}`,
+        $caseSensitive: false,
+      },
+    })
+      .sort('_id')
+      .skip(0)
+      .lean();
+
+    return properties.map(
+      (property) =>
+        new Property({
+          id: property._id.toString(),
+          ...property,
+          amenities: property.amenities as PropertyAmenity[],
+        }),
+    );
+  }
 }
 
 export const propertyRepository: IPropertyRepository = new PropertyRepository();

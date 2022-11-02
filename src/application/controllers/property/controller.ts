@@ -13,6 +13,7 @@ interface IPropertyController {
   get(
     req: Request<void, { propertyId: string }>,
   ): Promise<ResponseDtos.PropertyDto>;
+  search(req: Request): Promise<ResponseDtos.PropertyDto[]>;
   delete(req: Request<void, { propertyId: string }>): Promise<void>;
 }
 
@@ -51,6 +52,9 @@ class PropertyController implements IPropertyController {
     return this.propertyService.getById(req.params.propertyId);
   }
 
+  public async search(req: Request): Promise<ResponseDtos.PropertyDto[]> {
+    return this.propertyService.search(req.query.searchText as string);
+  }
   public async delete(
     req: Request<void, { propertyId: string }>,
   ): Promise<void> {

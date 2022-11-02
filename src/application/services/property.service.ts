@@ -18,6 +18,7 @@ interface IPropertyService {
     ownerEmail: string,
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
+  search(searchText: string): Promise<ResponseDtos.PropertyDto[]>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
   delete(propertyId: string, ownerEmail: string): Promise<void>;
 }
@@ -74,6 +75,16 @@ class PropertyService implements IPropertyService {
       throw new NotFoundException('Property does not exist');
     }
     return PropertyFactory.toDto(property);
+  }
+
+  public async search(searchText: string): Promise<ResponseDtos.PropertyDto[]> {
+    if (searchText) {
+      const properties = await this.propertyRepository.searchBy(searchText);
+      return properties.map((property) => PropertyFactory.toDto(property));
+    } else {
+      const properties = await this.propertyRepository.searchAll();
+      return properties.map((property) => PropertyFactory.toDto(property));
+    }
   }
 
   private async getOwnerFromEmail(email: string): Promise<User> {
