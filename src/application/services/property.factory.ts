@@ -4,7 +4,7 @@ import { Property } from '@domain/property';
 export class PropertyFactory {
   public static toDto(property: Property): ResponseDtos.PropertyDto {
     return {
-      id: property.id,
+      id: property.id!,
       ownerId: property.ownerId,
       capacity: property.capacity,
       imagesUrls: property.imagesUrls,

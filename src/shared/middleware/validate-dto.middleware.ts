@@ -12,7 +12,7 @@ function mapError(
   prefix?: string,
 ) {
   const errorProperty = prefix ? `${prefix}.${error.property}` : error.property;
-  if (error.children?.length > 0) {
+  if (error.children && error.children.length > 0) {
     error.children.forEach((childError) =>
       mapError(childError, dtoErrors, errorProperty),
     );

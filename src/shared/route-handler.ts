@@ -20,9 +20,7 @@ export function registerHandler<T = Record<string, unknown>>(
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const resObject = (await handler(req)) as
-        | Record<string, unknown>
-        | undefined;
+      const resObject = (await handler(req)) as Record<string, unknown>;
       if (!resObject) res.status(statusCode).send();
       const snakeResObject = snakecaseKeys(resObject, {
         deep: true,

@@ -6,6 +6,7 @@ interface IPropertyController {
   create(
     req: Request<RequestDtos.CreatePropertyDto>,
   ): Promise<ResponseDtos.PropertyDto>;
+  getUserProperties(req: Request<void>): Promise<ResponseDtos.PropertiesDto>;
   partialUpdate(
     req: Request<RequestDtos.UpdatePropertyDto>,
   ): Promise<ResponseDtos.PropertyDto>;
@@ -13,6 +14,7 @@ interface IPropertyController {
     req: Request<void, { propertyId: string }>,
   ): Promise<ResponseDtos.PropertyDto>;
   search(req: Request): Promise<ResponseDtos.PropertyDto[]>;
+  delete(req: Request<void, { propertyId: string }>): Promise<void>;
 }
 
 class PropertyController implements IPropertyController {
@@ -38,16 +40,25 @@ class PropertyController implements IPropertyController {
     );
   }
 
+  public async getUserProperties(
+    req: Request<void>,
+  ): Promise<ResponseDtos.PropertiesDto> {
+    return this.propertyService.getMyProperties(req.user.email);
+  }
+
   public async get(
     req: Request<void, { propertyId: string }>,
   ): Promise<ResponseDtos.PropertyDto> {
     return this.propertyService.getById(req.params.propertyId);
   }
-  //LIO
 
   public async search(req: Request): Promise<ResponseDtos.PropertyDto[]> {
-    console.log('LIO_1 *********************** - req: ', req);
     return this.propertyService.search(req.query.searchText as string);
+  }
+  public async delete(
+    req: Request<void, { propertyId: string }>,
+  ): Promise<void> {
+    return this.propertyService.delete(req.params.propertyId, req.user.email);
   }
 }
 

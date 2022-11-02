@@ -18,7 +18,7 @@ interface IUserService {
     userEmail: string,
     userDto: RequestDtos.UpdateUserDto,
   ): Promise<ResponseDtos.UserDto>;
-  profile(userEmail: string): Promise<ResponseDtos.UserDto>;
+  getProfile(userEmail: string): Promise<ResponseDtos.UserDto>;
   findFromEmail(email: string): Promise<User | null>;
 }
 
@@ -74,13 +74,15 @@ class UserService implements IUserService {
     const updatedUser = new User({
       ...user,
       ...userDto,
-      creditCardInfo: new CreditCardInfo(userDto.creditCardInfo),
+      creditCardInfo: userDto.creditCardInfo
+        ? new CreditCardInfo(userDto.creditCardInfo)
+        : user.creditCardInfo,
     });
     await this.userRepository.save(updatedUser);
     return UserFactory.toDto(updatedUser);
   }
 
-  public async profile(userEmail: string): Promise<ResponseDtos.UserDto> {
+  public async getProfile(userEmail: string): Promise<ResponseDtos.UserDto> {
     const user = await this.userRepository.findOneByEmail(userEmail);
     if (!user) throw new NotFoundException('User not found');
     return UserFactory.toDto(user);

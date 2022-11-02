@@ -36,7 +36,7 @@ export function UserRouter() {
   router.get(
     '/',
     validateJWT,
-    registerHandler((req) => userController.profile(req)),
+    registerHandler((req) => userController.getProfile(req)),
   );
 
   return router;

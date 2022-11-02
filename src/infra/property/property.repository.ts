@@ -4,7 +4,7 @@ import {
   PropertyAmenity,
 } from '@domain/property';
 import { loadObjectIdentification } from '@infra/identification';
-import { DomainException } from '@shared';
+import { DomainException, InternalServerException } from '@shared';
 import cloneDeep from 'clone-deep';
 
 import { PropertyDoc } from './property.doc';
@@ -30,26 +30,59 @@ class PropertyRepository implements IPropertyRepository {
     });
   }
 
+  public async findByOwnerId(ownerId: string): Promise<Property[]> {
+    const properties = await PropertyDoc.find({ ownerId }).lean();
+    return properties.map(
+      (property) =>
+        new Property({
+          id: property._id.toString(),
+          ...property,
+          amenities: property.amenities as PropertyAmenity[],
+        }),
+    );
+  }
+
+  public async deleteById(id: string) {
+    await PropertyDoc.deleteOne({ _id: id });
+  }
+
   private async validateOwner(property: Property) {
     if (!property.id) return;
     const propertyDoc = await PropertyDoc.findById(property.id).lean();
+    if (!propertyDoc) {
+      throw new InternalServerException(
+        `Tried to save a property with an invalid id ${property.id}`,
+      );
+    }
     if (propertyDoc.ownerId !== property.ownerId) {
       throw new DomainException("Cannot reassign a property's owner");
     }
   }
 
+  public async searchAll(): Promise<Property[]> {
+    const properties = await PropertyDoc.find({}).sort('_id').skip(0).lean();
+
+    return properties.map(
+      (property) =>
+        new Property({
+          id: property._id.toString(),
+          ...property,
+          amenities: property.amenities as PropertyAmenity[],
+        }),
+    );
+  }
+
   public async searchBy(searchText: string | string[]): Promise<Property[]> {
-    // {$text: {$search: `${search}`}}
     const properties = await PropertyDoc.find({
       $text: {
-        $search: 'depto',
+        $search: `${searchText}`,
         $caseSensitive: false,
       },
     })
       .sort('_id')
       .skip(0)
-      .limit(2)
       .lean();
+
     return properties.map(
       (property) =>
         new Property({

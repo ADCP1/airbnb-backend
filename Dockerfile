@@ -1,6 +1,8 @@
-FROM node:16.14.2
+FROM node:16.14.2-alpine3.15
 
 WORKDIR /app
+
+RUN apk update && apk add curl
 
 COPY package*.json ./
 RUN npm ci

@@ -9,6 +9,8 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "experimentalDecorators": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "baseUrl": "./src",
     "paths": {

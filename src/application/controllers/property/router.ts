@@ -23,6 +23,11 @@ export function PropertyRouter() {
       StatusCodes.CREATED,
     ),
   );
+  router.get(
+    '/owned',
+    validateJWT,
+    registerHandler((req) => propertyController.getUserProperties(req)),
+  );
   router.patch(
     '/:propertyId',
     validateJWT,
@@ -40,6 +45,13 @@ export function PropertyRouter() {
     '/',
     validateJWT,
     registerHandler((req) => propertyController.search(req)),
+  );
+  router.delete(
+    '/:propertyId',
+    validateJWT,
+    registerHandler((req: Request<void, { propertyId: string }>) =>
+      propertyController.delete(req),
+    ),
   );
 
   return router;
