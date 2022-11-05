@@ -4,17 +4,14 @@ import {
   PaymentType,
   ReservationStatus,
 } from '@domain/reservation';
-import {
-  IsAfterDateArgConstraint,
-  IsAfterNowConstraint,
-} from '@shared/customValidations/dateValidations';
+import { IsAfterDateArgConstraint, IsAfterNowConstraint } from '@shared';
 import { Type } from 'class-transformer';
 import {
   IsDate,
   IsIn,
-  IsMongoId,
   IsNotEmpty,
   IsPositive,
+  IsString,
   Validate,
 } from 'class-validator';
 
@@ -22,7 +19,7 @@ const reservationStatusValues = getReservationStatusValues();
 const paymentTypeValues = getPaymentTypeValues();
 
 export class CreateReservationDto {
-  @IsMongoId()
+  @IsString()
   @IsNotEmpty()
   public propertyId: string;
 

@@ -8,6 +8,7 @@ import { DomainException, InternalServerException } from '@shared';
 import cloneDeep from 'clone-deep';
 
 import { PropertyDoc } from './property.doc';
+import { PropertyFactory } from './property.factory';
 
 class PropertyRepository implements IPropertyRepository {
   public async save(property: Property) {
@@ -23,22 +24,13 @@ class PropertyRepository implements IPropertyRepository {
   public async findById(id: string): Promise<Property | null> {
     const property = await PropertyDoc.findById(id).lean();
     if (!property) return null;
-    return new Property({
-      id: property._id.toString(),
-      ...property,
-      amenities: property.amenities as PropertyAmenity[],
-    });
+    return PropertyFactory.fromPropertyDoc(property);
   }
 
   public async findByOwnerId(ownerId: string): Promise<Property[]> {
     const properties = await PropertyDoc.find({ ownerId }).lean();
-    return properties.map(
-      (property) =>
-        new Property({
-          id: property._id.toString(),
-          ...property,
-          amenities: property.amenities as PropertyAmenity[],
-        }),
+    return properties.map((property) =>
+      PropertyFactory.fromPropertyDoc(property),
     );
   }
 
@@ -62,34 +54,23 @@ class PropertyRepository implements IPropertyRepository {
   public async searchAll(): Promise<Property[]> {
     const properties = await PropertyDoc.find({}).sort('_id').skip(0).lean();
 
-    return properties.map(
-      (property) =>
-        new Property({
-          id: property._id.toString(),
-          ...property,
-          amenities: property.amenities as PropertyAmenity[],
-        }),
+    return properties.map((property) =>
+      PropertyFactory.fromPropertyDoc(property),
     );
   }
 
-  public async searchBy(searchText: string): Promise<Property[]> {
+  public async findManyByText(searchText: string): Promise<Property[]> {
     const properties = await PropertyDoc.find({
       $text: {
-        $search: `${searchText}`,
+        $search: searchText,
         $caseSensitive: false,
       },
     })
       .sort('_id')
-      .skip(0)
-      .lean();
+      .lean(); // TODO we should paginate these results
 
-    return properties.map(
-      (property) =>
-        new Property({
-          id: property._id.toString(),
-          ...property,
-          amenities: property.amenities as PropertyAmenity[],
-        }),
+    return properties.map((property) =>
+      PropertyFactory.fromPropertyDoc(property),
     );
   }
 }

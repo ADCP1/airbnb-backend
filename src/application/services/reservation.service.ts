@@ -1,10 +1,11 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
+import { IPropertyRepository } from '@domain/property';
 import { IReservationRepository, Reservation } from '@domain/reservation';
 import { User } from '@domain/user';
+import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
 import { NotFoundException } from '@shared';
 
-import { IPropertyService, propertyService } from './property.service';
 import { ReservationFactory } from './reservation.factory';
 import { IUserService, userService } from './user.service';
 
@@ -17,17 +18,17 @@ interface IReservationService {
 
 class ReservationService implements IReservationService {
   private reservationRepository: IReservationRepository;
+  private propertyRepository: IPropertyRepository;
   private userService: IUserService;
-  private propertyService: IPropertyService;
 
   constructor(
     reservationRepository: IReservationRepository,
+    propertyRepository: IPropertyRepository,
     userService: IUserService,
-    propertyService: IPropertyService,
   ) {
     this.reservationRepository = reservationRepository;
+    this.propertyRepository = propertyRepository;
     this.userService = userService;
-    this.propertyService = propertyService;
   }
 
   public async create(
@@ -39,7 +40,12 @@ class ReservationService implements IReservationService {
       ...reservationDto,
       guestId: guest.id!,
     });
-    await propertyService.getById(reservation.propertyId);
+    const property = await this.propertyRepository.findById(
+      reservationDto.propertyId,
+    );
+    if (!property) {
+      throw new NotFoundException('The reservation property does not exist');
+    }
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation);
   }
@@ -55,8 +61,8 @@ class ReservationService implements IReservationService {
 
 const reservationService: IReservationService = new ReservationService(
   reservationRepository,
+  propertyRepository,
   userService,
-  propertyService,
 );
 
 export { IReservationService, reservationService };

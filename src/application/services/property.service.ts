@@ -18,7 +18,7 @@ interface IPropertyService {
     ownerEmail: string,
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
-  search(searchText: string): Promise<ResponseDtos.PropertyDto[]>;
+  searchByText(searchText: string): Promise<ResponseDtos.PropertyDto[]>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
   delete(propertyId: string, ownerEmail: string): Promise<void>;
 }
@@ -77,14 +77,11 @@ class PropertyService implements IPropertyService {
     return PropertyFactory.toDto(property);
   }
 
-  public async search(searchText: string): Promise<ResponseDtos.PropertyDto[]> {
-    if (searchText) {
-      const properties = await this.propertyRepository.searchBy(searchText);
-      return properties.map((property) => PropertyFactory.toDto(property));
-    } else {
-      const properties = await this.propertyRepository.searchAll();
-      return properties.map((property) => PropertyFactory.toDto(property));
-    }
+  public async searchByText(
+    searchText: string,
+  ): Promise<ResponseDtos.PropertyDto[]> {
+    const properties = await this.propertyRepository.findManyByText(searchText);
+    return properties.map((property) => PropertyFactory.toDto(property));
   }
 
   private async getOwnerFromEmail(email: string): Promise<User> {
@@ -115,7 +112,6 @@ class PropertyService implements IPropertyService {
       throw new DomainException('Property does not belong to the user');
     }
     await this.propertyRepository.deleteById(propertyId);
-    return;
   }
 }
 

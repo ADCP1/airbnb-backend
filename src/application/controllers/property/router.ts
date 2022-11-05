@@ -1,9 +1,7 @@
-import { userController } from '@application/controllers/user/controller';
 import {
   CreatePropertyDto,
   UpdatePropertyDto,
 } from '@application/dtos/request';
-import { SearchPropertyDto } from '@application/dtos/request/property/search-property.dto';
 import { registerHandler, validateDto, validateJWT } from '@shared';
 import { Request } from '@shared';
 import { Router } from 'express';
@@ -43,7 +41,9 @@ export function PropertyRouter() {
   router.get(
     '/',
     validateJWT,
-    registerHandler((req) => propertyController.search(req)),
+    registerHandler((req: Request<void, any, { searchText: string }>) =>
+      propertyController.searchByText(req),
+    ),
   );
   router.delete(
     '/:propertyId',

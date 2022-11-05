@@ -28,13 +28,12 @@ class ReservationRepository implements IReservationRepository {
   private async validatePropertyAvailability(
     reservation: Reservation,
   ): Promise<void> {
-    const foundedReservations =
-      await this.findReservationByPropertyIdInBetweenDates(
-        reservation.propertyId,
-        reservation.startDate,
-        reservation.endDate,
-      );
-    if (foundedReservations) {
+    const reservations = await this.findReservationByPropertyIdInBetweenDates(
+      reservation.propertyId,
+      reservation.startDate,
+      reservation.endDate,
+    );
+    if (reservations) {
       throw new DomainException(
         'Property is not available for the selected dates.',
       );
