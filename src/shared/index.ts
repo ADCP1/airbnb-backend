@@ -1,3 +1,4 @@
+export * from './customValidations';
 export * from './exceptions';
 export * from './http';
 export * from './middleware';

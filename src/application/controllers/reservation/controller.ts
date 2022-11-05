@@ -6,6 +6,9 @@ interface IReservationController {
   create(
     req: Request<RequestDtos.CreateReservationDto>,
   ): Promise<ResponseDtos.ReservationDto>;
+  getPropertyAvailability(
+    req: Request<RequestDtos.GetPropertyAvailabilityDto>,
+  ): Promise<ResponseDtos.PropertyAvailabilityDto>;
 }
 
 class ReservationController implements IReservationController {
@@ -19,6 +22,12 @@ class ReservationController implements IReservationController {
     req: Request<RequestDtos.CreateReservationDto>,
   ): Promise<ResponseDtos.ReservationDto> {
     return this.reservationService.create(req.body, req.user.email);
+  }
+
+  public async getPropertyAvailability(
+    req: Request<RequestDtos.GetPropertyAvailabilityDto>,
+  ): Promise<ResponseDtos.PropertyAvailabilityDto> {
+    return this.reservationService.getPropertyAvailability(req.body);
   }
 }
 
