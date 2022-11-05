@@ -51,8 +51,8 @@ class PropertyRepository implements IPropertyRepository {
     }
   }
 
-  public async searchAll(): Promise<Property[]> {
-    const properties = await PropertyDoc.find({}).sort('_id').skip(0).lean();
+  public async findMany(limit: number): Promise<Property[]> {
+    const properties = await PropertyDoc.find().limit(limit).lean();
 
     return properties.map((property) =>
       PropertyFactory.fromPropertyDoc(property),

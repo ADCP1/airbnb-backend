@@ -45,6 +45,10 @@ export function PropertyRouter() {
       propertyController.searchByText(req),
     ),
   );
+  router.get(
+    '/preview',
+    registerHandler((req) => propertyController.getPreview(req)),
+  );
   router.delete(
     '/:propertyId',
     validateJWT,

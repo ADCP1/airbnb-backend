@@ -6,7 +6,7 @@ interface IPropertyController {
   create(
     req: Request<RequestDtos.CreatePropertyDto>,
   ): Promise<ResponseDtos.PropertyDto>;
-  getUserProperties(req: Request<void>): Promise<ResponseDtos.PropertiesDto>;
+  getUserProperties(req: Request<void>): Promise<ResponseDtos.PropertiesDto>; // TODO return array of properties
   partialUpdate(
     req: Request<RequestDtos.UpdatePropertyDto>,
   ): Promise<ResponseDtos.PropertyDto>;
@@ -16,6 +16,7 @@ interface IPropertyController {
   searchByText(
     req: Request<void, any, { searchText: string }>,
   ): Promise<ResponseDtos.PropertyDto[]>;
+  getPreview(req: Request): Promise<ResponseDtos.PropertyDto[]>;
   delete(req: Request<void, { propertyId: string }>): Promise<void>;
 }
 
@@ -58,6 +59,10 @@ class PropertyController implements IPropertyController {
     req: Request<void, any, { searchText: string }>,
   ): Promise<ResponseDtos.PropertyDto[]> {
     return this.propertyService.searchByText(req.query.searchText);
+  }
+
+  public async getPreview(): Promise<ResponseDtos.PropertyDto[]> {
+    return this.propertyService.getPreview();
   }
 
   public async delete(

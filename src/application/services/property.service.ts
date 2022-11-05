@@ -20,6 +20,7 @@ interface IPropertyService {
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
   searchByText(searchText: string): Promise<ResponseDtos.PropertyDto[]>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
+  getPreview(): Promise<ResponseDtos.PropertyDto[]>;
   delete(propertyId: string, ownerEmail: string): Promise<void>;
 }
 
@@ -100,6 +101,14 @@ class PropertyService implements IPropertyService {
     return {
       properties: properties.map((property) => PropertyFactory.toDto(property)),
     };
+  }
+
+  public async getPreview(): Promise<ResponseDtos.PropertyDto[]> {
+    const maxPreviewPropertyAmount = 20;
+    const properties = await this.propertyRepository.findMany(
+      maxPreviewPropertyAmount,
+    );
+    return properties.map((property) => PropertyFactory.toDto(property));
   }
 
   public async delete(propertyId: string, ownerEmail: string): Promise<void> {
