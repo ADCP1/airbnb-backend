@@ -52,7 +52,7 @@ class PropertyRepository implements IPropertyRepository {
   }
 
   public async findMany(limit: number): Promise<Property[]> {
-    const properties = await PropertyDoc.find().limit(limit).lean();
+    const properties = await PropertyDoc.find({}).limit(limit).lean();
 
     return properties.map((property) =>
       PropertyFactory.fromPropertyDoc(property),
