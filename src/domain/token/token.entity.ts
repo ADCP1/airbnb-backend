@@ -7,8 +7,8 @@ export type TokenArgs = {
 };
 
 export class Token extends Entity {
-  public readonly key: string;
-  public readonly value: string;
+  public key: string;
+  public value: string;
 
   constructor(args: TokenArgs) {
     super(args.id);

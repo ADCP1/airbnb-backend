@@ -1,20 +1,31 @@
 import { NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import snakecaseKeys from 'snakecase-keys';
+
 import { Request, Response } from './http';
 
-export function registerHandler<T, U>(
-  handler: (req: Request<T>) => Promise<U>,
+type ResBody = Record<string, unknown> | Record<string, unknown>[] | void;
+
+export function registerHandler<T = Record<string, unknown>>(
+  handler: (req: Request<T>) => Promise<ResBody>,
   statusCode = StatusCodes.OK,
-): (req: Request<T>, res: Response<U>, next: NextFunction) => Promise<void> {
+): (
+  req: Request<T>,
+  res: Response<ResBody>,
+  next: NextFunction,
+) => Promise<void> {
   return async (
     req: Request<T>,
-    res: Response<U>,
+    res: Response<ResBody>,
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const resObject = await handler(req);
+      const resObject = (await handler(req)) as Record<string, unknown>;
       if (!resObject) res.status(statusCode).send();
-      res.status(statusCode).json(resObject);
+      const snakeResObject = snakecaseKeys(resObject, {
+        deep: true,
+      });
+      res.status(statusCode).json(snakeResObject);
     } catch (error) {
       next(error);
     }

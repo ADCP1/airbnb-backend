@@ -1,27 +1,27 @@
-import { User, IUserRepository } from '@domain/user';
-import { DomainException } from '@shared';
+import { IUserRepository, User } from '@domain/user';
+import { loadObjectIdentification } from '@infra/identification';
+import cloneDeep from 'clone-deep';
+
 import { UserDoc } from './user.doc';
 
 class UserRepository implements IUserRepository {
   public async save(user: User) {
-    const userAlreadyExists =
-      (await this.findOneByUsername(user.username)) !== undefined;
-    if (!userAlreadyExists) {
-      await new UserDoc({ ...user }).save();
-    } else {
-      throw new DomainException('A user with that username already exists');
-    }
+    loadObjectIdentification(user);
+    await UserDoc.updateOne(
+      { email: user.email },
+      { $set: cloneDeep({ ...user }) },
+      { upsert: true },
+    );
   }
 
-  public async findOneByUsername(username: string): Promise<User | undefined> {
+  public async findOneByEmail(email: string): Promise<User | null> {
     const user = await UserDoc.findOne({
-      username,
+      email,
     });
-    if (!user) return undefined;
+    if (!user) return null;
     return new User({
       id: user.id,
-      username: user.username,
-      password: user.password,
+      ...user.toObject(),
     });
   }
 }

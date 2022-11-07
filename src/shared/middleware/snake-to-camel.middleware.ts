@@ -1,5 +1,5 @@
-import { RequestHandler } from 'express';
 import camelcaseKeys from 'camelcase-keys';
+import { RequestHandler } from 'express';
 
 export function snakeToCamelcaseKeys(): RequestHandler {
   return (req, _, next) => {

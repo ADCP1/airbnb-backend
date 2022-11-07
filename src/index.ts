@@ -1,13 +1,16 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
-import express from 'express';
+import 'reflect-metadata';
+
 import cors from 'cors';
-import mongoose from 'mongoose';
+import express from 'express';
 import pino from 'express-pino-logger';
+import mongoose from 'mongoose';
 import pinoLogger from 'pino';
-import { exceptionToHttpError, snakeToCamelcaseKeys } from './shared';
+
+import { registerRouters } from './application/controllers';
 import { config } from './config';
-import { registerRouters } from './controllers';
+import { exceptionToHttpError, snakeToCamelcaseKeys } from './shared';
 
 async function main() {
   await mongoose.connect(config.mongoUri);

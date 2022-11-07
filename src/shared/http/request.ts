@@ -7,10 +7,14 @@ declare global {
   namespace Express {
     interface Request {
       user: {
-        username: string;
+        email: string;
       };
     }
   }
 }
 
-export type Request<T = any> = express.Request<core.ParamsDictionary, any, T>;
+export type Request<
+  T = any,
+  U = core.ParamsDictionary,
+  V = core.Query,
+> = express.Request<U, any, T, V>;
