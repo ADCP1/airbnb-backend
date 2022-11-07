@@ -1,2 +1,2 @@
 export * from './create-reservation.dto';
-export * from './get-Property-availability.dto';
+export * from './get-property-availability.dto';
