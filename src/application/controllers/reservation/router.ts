@@ -19,7 +19,7 @@ export function ReservationRouter() {
       StatusCodes.CREATED,
     ),
   );
-  router.get(
+  router.post(
     '/property-availability',
     validateJWT,
     validateDto(GetPropertyAvailabilityDto),
