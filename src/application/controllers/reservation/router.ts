@@ -36,5 +36,13 @@ export function ReservationRouter() {
       StatusCodes.OK,
     ),
   );
+  router.delete(
+    'own/:id',
+    validateJWT,
+    registerHandler(
+      (req) => reservationController.deleteOwnReservation(req),
+      StatusCodes.OK,
+    ),
+  );
   return router;
 }

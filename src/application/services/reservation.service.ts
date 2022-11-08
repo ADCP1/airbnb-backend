@@ -4,7 +4,7 @@ import { IReservationRepository, Reservation } from '@domain/reservation';
 import { User } from '@domain/user';
 import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
-import { NotFoundException } from '@shared';
+import { NotFoundException, UnauthorizedException } from '@shared';
 
 import { ReservationFactory } from './reservation.factory';
 import { IUserService, userService } from './user.service';
@@ -20,6 +20,7 @@ interface IReservationService {
   getOwnReservations(
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto[]>;
+  deleteOwnReservation(id: string): Promise<void>;
 }
 
 class ReservationService implements IReservationService {
@@ -85,6 +86,19 @@ class ReservationService implements IReservationService {
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation),
     );
+  }
+
+  public async deleteOwnReservation(id: string): Promise<void> {
+    const reservation = await this.reservationRepository.findById(id);
+    if (!reservation) {
+      throw new NotFoundException('The reservation does not exist');
+    }
+    if (reservation.guestId !== id) {
+      throw new UnauthorizedException(
+        'You are not allowed to cancel this reservation',
+      );
+    }
+    await this.reservationRepository.delete(reservation.id!);
   }
 
   private parseReservationsToAvailableDates(

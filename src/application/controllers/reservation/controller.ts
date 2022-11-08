@@ -10,6 +10,7 @@ interface IReservationController {
     req: Request<RequestDtos.GetPropertyAvailabilityDto>,
   ): Promise<ResponseDtos.PropertyAvailabilityDto>;
   getOwnReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
+  deleteOwnReservation(req: Request): Promise<void>;
 }
 
 class ReservationController implements IReservationController {
@@ -35,6 +36,10 @@ class ReservationController implements IReservationController {
     req: Request,
   ): Promise<ResponseDtos.ReservationDto[]> {
     return this.reservationService.getOwnReservations(req.user.email);
+  }
+
+  public async deleteOwnReservation(req: Request): Promise<void> {
+    return this.reservationService.deleteOwnReservation(req.params.id);
   }
 }
 

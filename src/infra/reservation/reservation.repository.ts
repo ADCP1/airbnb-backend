@@ -59,6 +59,13 @@ class ReservationRepository implements IReservationRepository {
     );
   }
 
+  public async delete(id: string): Promise<void> {
+    await ReservationDoc.updateOne(
+      { _id: id },
+      { $set: { status: 'cancelled' } },
+    );
+  }
+
   private async validatePropertyAvailability(
     reservation: Reservation,
   ): Promise<void> {
