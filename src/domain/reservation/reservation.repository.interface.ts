@@ -8,4 +8,5 @@ export interface IReservationRepository {
     from: Date,
     to: Date,
   ): Promise<Reservation[]>;
+  getGuestReservations(guestId: string): Promise<Reservation[]>;
 }

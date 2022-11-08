@@ -17,6 +17,9 @@ interface IReservationService {
   getPropertyAvailability(
     propertyDto: RequestDtos.GetPropertyAvailabilityDto,
   ): Promise<ResponseDtos.PropertyAvailabilityDto>;
+  getOwnReservations(
+    guestEmail: string,
+  ): Promise<ResponseDtos.ReservationDto[]>;
 }
 
 class ReservationService implements IReservationService {
@@ -70,6 +73,18 @@ class ReservationService implements IReservationService {
     return {
       dates: availableDates,
     };
+  }
+
+  public async getOwnReservations(
+    guestEmail: string,
+  ): Promise<ResponseDtos.ReservationDto[]> {
+    const guest = await this.getGuestFromEmail(guestEmail);
+    const reservations = await this.reservationRepository.getGuestReservations(
+      guest.id!,
+    );
+    return reservations.map((reservation) =>
+      ReservationFactory.toDto(reservation),
+    );
   }
 
   private parseReservationsToAvailableDates(

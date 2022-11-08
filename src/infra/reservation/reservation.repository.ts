@@ -30,12 +30,25 @@ class ReservationRepository implements IReservationRepository {
     from: Date,
     to: Date,
   ): Promise<Reservation[]> {
-    //find reservations with status active or pending and (StartDate < to and EndDate > from)
     const reservations = await ReservationDoc.find({
       propertyId,
       status: { $in: ['active', 'pending'] },
       startDate: { $lt: to },
       endDate: { $gt: from },
+    }).lean();
+    return reservations.map(
+      (reservation) =>
+        new Reservation({
+          id: reservation._id.toString(),
+          ...reservation,
+        }),
+    );
+  }
+
+  public async getGuestReservations(guestId: string): Promise<Reservation[]> {
+    const reservations = await ReservationDoc.find({
+      guestId,
+      status: { $in: ['active', 'pending'] },
     }).lean();
     return reservations.map(
       (reservation) =>

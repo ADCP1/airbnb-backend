@@ -28,5 +28,13 @@ export function ReservationRouter() {
       StatusCodes.OK,
     ),
   );
+  router.get(
+    '/own',
+    validateJWT,
+    registerHandler(
+      (req) => reservationController.getOwnReservations(req),
+      StatusCodes.OK,
+    ),
+  );
   return router;
 }
