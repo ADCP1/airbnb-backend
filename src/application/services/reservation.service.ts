@@ -1,5 +1,5 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
-import { IPropertyRepository } from '@domain/property';
+import { IPropertyRepository, Property } from '@domain/property';
 import { IReservationRepository, Reservation } from '@domain/reservation';
 import { User } from '@domain/user';
 import { propertyRepository } from '@infra/property';
@@ -17,10 +17,14 @@ interface IReservationService {
   getPropertyAvailability(
     propertyDto: RequestDtos.GetPropertyAvailabilityDto,
   ): Promise<ResponseDtos.PropertyAvailabilityDto>;
-  getOwnReservations(
+  getGuestReservations(
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto[]>;
-  deleteOwnReservation(id: string): Promise<void>;
+  getHostReservations(
+    hostEmail: string,
+  ): Promise<ResponseDtos.ReservationDto[]>;
+  cancelGuestReservation(id: string, email: string): Promise<void>;
+  cancelHostReservation(id: string, email: string): Promise<void>;
 }
 
 class ReservationService implements IReservationService {
@@ -42,17 +46,12 @@ class ReservationService implements IReservationService {
     reservationDto: RequestDtos.CreateReservationDto,
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto> {
-    const guest = await this.getGuestFromEmail(guestEmail);
+    const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const reservation = new Reservation({
       ...reservationDto,
       guestId: guest.id!,
     });
-    const property = await this.propertyRepository.findById(
-      reservationDto.propertyId,
-    );
-    if (!property) {
-      throw new NotFoundException('The reservation property does not exist');
-    }
+    await this.getPropertyById(reservationDto.propertyId);
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation);
   }
@@ -76,10 +75,10 @@ class ReservationService implements IReservationService {
     };
   }
 
-  public async getOwnReservations(
+  public async getGuestReservations(
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto[]> {
-    const guest = await this.getGuestFromEmail(guestEmail);
+    const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const reservations = await this.reservationRepository.getGuestReservations(
       guest.id!,
     );
@@ -88,17 +87,44 @@ class ReservationService implements IReservationService {
     );
   }
 
-  public async deleteOwnReservation(id: string): Promise<void> {
-    const reservation = await this.reservationRepository.findById(id);
-    if (!reservation) {
-      throw new NotFoundException('The reservation does not exist');
-    }
-    if (reservation.guestId !== id) {
+  public async getHostReservations(
+    hostEmail: string,
+  ): Promise<ResponseDtos.ReservationDto[]> {
+    const host = await this.getUserFromEmail(hostEmail, 'Host');
+    const properties = await this.propertyRepository.findByOwnerId(host.id!);
+    const reservations =
+      await this.reservationRepository.getPropertiesReservations(
+        properties.map((property) => property.id!),
+      );
+    return reservations.map((reservation) =>
+      ReservationFactory.toDto(reservation),
+    );
+  }
+
+  public async cancelGuestReservation(
+    id: string,
+    email: string,
+  ): Promise<void> {
+    const reservation = await this.findById(id);
+    const guest = await this.getUserFromEmail(email, 'Guest');
+    if (reservation.guestId !== guest.id) {
       throw new UnauthorizedException(
         'You are not allowed to cancel this reservation',
       );
     }
-    await this.reservationRepository.delete(reservation.id!);
+    await this.reservationRepository.cancel(reservation.id!);
+  }
+
+  public async cancelHostReservation(id: string, email: string): Promise<void> {
+    const reservation = await this.findById(id);
+    const host = await this.getUserFromEmail(email, 'Host');
+    const property = await this.getPropertyById(reservation.propertyId);
+    if (property.ownerId !== host.id) {
+      throw new UnauthorizedException(
+        'You are not allowed to cancel this reservation',
+      );
+    }
+    await this.reservationRepository.cancel(reservation.id!);
   }
 
   private parseReservationsToAvailableDates(
@@ -135,12 +161,31 @@ class ReservationService implements IReservationService {
     return availableDates;
   }
 
-  private async getGuestFromEmail(email: string): Promise<User> {
-    const guest = await this.userService.findFromEmail(email);
-    if (!guest) {
-      throw new NotFoundException('Guest does not exist');
+  private async getUserFromEmail(
+    email: string,
+    userType: string,
+  ): Promise<User> {
+    const user = await this.userService.findFromEmail(email);
+    if (!user) {
+      throw new NotFoundException(`${userType} does not exist`);
     }
-    return guest;
+    return user;
+  }
+
+  private async getPropertyById(id: string): Promise<Property> {
+    const property = await this.propertyRepository.findById(id);
+    if (!property) {
+      throw new NotFoundException('The reservation property does not exist');
+    }
+    return property;
+  }
+
+  private async findById(id: string): Promise<Reservation> {
+    const reservation = await this.reservationRepository.findById(id);
+    if (!reservation) {
+      throw new NotFoundException('The reservation does not exist');
+    }
+    return reservation;
   }
 }
 

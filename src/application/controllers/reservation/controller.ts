@@ -9,8 +9,10 @@ interface IReservationController {
   getPropertyAvailability(
     req: Request<RequestDtos.GetPropertyAvailabilityDto>,
   ): Promise<ResponseDtos.PropertyAvailabilityDto>;
-  getOwnReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
-  deleteOwnReservation(req: Request): Promise<void>;
+  getGuestReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
+  getHostReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
+  cancelGuestReservation(req: Request): Promise<void>;
+  cancelHostReservation(req: Request): Promise<void>;
 }
 
 class ReservationController implements IReservationController {
@@ -32,14 +34,30 @@ class ReservationController implements IReservationController {
     return this.reservationService.getPropertyAvailability(req.body);
   }
 
-  public async getOwnReservations(
+  public async getGuestReservations(
     req: Request,
   ): Promise<ResponseDtos.ReservationDto[]> {
-    return this.reservationService.getOwnReservations(req.user.email);
+    return this.reservationService.getGuestReservations(req.user.email);
   }
 
-  public async deleteOwnReservation(req: Request): Promise<void> {
-    return this.reservationService.deleteOwnReservation(req.params.id);
+  public async getHostReservations(
+    req: Request,
+  ): Promise<ResponseDtos.ReservationDto[]> {
+    return this.reservationService.getHostReservations(req.user.email);
+  }
+
+  public async cancelGuestReservation(req: Request): Promise<void> {
+    return this.reservationService.cancelGuestReservation(
+      req.params.id,
+      req.user.email,
+    );
+  }
+
+  public async cancelHostReservation(req: Request): Promise<void> {
+    return this.reservationService.cancelHostReservation(
+      req.params.id,
+      req.user.email,
+    );
   }
 }
 

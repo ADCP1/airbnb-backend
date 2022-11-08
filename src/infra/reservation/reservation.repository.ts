@@ -59,7 +59,23 @@ class ReservationRepository implements IReservationRepository {
     );
   }
 
-  public async delete(id: string): Promise<void> {
+  public async getPropertiesReservations(
+    propertyIds: string[],
+  ): Promise<Reservation[]> {
+    const reservations = await ReservationDoc.find({
+      propertyId: { $in: propertyIds },
+      status: { $in: ['active', 'pending'] },
+    }).lean();
+    return reservations.map(
+      (reservation) =>
+        new Reservation({
+          id: reservation._id.toString(),
+          ...reservation,
+        }),
+    );
+  }
+
+  public async cancel(id: string): Promise<void> {
     await ReservationDoc.updateOne(
       { _id: id },
       { $set: { status: 'cancelled' } },

@@ -29,20 +29,34 @@ export function ReservationRouter() {
     ),
   );
   router.get(
-    '/own',
+    '/own/guest',
     validateJWT,
     registerHandler(
-      (req) => reservationController.getOwnReservations(req),
+      (req) => reservationController.getGuestReservations(req),
+      StatusCodes.OK,
+    ),
+  );
+  router.get(
+    '/own/host',
+    validateJWT,
+    registerHandler(
+      (req) => reservationController.getHostReservations(req),
       StatusCodes.OK,
     ),
   );
   router.delete(
-    'own/:id',
+    'own/guest/:id',
     validateJWT,
     registerHandler(
-      (req) => reservationController.deleteOwnReservation(req),
+      (req) => reservationController.cancelGuestReservation(req),
       StatusCodes.OK,
     ),
   );
+  router.delete(
+    'own/host/:id',
+    validateJWT,
+    registerHandler((req) => reservationController.cancelHostReservation(req)),
+  );
+
   return router;
 }

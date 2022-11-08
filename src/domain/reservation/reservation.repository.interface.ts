@@ -9,5 +9,6 @@ export interface IReservationRepository {
     to: Date,
   ): Promise<Reservation[]>;
   getGuestReservations(guestId: string): Promise<Reservation[]>;
-  delete(id: string): Promise<void>;
+  getPropertiesReservations(propertyIds: string[]): Promise<Reservation[]>;
+  cancel(id: string): Promise<void>;
 }
