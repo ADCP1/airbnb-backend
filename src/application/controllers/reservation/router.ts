@@ -45,7 +45,7 @@ export function ReservationRouter() {
     ),
   );
   router.delete(
-    'own/guest/:id',
+    '/own/guest/:id',
     validateJWT,
     registerHandler(
       (req) => reservationController.cancelGuestReservation(req),
@@ -53,7 +53,7 @@ export function ReservationRouter() {
     ),
   );
   router.delete(
-    'own/host/:id',
+    '/own/host/:id',
     validateJWT,
     registerHandler((req) => reservationController.cancelHostReservation(req)),
   );
