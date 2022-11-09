@@ -4,7 +4,7 @@ import snakecaseKeys from 'snakecase-keys';
 
 import { Request, Response } from './http';
 
-type ResBody = Record<string, unknown> | void | Record<string, unknown>[];
+type ResBody = Record<string, unknown> | Record<string, unknown>[] | void;
 
 export function registerHandler<T = Record<string, unknown>>(
   handler: (req: Request<T>) => Promise<ResBody>,

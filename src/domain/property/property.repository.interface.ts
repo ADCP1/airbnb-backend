@@ -6,6 +6,8 @@ export interface IPropertyRepository {
   searchBy(searchText: string): Promise<Property[]>;
   searchAll(): Promise<Property[]>;
   searchByFilters(searchText: string[]): Promise<Property[]>;
+  findManyByText(searchText: string): Promise<Property[]>;
+  findMany(limit: number): Promise<Property[]>;
   findByOwnerId(ownerId: string): Promise<Property[]>;
   deleteById(id: string): Promise<void>;
 }

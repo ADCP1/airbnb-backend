@@ -25,16 +25,36 @@ class ReservationRepository implements IReservationRepository {
     });
   }
 
+  public async getPropertyReservations(
+    propertyId: string,
+    from: Date,
+    to: Date,
+  ): Promise<Reservation[]> {
+    //find reservations with status active or pending and (StartDate < to and EndDate > from)
+    const reservations = await ReservationDoc.find({
+      propertyId,
+      status: { $in: ['active', 'pending'] },
+      startDate: { $lt: to },
+      endDate: { $gt: from },
+    }).lean();
+    return reservations.map(
+      (reservation) =>
+        new Reservation({
+          id: reservation._id.toString(),
+          ...reservation,
+        }),
+    );
+  }
+
   private async validatePropertyAvailability(
     reservation: Reservation,
   ): Promise<void> {
-    const foundedReservations =
-      await this.findReservationByPropertyIdInBetweenDates(
-        reservation.propertyId,
-        reservation.startDate,
-        reservation.endDate,
-      );
-    if (foundedReservations) {
+    const reservations = await this.findReservationByPropertyIdInBetweenDates(
+      reservation.propertyId,
+      reservation.startDate,
+      reservation.endDate,
+    );
+    if (reservations) {
       throw new DomainException(
         'Property is not available for the selected dates.',
       );

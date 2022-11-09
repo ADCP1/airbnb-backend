@@ -21,6 +21,7 @@ interface IPropertyService {
   search(searchText: string): Promise<ResponseDtos.PropertyDto[]>;
   //searchByFilters(searchFilters: string[]): Promise<ResponseDtos.PropertyDto>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
+  getPreview(): Promise<ResponseDtos.PropertyDto[]>;
   delete(propertyId: string, ownerEmail: string): Promise<void>;
 }
 
@@ -116,6 +117,14 @@ class PropertyService implements IPropertyService {
     };
   }
 
+  public async getPreview(): Promise<ResponseDtos.PropertyDto[]> {
+    const maxPreviewPropertyAmount = 20;
+    const properties = await this.propertyRepository.findMany(
+      maxPreviewPropertyAmount,
+    );
+    return properties.map((property) => PropertyFactory.toDto(property));
+  }
+
   public async delete(propertyId: string, ownerEmail: string): Promise<void> {
     const owner = await this.getOwnerFromEmail(ownerEmail);
     const property = await this.propertyRepository.findById(propertyId);
@@ -126,7 +135,6 @@ class PropertyService implements IPropertyService {
       throw new DomainException('Property does not belong to the user');
     }
     await this.propertyRepository.deleteById(propertyId);
-    return;
   }
 }
 
