@@ -23,9 +23,11 @@ interface IReservationService {
   ): Promise<ResponseDtos.PropertyAvailabilityDto>;
   getGuestReservations(
     guestEmail: string,
+    status: string[],
   ): Promise<ResponseDtos.ReservationDto[]>;
   getHostReservations(
     hostEmail: string,
+    status: string[],
   ): Promise<ResponseDtos.ReservationDto[]>;
   cancelGuestReservation(id: string, email: string): Promise<void>;
   cancelHostReservation(id: string, email: string): Promise<void>;
@@ -84,10 +86,12 @@ class ReservationService implements IReservationService {
 
   public async getGuestReservations(
     guestEmail: string,
+    status: string[],
   ): Promise<ResponseDtos.ReservationDto[]> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const reservations = await this.reservationRepository.getGuestReservations(
       guest.id!,
+      status,
     );
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation),
@@ -96,12 +100,14 @@ class ReservationService implements IReservationService {
 
   public async getHostReservations(
     hostEmail: string,
+    status: string[],
   ): Promise<ResponseDtos.ReservationDto[]> {
     const host = await this.getUserFromEmail(hostEmail, 'Host');
     const properties = await this.propertyRepository.findByOwnerId(host.id!);
     const reservations =
       await this.reservationRepository.getPropertiesReservations(
         properties.map((property) => property.id!),
+        status,
       );
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation),

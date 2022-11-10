@@ -1,5 +1,6 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
 import { IReservationService, reservationService } from '@application/services';
+import { getReservationStatusIn } from '@domain/reservation';
 import { Request } from '@shared';
 
 interface IReservationController {
@@ -37,13 +38,15 @@ class ReservationController implements IReservationController {
   public async getGuestReservations(
     req: Request,
   ): Promise<ResponseDtos.ReservationDto[]> {
-    return this.reservationService.getGuestReservations(req.user.email);
+    const status = getReservationStatusIn(req.query.status as string);
+    return this.reservationService.getGuestReservations(req.user.email, status);
   }
 
   public async getHostReservations(
     req: Request,
   ): Promise<ResponseDtos.ReservationDto[]> {
-    return this.reservationService.getHostReservations(req.user.email);
+    const status = getReservationStatusIn(req.query.status as string);
+    return this.reservationService.getHostReservations(req.user.email, status);
   }
 
   public async cancelGuestReservation(req: Request): Promise<void> {
