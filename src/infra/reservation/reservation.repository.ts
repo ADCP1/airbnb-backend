@@ -32,7 +32,7 @@ class ReservationRepository implements IReservationRepository {
   ): Promise<Reservation[]> {
     const reservations = await ReservationDoc.find({
       propertyId,
-      status: { $in: ['active', 'pending'] },
+      status: { $in: ['confirmed', 'pending'] },
       startDate: { $lt: to },
       endDate: { $gt: from },
     }).lean();
@@ -108,7 +108,7 @@ class ReservationRepository implements IReservationRepository {
   ): Promise<Reservation | null> {
     const reservation = await ReservationDoc.findOne({
       propertyId,
-      status: { $in: ['active', 'pending'] },
+      status: { $in: ['confirmed', 'pending'] },
       $or: [
         {
           startDate: { $gte: startDate, $lt: endDate },
