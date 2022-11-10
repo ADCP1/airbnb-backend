@@ -8,6 +8,7 @@ import { ReservationDoc } from '@infra/reservation/reservation.doc';
 import { UserDoc } from '@infra/user/user.doc';
 import { DomainException, InternalServerException } from '@shared';
 import cloneDeep from 'clone-deep';
+import mongoose from 'mongoose';
 
 import { PropertyDoc } from './property.doc';
 import { PropertyFactory } from './property.factory';
@@ -77,93 +78,94 @@ class PropertyRepository implements IPropertyRepository {
   }
 
   //LIO
-  public async searchByFilters(searchText: string[]): Promise<Property[]> {
-    console.log('Params received');
-    console.log('searchText[0] - languages: ' + searchText.at(0));
-    console.log('searchText[1] - startDate: ' + searchText.at(1));
-    console.log('searchText[2] - endDate: ' + searchText.at(2));
-    console.log('searchText[3] - capacity: ' + searchText.at(3));
-    console.log('searchText[4] - minPrice: ' + searchText.at(4));
-    console.log('searchText[5] - maxPrice: ' + searchText.at(5));
-    console.log('searchText[6] - roomAmount: ' + searchText.at(6));
-    console.log('searchText[7] - toiletAmount: ' + searchText.at(7));
-    console.log('searchText[8] - location: ' + searchText.at(8));
+  public async searchByFilters(filters: any): Promise<Property[]> {
+    //const { languages, startDate, endDate, capacity, minPrice, maxPrice, roomAmount, toiletAmount,
+    //       location } = filters;
 
-    const languagesParam = searchText.at(0);
-    let languagesAsArray;
-    if (languagesParam) {
-      languagesAsArray = languagesParam.split(',');
-    }
-    //se filtran los idiomas->usuarios
-    const languageMatchingUsers = await UserDoc.find(
-      {
+    console.log('Params received');
+    console.log('languages: ' + filters.languages);
+    console.log('startDate: ' + filters.startDate);
+    console.log('endDate: ' + filters.endDate);
+    console.log('capacity: ' + filters.capacity);
+    console.log('minPrice: ' + filters.minPrice);
+    console.log('maxPrice: ' + filters.maxPrice);
+    console.log('roomAmount: ' + filters.roomAmount);
+    console.log('toiletAmount: ' + filters.toiletAmount);
+    console.log('location: ' + filters.location);
+
+    //LIO begin
+    const languageMatchingUsersArray: any[] = [];
+    if (filters.languages) {
+      const languagesParam = filters.languages;
+      let languagesAsArray;
+      if (languagesParam) {
+        languagesAsArray = languagesParam.split(',');
+      }
+      //se filtran los idiomas para obtener los usuarios
+      const languageMatchingUsers = await UserDoc.find({
         languages: {
           $in: languagesAsArray,
         },
-      },
+      });
 
-      {
-        _id: 1,
-        email: 0,
-        password: 0,
-        name: 0,
-        lastName: 0,
-        phone: 0,
-        dateOfBirth: 0,
-        location: 0,
-        languages: 0,
-        description: 0,
-        profession: 0,
-        pictureUrl: 0,
-        creditCardInfo: 0,
-        __v: 0,
-      },
-    );
-
-    const languageMatchingUsersArray: any[] = [];
-    languageMatchingUsers.map(function (item) {
-      languageMatchingUsersArray.push(item._id);
-    });
-
-    console.log('valid ids: ' + JSON.stringify(languageMatchingUsersArray));
-
-    //se filtran las fechas disponibles
-
-    const availableDates = await ReservationDoc.find({
-      $or: [
-        { startDate: { $gte: `${searchText.at(2)}` } },
-        { endDate: { $lte: `${searchText.at(1)}` } },
-      ],
-    });
+      languageMatchingUsers.map(function (item) {
+        languageMatchingUsersArray.push(item._id);
+      });
+      console.log(
+        'valid users for language: ' +
+          JSON.stringify(languageMatchingUsersArray),
+      );
+    }
 
     const datesMatchingPropertiesArray: any[] = [];
-    availableDates.map(function (item) {
-      datesMatchingPropertiesArray.push(item.propertyId);
-    });
+    //se filtran las fechas disponibles
+    if (filters.startDate && filters.endDate) {
+      const availableDates = await ReservationDoc.find({
+        $or: [
+          { startDate: { $gte: `${filters.endDate}` } },
+          { endDate: { $lte: `${filters.startDate}` } },
+        ],
+      });
+      //var mongoose = require('mongoose');
+      availableDates.map(function (item) {
+        const objectId = new mongoose.Types.ObjectId(item.propertyId);
+        datesMatchingPropertiesArray.push(objectId);
+      });
+      console.log(
+        'available properties: ' + JSON.stringify(datesMatchingPropertiesArray),
+      );
+    }
 
-    console.log(
-      'available properties: ' + JSON.stringify(datesMatchingPropertiesArray),
-    );
+    //Building the query dinamically
+    const query: { [k: string]: any } = {}; // declare the query object
 
-    //main search
-    const properties = await PropertyDoc.find({
-      capacity: `${searchText.at(3)}`,
-      price: { $gte: `${searchText.at(4)}`, $lte: `${searchText.at(5)}` },
-      roomAmount: `${searchText.at(6)}`,
-      toiletAmount: `${searchText.at(7)}`,
-      //location: `${searchText.at(8)}`,
-      location: {
-        $regex: new RegExp('^' + `${searchText.at(8)}`.toLowerCase(), 'i'),
-      },
-      ownerId: { $in: languageMatchingUsersArray },
-      //LIO: revisar esto que no se como matchear el ObjectID con los id que recibo de las availablePOroperties
-      //LIO: idea-> crear un campo en properties que sea CODE (String) y matchear por ese code?
-      //_id : {"$in": datesMatchingPropertiesArray}
-      //$eq: [ "$_id", {$toString: {"$in": datesMatchingPropertiesArray}}]
-    })
-      .sort('_id')
-      .skip(0)
-      .lean();
+    if (filters.capacity != undefined) {
+      query.capacity = `${filters.capacity}`;
+    }
+    if (filters.minPrice != undefined && filters.maxPrice != undefined) {
+      query.price = {
+        $gte: `${filters.minPrice}`,
+        $lte: `${filters.maxPrice}`,
+      };
+    }
+    if (filters.roomAmount != undefined) {
+      query.roomAmount = `${filters.roomAmount}`;
+    }
+    if (filters.toiletAmount != undefined) {
+      query.toiletAmount = `${filters.toiletAmount}`;
+    }
+    if (filters.location != undefined) {
+      query.location = {
+        $regex: new RegExp('^' + `${filters.location}`.toLowerCase(), 'i'),
+      };
+    }
+    if (languageMatchingUsersArray.length > 0) {
+      query.ownerId = { $in: languageMatchingUsersArray };
+    }
+    if (datesMatchingPropertiesArray.length > 0) {
+      query._id = { $in: datesMatchingPropertiesArray };
+    }
+    const properties = await PropertyDoc.find(query).sort('_id').skip(0).lean();
 
     return properties.map(
       (property) =>

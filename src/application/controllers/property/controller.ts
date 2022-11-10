@@ -57,10 +57,11 @@ class PropertyController implements IPropertyController {
 
   //LIO
   public async search(req: Request): Promise<ResponseDtos.PropertyDto[]> {
+    console.log(req.query);
     // if(!req.query.searchText && !req.query.filters) {
     //  return this.propertyService.searchByFilters(req.query.searchParams);
     //}
-    return this.propertyService.search(req.query.searchText as string);
+    return this.propertyService.search(req.query);
   }
 
   public async getPreview(): Promise<ResponseDtos.PropertyDto[]> {

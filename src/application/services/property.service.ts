@@ -18,7 +18,7 @@ interface IPropertyService {
     ownerEmail: string,
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
-  search(searchText: string): Promise<ResponseDtos.PropertyDto[]>;
+  search(filters: any): Promise<ResponseDtos.PropertyDto[]>;
   //searchByFilters(searchFilters: string[]): Promise<ResponseDtos.PropertyDto>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
   getPreview(): Promise<ResponseDtos.PropertyDto[]>;
@@ -79,24 +79,9 @@ class PropertyService implements IPropertyService {
     return PropertyFactory.toDto(property);
   }
 
-  public async search(
-    searchText: string | string[],
-  ): Promise<ResponseDtos.PropertyDto[]> {
-    console.log('searchText: ' + searchText);
-    if (Array.isArray(searchText)) {
-      const properties = await this.propertyRepository.searchByFilters(
-        searchText,
-      );
-      return properties.map((property) => PropertyFactory.toDto(property));
-    } else {
-      if (searchText) {
-        const properties = await this.propertyRepository.searchBy(searchText);
-        return properties.map((property) => PropertyFactory.toDto(property));
-      } else {
-        const properties = await this.propertyRepository.searchAll();
-        return properties.map((property) => PropertyFactory.toDto(property));
-      }
-    }
+  public async search(filters: any): Promise<ResponseDtos.PropertyDto[]> {
+    const properties = await this.propertyRepository.searchByFilters(filters);
+    return properties.map((property) => PropertyFactory.toDto(property));
   }
 
   private async getOwnerFromEmail(email: string): Promise<User> {

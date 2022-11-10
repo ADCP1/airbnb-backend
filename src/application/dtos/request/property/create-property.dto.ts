@@ -3,6 +3,10 @@ import { IsNotEmpty, IsPositive, IsString, IsUrl } from 'class-validator';
 export class CreatePropertyDto {
   @IsString()
   @IsNotEmpty()
+  propertyCode: string;
+
+  @IsString()
+  @IsNotEmpty()
   location: string;
 
   @IsString()
