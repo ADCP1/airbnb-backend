@@ -4,7 +4,11 @@ import { IReservationRepository, Reservation } from '@domain/reservation';
 import { User } from '@domain/user';
 import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
-import { NotFoundException, UnauthorizedException } from '@shared';
+import {
+  DomainException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@shared';
 
 import { ReservationFactory } from './reservation.factory';
 import { IUserService, userService } from './user.service';
@@ -51,7 +55,10 @@ class ReservationService implements IReservationService {
       ...reservationDto,
       guestId: guest.id!,
     });
-    await this.getPropertyById(reservationDto.propertyId);
+    const property = await this.getPropertyById(reservationDto.propertyId);
+    if (reservationDto.amountOfGuests > property.capacity) {
+      throw new DomainException(`Maximum capacity is ${property.capacity}`);
+    }
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation);
   }
