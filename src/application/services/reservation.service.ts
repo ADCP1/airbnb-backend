@@ -1,10 +1,14 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
-import { IPropertyRepository } from '@domain/property';
+import { IPropertyRepository, Property } from '@domain/property';
 import { IReservationRepository, Reservation } from '@domain/reservation';
 import { User } from '@domain/user';
 import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
-import { NotFoundException } from '@shared';
+import {
+  DomainException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@shared';
 
 import { ReservationFactory } from './reservation.factory';
 import { IUserService, userService } from './user.service';
@@ -17,6 +21,16 @@ interface IReservationService {
   getPropertyAvailability(
     propertyDto: RequestDtos.GetPropertyAvailabilityDto,
   ): Promise<ResponseDtos.PropertyAvailabilityDto>;
+  getGuestReservations(
+    guestEmail: string,
+    status: string[],
+  ): Promise<ResponseDtos.ReservationDto[]>;
+  getHostReservations(
+    hostEmail: string,
+    status: string[],
+  ): Promise<ResponseDtos.ReservationDto[]>;
+  cancelGuestReservation(id: string, email: string): Promise<void>;
+  cancelHostReservation(id: string, email: string): Promise<void>;
 }
 
 class ReservationService implements IReservationService {
@@ -38,16 +52,14 @@ class ReservationService implements IReservationService {
     reservationDto: RequestDtos.CreateReservationDto,
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto> {
-    const guest = await this.getGuestFromEmail(guestEmail);
+    const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const reservation = new Reservation({
       ...reservationDto,
       guestId: guest.id!,
     });
-    const property = await this.propertyRepository.findById(
-      reservationDto.propertyId,
-    );
-    if (!property) {
-      throw new NotFoundException('The reservation property does not exist');
+    const property = await this.getPropertyById(reservationDto.propertyId);
+    if (reservationDto.amountOfGuests > property.capacity) {
+      throw new DomainException(`Maximum capacity is ${property.capacity}`);
     }
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation);
@@ -70,6 +82,62 @@ class ReservationService implements IReservationService {
     return {
       dates: availableDates,
     };
+  }
+
+  public async getGuestReservations(
+    guestEmail: string,
+    status: string[],
+  ): Promise<ResponseDtos.ReservationDto[]> {
+    const guest = await this.getUserFromEmail(guestEmail, 'Guest');
+    const reservations = await this.reservationRepository.getGuestReservations(
+      guest.id!,
+      status,
+    );
+    return reservations.map((reservation) =>
+      ReservationFactory.toDto(reservation),
+    );
+  }
+
+  public async getHostReservations(
+    hostEmail: string,
+    status: string[],
+  ): Promise<ResponseDtos.ReservationDto[]> {
+    const host = await this.getUserFromEmail(hostEmail, 'Host');
+    const properties = await this.propertyRepository.findByOwnerId(host.id!);
+    const reservations =
+      await this.reservationRepository.getPropertiesReservations(
+        properties.map((property) => property.id!),
+        status,
+      );
+    return reservations.map((reservation) =>
+      ReservationFactory.toDto(reservation),
+    );
+  }
+
+  public async cancelGuestReservation(
+    id: string,
+    email: string,
+  ): Promise<void> {
+    const reservation = await this.findById(id);
+    const guest = await this.getUserFromEmail(email, 'Guest');
+    if (reservation.guestId !== guest.id) {
+      throw new UnauthorizedException(
+        'You are not allowed to cancel this reservation',
+      );
+    }
+    await this.reservationRepository.cancel(reservation.id!);
+  }
+
+  public async cancelHostReservation(id: string, email: string): Promise<void> {
+    const reservation = await this.findById(id);
+    const host = await this.getUserFromEmail(email, 'Host');
+    const property = await this.getPropertyById(reservation.propertyId);
+    if (property.ownerId !== host.id) {
+      throw new UnauthorizedException(
+        'You are not allowed to cancel this reservation',
+      );
+    }
+    await this.reservationRepository.cancel(reservation.id!);
   }
 
   private parseReservationsToAvailableDates(
@@ -106,12 +174,31 @@ class ReservationService implements IReservationService {
     return availableDates;
   }
 
-  private async getGuestFromEmail(email: string): Promise<User> {
-    const guest = await this.userService.findFromEmail(email);
-    if (!guest) {
-      throw new NotFoundException('Guest does not exist');
+  private async getUserFromEmail(
+    email: string,
+    userType: string,
+  ): Promise<User> {
+    const user = await this.userService.findFromEmail(email);
+    if (!user) {
+      throw new NotFoundException(`${userType} does not exist`);
     }
-    return guest;
+    return user;
+  }
+
+  private async getPropertyById(id: string): Promise<Property> {
+    const property = await this.propertyRepository.findById(id);
+    if (!property) {
+      throw new NotFoundException('The reservation property does not exist');
+    }
+    return property;
+  }
+
+  private async findById(id: string): Promise<Reservation> {
+    const reservation = await this.reservationRepository.findById(id);
+    if (!reservation) {
+      throw new NotFoundException('The reservation does not exist');
+    }
+    return reservation;
   }
 }
 

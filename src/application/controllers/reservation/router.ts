@@ -2,7 +2,7 @@ import {
   CreateReservationDto,
   GetPropertyAvailabilityDto,
 } from '@application/dtos/request';
-import { registerHandler, validateDto, validateJWT } from '@shared';
+import { registerHandler, Request, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -28,5 +28,36 @@ export function ReservationRouter() {
       StatusCodes.OK,
     ),
   );
+  router.get(
+    '/own/guest',
+    validateJWT,
+    registerHandler(
+      (req) => reservationController.getGuestReservations(req),
+      StatusCodes.OK,
+    ),
+  );
+  router.get(
+    '/own/host',
+    validateJWT,
+    registerHandler(
+      (req: Request<void, any, { status: string }>) =>
+        reservationController.getHostReservations(req),
+      StatusCodes.OK,
+    ),
+  );
+  router.delete(
+    '/own/guest/:id',
+    validateJWT,
+    registerHandler(
+      (req) => reservationController.cancelGuestReservation(req),
+      StatusCodes.OK,
+    ),
+  );
+  router.delete(
+    '/own/host/:id',
+    validateJWT,
+    registerHandler((req) => reservationController.cancelHostReservation(req)),
+  );
+
   return router;
 }

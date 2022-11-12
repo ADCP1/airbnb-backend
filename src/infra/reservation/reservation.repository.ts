@@ -30,10 +30,9 @@ class ReservationRepository implements IReservationRepository {
     from: Date,
     to: Date,
   ): Promise<Reservation[]> {
-    //find reservations with status active or pending and (StartDate < to and EndDate > from)
     const reservations = await ReservationDoc.find({
       propertyId,
-      status: { $in: ['active', 'pending'] },
+      status: { $in: ['confirmed', 'pending'] },
       startDate: { $lt: to },
       endDate: { $gt: from },
     }).lean();
@@ -43,6 +42,47 @@ class ReservationRepository implements IReservationRepository {
           id: reservation._id.toString(),
           ...reservation,
         }),
+    );
+  }
+
+  public async getGuestReservations(
+    guestId: string,
+    status: string[],
+  ): Promise<Reservation[]> {
+    const reservations = await ReservationDoc.find({
+      guestId,
+      status: { $in: status },
+    }).lean();
+    return reservations.map(
+      (reservation) =>
+        new Reservation({
+          id: reservation._id.toString(),
+          ...reservation,
+        }),
+    );
+  }
+
+  public async getPropertiesReservations(
+    propertyIds: string[],
+    status: string[],
+  ): Promise<Reservation[]> {
+    const reservations = await ReservationDoc.find({
+      propertyId: { $in: propertyIds },
+      status: { $in: status },
+    }).lean();
+    return reservations.map(
+      (reservation) =>
+        new Reservation({
+          id: reservation._id.toString(),
+          ...reservation,
+        }),
+    );
+  }
+
+  public async cancel(id: string): Promise<void> {
+    await ReservationDoc.updateOne(
+      { _id: id },
+      { $set: { status: 'cancelled' } },
     );
   }
 
@@ -68,7 +108,7 @@ class ReservationRepository implements IReservationRepository {
   ): Promise<Reservation | null> {
     const reservation = await ReservationDoc.findOne({
       propertyId,
-      status: { $in: ['active', 'pending'] },
+      status: { $in: ['confirmed', 'pending'] },
       $or: [
         {
           startDate: { $gte: startDate, $lt: endDate },
