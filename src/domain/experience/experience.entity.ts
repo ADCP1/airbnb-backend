@@ -1,9 +1,14 @@
 import { Entity } from '@domain';
 
+import { ExperienceAccessibility } from './experience-accessibility.enum';
+import { ExperienceCategory } from './experience-category.enum';
+import { ExperienceLanguage } from './experience-language.enum';
+import { ExperienceType } from './experience-type.enum';
+
 export type ExperienceArgs = {
   id?: string;
   organizerId: string;
-  type: string;
+  type: ExperienceType;
   title: string;
   description: string;
   price: number;
@@ -12,11 +17,14 @@ export type ExperienceArgs = {
   duration: number; // in hours
   imagesUrls: string[];
   dates: Date[];
+  accessibility: ExperienceAccessibility[];
+  languages: ExperienceLanguage[];
+  category: ExperienceCategory;
 };
 
 export class Experience extends Entity {
   public organizerId: string;
-  public type: string;
+  public type: ExperienceType;
   public title: string;
   public description: string;
   public price: number;
@@ -25,6 +33,9 @@ export class Experience extends Entity {
   public duration: number;
   public imagesUrls: string[];
   public dates: Date[];
+  public languages: ExperienceLanguage[];
+  public accessibility: ExperienceAccessibility[];
+  public category: ExperienceCategory;
 
   constructor(args: ExperienceArgs) {
     super(args.id);
@@ -38,5 +49,8 @@ export class Experience extends Entity {
     this.duration = args.duration;
     this.imagesUrls = args.imagesUrls;
     this.dates = args.dates;
+    this.languages = args.languages;
+    this.accessibility = args.accessibility;
+    this.category = args.category;
   }
 }

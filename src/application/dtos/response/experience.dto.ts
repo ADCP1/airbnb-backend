@@ -1,3 +1,10 @@
+import {
+  ExperienceAccessibility,
+  ExperienceCategory,
+  ExperienceLanguage,
+  ExperienceType,
+} from '@domain/experience';
+
 export type ExperienceDto = {
   id: string;
   organizerId: string;
@@ -8,6 +15,9 @@ export type ExperienceDto = {
   duration: number;
   imagesUrls: string[];
   dates: Date[];
-  type: string;
+  type: ExperienceType;
   capacity: number;
+  languages: ExperienceLanguage[];
+  accessibility: ExperienceAccessibility[];
+  category: ExperienceCategory;
 };

@@ -1,7 +1,9 @@
 import {
-  getPaymentTypeValues,
-  getReservationStatusValues,
-} from '@domain/reservation';
+  getExperienceAccessibilityValues,
+  getExperienceCategoriesValues,
+  getExperienceLanguagesValues,
+  getExperienceTypesValues,
+} from '@domain/experience';
 import mongoose from 'mongoose';
 
 const experienceSchema = new mongoose.Schema({
@@ -11,6 +13,7 @@ const experienceSchema = new mongoose.Schema({
   },
   type: {
     type: String,
+    enum: getExperienceTypesValues(),
     required: true,
   },
   title: {
@@ -42,6 +45,21 @@ const experienceSchema = new mongoose.Schema({
   },
   dates: {
     type: [Date],
+    required: true,
+  },
+  languages: {
+    type: [String],
+    enum: getExperienceLanguagesValues(),
+    required: true,
+  },
+  accessibility: {
+    type: [String],
+    enum: getExperienceAccessibilityValues(),
+    required: true,
+  },
+  category: {
+    type: String,
+    enum: getExperienceCategoriesValues(),
     required: true,
   },
 });

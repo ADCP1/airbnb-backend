@@ -15,6 +15,9 @@ export class ExperienceFactory {
       duration: experience.duration,
       imagesUrls: experience.imagesUrls,
       dates: experience.dates,
+      languages: experience.languages,
+      accessibility: experience.accessibility,
+      category: experience.category,
     };
   }
 }
