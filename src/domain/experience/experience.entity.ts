@@ -13,7 +13,7 @@ export type ExperienceArgs = {
   description: string;
   price: number;
   capacity: number;
-  location: string;
+  location?: string;
   duration: number; // in hours
   imagesUrls: string[];
   dates: Date[];
@@ -29,7 +29,7 @@ export class Experience extends Entity {
   public description: string;
   public price: number;
   public capacity: number;
-  public location: string;
+  public location?: string;
   public duration: number;
   public imagesUrls: string[];
   public dates: Date[];

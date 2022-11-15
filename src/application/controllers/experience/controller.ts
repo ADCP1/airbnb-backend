@@ -6,6 +6,9 @@ interface IExperienceController {
   create(
     req: Request<RequestDtos.CreateExperienceDto>,
   ): Promise<ResponseDtos.ExperienceDto>;
+  partialUpdate(
+    req: Request<RequestDtos.UpdateExperienceDto>,
+  ): Promise<ResponseDtos.ExperienceDto>;
 }
 
 class ExperienceController implements IExperienceController {
@@ -19,6 +22,16 @@ class ExperienceController implements IExperienceController {
     req: Request<RequestDtos.CreateExperienceDto>,
   ): Promise<ResponseDtos.ExperienceDto> {
     return this.experienceService.create(req.body, req.user.email);
+  }
+
+  public async partialUpdate(
+    req: Request<RequestDtos.UpdateExperienceDto>,
+  ): Promise<ResponseDtos.ExperienceDto> {
+    return this.experienceService.partialUpdate(
+      req.params.experienceId,
+      req.body,
+      req.user.email,
+    );
   }
 }
 

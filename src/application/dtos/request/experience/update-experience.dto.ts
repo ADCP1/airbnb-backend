@@ -8,10 +8,8 @@ import {
   getExperienceLanguagesValues,
   getExperienceTypesValues,
 } from '@domain/experience';
-import { Type } from 'class-transformer';
 import {
   IsDate,
-  IsDateString,
   IsIn,
   IsNotEmpty,
   IsOptional,
@@ -25,49 +23,53 @@ const accessibilityTypes = getExperienceAccessibilityValues();
 const experienceCategories = getExperienceCategoriesValues();
 const experienceLangues = getExperienceLanguagesValues();
 
-export class CreateExperienceDto {
-  @IsString()
+export class UpdateExperienceDto {
   @IsOptional()
-  location: string;
-
   @IsString()
-  @IsNotEmpty()
-  title: string;
+  title?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  description?: string;
 
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
   @IsPositive()
-  price: number;
+  price?: number;
 
+  @IsOptional()
   @IsPositive()
-  capacity: number;
+  capacity?: number;
 
+  @IsOptional()
   @IsPositive()
-  duration: number;
+  duration?: number;
 
+  @IsOptional()
   @IsUrl(undefined, { each: true })
-  imagesUrls: string[];
+  imagesUrls?: string[];
 
-  // @Type(() => Date)
+  @IsOptional()
   @IsNotEmpty()
-  @IsDateString(undefined, { each: true })
-  dates: Date[];
+  @IsDate({ each: true })
+  dates?: Date[];
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsIn(experienceTypes)
-  type: ExperienceType;
+  type?: ExperienceType;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsIn(experienceLangues, { each: true })
-  languages: ExperienceLanguage[];
+  languages?: ExperienceLanguage[];
 
-  @IsNotEmpty()
-  @IsIn(accessibilityTypes, { each: true })
-  accessibility: ExperienceAccessibility[];
-
-  @IsNotEmpty()
+  @IsOptional()
   @IsIn(experienceCategories)
-  category: ExperienceCategory;
+  category?: ExperienceCategory;
+
+  @IsOptional()
+  @IsIn(accessibilityTypes, { each: true })
+  accessibility?: ExperienceAccessibility[];
 }

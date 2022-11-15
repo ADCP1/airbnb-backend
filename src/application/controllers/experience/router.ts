@@ -1,4 +1,7 @@
-import { CreateExperienceDto } from '@application/dtos/request';
+import {
+  CreateExperienceDto,
+  UpdateExperienceDto,
+} from '@application/dtos/request';
 import { registerHandler, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -15,6 +18,12 @@ export function ExperienceRouter() {
       (req) => experienceController.create(req),
       StatusCodes.CREATED,
     ),
+  );
+  router.patch(
+    '/:experienceId',
+    validateJWT,
+    validateDto(UpdateExperienceDto),
+    registerHandler((req) => experienceController.partialUpdate(req)),
   );
   return router;
 }
