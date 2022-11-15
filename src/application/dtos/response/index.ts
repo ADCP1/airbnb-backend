@@ -1,3 +1,4 @@
+export * from './experience.dto';
 export * from './property.dto';
 export * from './property-availability.dto';
 export * from './reservation.dto';
