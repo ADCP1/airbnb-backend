@@ -14,7 +14,7 @@ export type ExperienceDto = {
   location: string;
   duration: number;
   imagesUrls: string[];
-  dates: Date[];
+  date: Date;
   type: ExperienceType;
   capacity: number;
   languages: ExperienceLanguage[];

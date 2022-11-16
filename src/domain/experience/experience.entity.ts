@@ -16,7 +16,7 @@ export type ExperienceArgs = {
   location?: string;
   duration: number; // in hours
   imagesUrls: string[];
-  dates: Date[];
+  date: Date;
   accessibility: ExperienceAccessibility[];
   languages: ExperienceLanguage[];
   category: ExperienceCategory;
@@ -32,7 +32,7 @@ export class Experience extends Entity {
   public location?: string;
   public duration: number;
   public imagesUrls: string[];
-  public dates: Date[];
+  public date: Date;
   public languages: ExperienceLanguage[];
   public accessibility: ExperienceAccessibility[];
   public category: ExperienceCategory;
@@ -48,7 +48,7 @@ export class Experience extends Entity {
     this.location = args.location;
     this.duration = args.duration;
     this.imagesUrls = args.imagesUrls;
-    this.dates = args.dates;
+    this.date = args.date;
     this.languages = args.languages;
     this.accessibility = args.accessibility;
     this.category = args.category;

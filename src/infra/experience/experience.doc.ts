@@ -43,8 +43,8 @@ const experienceSchema = new mongoose.Schema({
     type: [String],
     required: true,
   },
-  dates: {
-    type: [Date],
+  date: {
+    type: Date,
     required: true,
   },
   languages: {
