@@ -19,7 +19,6 @@ interface IPropertyService {
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
   search(filters: any): Promise<ResponseDtos.PropertyDto[]>;
-  //searchByFilters(searchFilters: string[]): Promise<ResponseDtos.PropertyDto>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
   getPreview(): Promise<ResponseDtos.PropertyDto[]>;
   delete(propertyId: string, ownerEmail: string): Promise<void>;

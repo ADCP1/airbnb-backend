@@ -80,9 +80,9 @@ class PropertyRepository implements IPropertyRepository {
   public async searchByFilters(filters: any): Promise<Property[]> {
     // TODO agregar filtro por property type
     const languageMatchingUsersArray: any[] = [];
+    let languagesAsArray = [];
     if (filters.languages) {
       const languagesParam = filters.languages;
-      let languagesAsArray;
       if (languagesParam) {
         languagesAsArray = languagesParam.split(',');
       }
@@ -164,7 +164,7 @@ class PropertyRepository implements IPropertyRepository {
       query.amenities = { $in: filters.amenities.split(',') };
     }
 
-    if (filters.languages.split(',').length > 0) {
+    if (languagesAsArray.length > 0) {
       query.ownerId = { $in: languageMatchingUsersArray };
     }
 
@@ -182,12 +182,6 @@ class PropertyRepository implements IPropertyRepository {
           amenities: property.amenities as PropertyAmenity[],
         }),
     );
-  }
-  searchBy(searchText: string): Promise<Property[]> {
-    throw new Error('Method not implemented.');
-  }
-  searchAll(): Promise<Property[]> {
-    throw new Error('Method not implemented.');
   }
 }
 

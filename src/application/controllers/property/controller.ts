@@ -55,12 +55,7 @@ class PropertyController implements IPropertyController {
     return this.propertyService.getById(req.params.propertyId);
   }
 
-  //LIO
   public async search(req: Request): Promise<ResponseDtos.PropertyDto[]> {
-    console.log(req.query);
-    // if(!req.query.searchText && !req.query.filters) {
-    //  return this.propertyService.searchByFilters(req.query.searchParams);
-    //}
     return this.propertyService.search(req.query);
   }
 
