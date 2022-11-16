@@ -18,7 +18,7 @@ interface IPropertyService {
     ownerEmail: string,
   ): Promise<ResponseDtos.PropertyDto>;
   getById(propertyId: string): Promise<ResponseDtos.PropertyDto>;
-  searchByText(searchText: string): Promise<ResponseDtos.PropertyDto[]>;
+  search(filters: any): Promise<ResponseDtos.PropertyDto[]>;
   getMyProperties(ownerEmail: string): Promise<ResponseDtos.PropertiesDto>;
   getPreview(): Promise<ResponseDtos.PropertyDto[]>;
   delete(propertyId: string, ownerEmail: string): Promise<void>;
@@ -78,10 +78,8 @@ class PropertyService implements IPropertyService {
     return PropertyFactory.toDto(property);
   }
 
-  public async searchByText(
-    searchText: string,
-  ): Promise<ResponseDtos.PropertyDto[]> {
-    const properties = await this.propertyRepository.findManyByText(searchText);
+  public async search(filters: any): Promise<ResponseDtos.PropertyDto[]> {
+    const properties = await this.propertyRepository.searchByFilters(filters);
     return properties.map((property) => PropertyFactory.toDto(property));
   }
 
