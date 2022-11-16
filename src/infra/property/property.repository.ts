@@ -79,9 +79,6 @@ class PropertyRepository implements IPropertyRepository {
 
   //LIO
   public async searchByFilters(filters: any): Promise<Property[]> {
-    //const { languages, startDate, endDate, capacity, minPrice, maxPrice, roomAmount, toiletAmount,
-    //       location } = filters;
-
     console.log('Params received');
     console.log('languages: ' + filters.languages);
     console.log('startDate: ' + filters.startDate);
@@ -92,8 +89,8 @@ class PropertyRepository implements IPropertyRepository {
     console.log('roomAmount: ' + filters.roomAmount);
     console.log('toiletAmount: ' + filters.toiletAmount);
     console.log('location: ' + filters.location);
+    // falta propertyType
 
-    //LIO begin
     const languageMatchingUsersArray: any[] = [];
     if (filters.languages) {
       const languagesParam = filters.languages;
@@ -101,13 +98,13 @@ class PropertyRepository implements IPropertyRepository {
       if (languagesParam) {
         languagesAsArray = languagesParam.split(',');
       }
-      //se filtran los idiomas para obtener los usuarios
+
       const languageMatchingUsers = await UserDoc.find({
         languages: {
           $in: languagesAsArray,
         },
       });
-
+      console.log('MATCH LANG', languageMatchingUsers);
       languageMatchingUsers.map(function (item) {
         languageMatchingUsersArray.push(item._id);
       });
@@ -117,54 +114,81 @@ class PropertyRepository implements IPropertyRepository {
       );
     }
 
-    const datesMatchingPropertiesArray: any[] = [];
-    //se filtran las fechas disponibles
+    const unavailableProperties: any[] = [];
+    let availableProperties: any[] = [];
     if (filters.startDate && filters.endDate) {
-      const availableDates = await ReservationDoc.find({
+      const unavailableDates = await ReservationDoc.find({
         $or: [
-          { startDate: { $gte: `${filters.endDate}` } },
-          { endDate: { $lte: `${filters.startDate}` } },
+          {
+            $and: [
+              { startDate: { $gt: `${filters.startDate}` } },
+              { startDate: { $lt: `${filters.endDate}` } },
+              { status: { $ne: 'cancelled' } },
+            ],
+          },
+          {
+            $and: [
+              { endDate: { $gt: `${filters.startDate}` } },
+              { endDate: { $lt: `${filters.endDate}` } },
+              { status: { $ne: 'cancelled' } },
+            ],
+          },
         ],
       });
-      //var mongoose = require('mongoose');
-      availableDates.map(function (item) {
+
+      unavailableDates.map(function (item) {
         const objectId = new mongoose.Types.ObjectId(item.propertyId);
-        datesMatchingPropertiesArray.push(objectId);
+        unavailableProperties.push(objectId);
       });
-      console.log(
-        'available properties: ' + JSON.stringify(datesMatchingPropertiesArray),
-      );
+      availableProperties = await PropertyDoc.find({
+        _id: { $nin: unavailableProperties },
+      });
     }
 
-    //Building the query dinamically
-    const query: { [k: string]: any } = {}; // declare the query object
+    const query: { [k: string]: any } = {};
 
-    if (filters.capacity != undefined) {
-      query.capacity = `${filters.capacity}`;
+    if (filters.capacity) {
+      query.capacity =
+        filters.capacity === 'more' ? { $gte: 8 } : `${filters.capacity}`;
     }
-    if (filters.minPrice != undefined && filters.maxPrice != undefined) {
+
+    if (filters.minPrice && filters.maxPrice) {
       query.price = {
         $gte: `${filters.minPrice}`,
         $lte: `${filters.maxPrice}`,
       };
     }
-    if (filters.roomAmount != undefined) {
-      query.roomAmount = `${filters.roomAmount}`;
+
+    if (filters.roomAmount) {
+      query.roomAmount =
+        filters.roomAmount === 'more' ? { $gte: 8 } : `${filters.roomAmount}`;
     }
-    if (filters.toiletAmount != undefined) {
-      query.toiletAmount = `${filters.toiletAmount}`;
+
+    if (filters.toiletAmount) {
+      query.toiletAmount =
+        filters.toiletAmount === 'more'
+          ? { $gte: 8 }
+          : `${filters.toiletAmount}`;
     }
-    if (filters.location != undefined) {
+
+    if (filters.location) {
       query.location = {
         $regex: new RegExp('^' + `${filters.location}`.toLowerCase(), 'i'),
       };
     }
-    if (languageMatchingUsersArray.length > 0) {
+
+    if (filters.amenities) {
+      query.amenities = { $in: filters.amenities.split(',') };
+    }
+    console.log('LANG', languageMatchingUsersArray);
+    if (filters.languages.split(',').length > 0) {
       query.ownerId = { $in: languageMatchingUsersArray };
     }
-    if (datesMatchingPropertiesArray.length > 0) {
-      query._id = { $in: datesMatchingPropertiesArray };
+
+    if (availableProperties.length > 0) {
+      query._id = { $in: availableProperties };
     }
+
     const properties = await PropertyDoc.find(query).sort('_id').skip(0).lean();
 
     return properties.map(

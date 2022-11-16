@@ -6,12 +6,6 @@ const propertySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  //LIO: agregado
-  /*
-  propertyCode: {
-    type: String,
-    requiered: true,
-  },*/
   imagesUrls: [String],
   location: {
     type: String,
