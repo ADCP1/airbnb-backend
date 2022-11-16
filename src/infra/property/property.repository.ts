@@ -77,20 +77,8 @@ class PropertyRepository implements IPropertyRepository {
     );
   }
 
-  //LIO
   public async searchByFilters(filters: any): Promise<Property[]> {
-    console.log('Params received');
-    console.log('languages: ' + filters.languages);
-    console.log('startDate: ' + filters.startDate);
-    console.log('endDate: ' + filters.endDate);
-    console.log('capacity: ' + filters.capacity);
-    console.log('minPrice: ' + filters.minPrice);
-    console.log('maxPrice: ' + filters.maxPrice);
-    console.log('roomAmount: ' + filters.roomAmount);
-    console.log('toiletAmount: ' + filters.toiletAmount);
-    console.log('location: ' + filters.location);
-    // falta propertyType
-
+    // TODO agregar filtro por property type
     const languageMatchingUsersArray: any[] = [];
     if (filters.languages) {
       const languagesParam = filters.languages;
@@ -104,14 +92,9 @@ class PropertyRepository implements IPropertyRepository {
           $in: languagesAsArray,
         },
       });
-      console.log('MATCH LANG', languageMatchingUsers);
       languageMatchingUsers.map(function (item) {
         languageMatchingUsersArray.push(item._id);
       });
-      console.log(
-        'valid users for language: ' +
-          JSON.stringify(languageMatchingUsersArray),
-      );
     }
 
     const unavailableProperties: any[] = [];
@@ -180,7 +163,7 @@ class PropertyRepository implements IPropertyRepository {
     if (filters.amenities) {
       query.amenities = { $in: filters.amenities.split(',') };
     }
-    console.log('LANG', languageMatchingUsersArray);
+
     if (filters.languages.split(',').length > 0) {
       query.ownerId = { $in: languageMatchingUsersArray };
     }
