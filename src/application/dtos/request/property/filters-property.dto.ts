@@ -1,16 +1,11 @@
-import {
-  IsAfterDateArgConstraint,
-  IsAfterNowConstraint,
-} from '@shared/customValidations/dateValidations';
+import { IsAfterDateArgConstraint, IsAfterNowConstraint } from '@shared';
 import { Type } from 'class-transformer';
 import {
   IsDate,
-  IsIn,
   IsNotEmpty,
   IsOptional,
   IsPositive,
   IsString,
-  IsUrl,
   Validate,
 } from 'class-validator';
 
