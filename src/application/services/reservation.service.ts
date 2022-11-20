@@ -129,6 +129,11 @@ class ReservationService implements IReservationService {
       throw new UnauthorizedException('You are not the owner of this property');
     }
     await this.reservationRepository.confirm(reservation.id!);
+    await this.reservationRepository.cancelPendingReservationsPropertyInBetweenDates(
+      reservation.propertyId,
+      reservation.startDate,
+      reservation.endDate,
+    );
   }
 
   public async cancelGuestReservation(

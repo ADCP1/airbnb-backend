@@ -32,7 +32,7 @@ class ReservationRepository implements IReservationRepository {
   ): Promise<Reservation[]> {
     const reservations = await ReservationDoc.find({
       propertyId,
-      status: { $in: ['confirmed', 'pending'] },
+      status: 'confirmed',
       startDate: { $lt: to },
       endDate: { $gt: from },
     }).lean();
@@ -93,29 +93,51 @@ class ReservationRepository implements IReservationRepository {
     );
   }
 
+  public async cancelPendingReservationsPropertyInBetweenDates(
+    propertyId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<void> {
+    const reservations =
+      await this.findReservationsByPropertyIdInBetweenDatesAndStatus(
+        propertyId,
+        startDate,
+        endDate,
+        'pending',
+      );
+    if (!reservations) return;
+    await ReservationDoc.updateMany(
+      { _id: { $in: reservations.map((reservation) => reservation.id) } },
+      { $set: { status: 'cancelled' } },
+    );
+  }
+
   private async validatePropertyAvailability(
     reservation: Reservation,
   ): Promise<void> {
-    const reservations = await this.findReservationByPropertyIdInBetweenDates(
-      reservation.propertyId,
-      reservation.startDate,
-      reservation.endDate,
-    );
-    if (reservations) {
+    const reservations =
+      await this.findReservationsByPropertyIdInBetweenDatesAndStatus(
+        reservation.propertyId,
+        reservation.startDate,
+        reservation.endDate,
+        'confirmed',
+      );
+    if (reservations && reservations.length > 0) {
       throw new DomainException(
         'Property is not available for the selected dates.',
       );
     }
   }
 
-  private async findReservationByPropertyIdInBetweenDates(
+  private async findReservationsByPropertyIdInBetweenDatesAndStatus(
     propertyId: string,
     startDate: Date,
     endDate: Date,
-  ): Promise<Reservation | null> {
-    const reservation = await ReservationDoc.findOne({
+    status: string,
+  ): Promise<Reservation[] | null> {
+    const reservations = await ReservationDoc.find({
       propertyId,
-      status: { $in: ['confirmed', 'pending'] },
+      status,
       $or: [
         {
           startDate: { $gte: startDate, $lt: endDate },
@@ -125,11 +147,14 @@ class ReservationRepository implements IReservationRepository {
         },
       ],
     }).lean();
-    if (!reservation) return null;
-    return new Reservation({
-      id: reservation._id.toString(),
-      ...reservation,
-    });
+    if (!reservations) return null;
+    return reservations.map(
+      (reservation) =>
+        new Reservation({
+          id: reservation._id.toString(),
+          ...reservation,
+        }),
+    );
   }
 }
 
