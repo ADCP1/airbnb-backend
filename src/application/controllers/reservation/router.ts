@@ -46,7 +46,7 @@ export function ReservationRouter() {
     ),
   );
   router.post(
-    '/own/host/:reservationId/confirm',
+    '/own/host/:id/confirm',
     validateJWT,
     registerHandler(
       (req: Request<void, any, { status: string }>) =>
