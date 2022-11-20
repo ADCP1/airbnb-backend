@@ -21,11 +21,14 @@ export function registerHandler<T = Record<string, unknown>>(
   ): Promise<void> => {
     try {
       const resObject = (await handler(req)) as Record<string, unknown>;
-      if (!resObject) res.status(statusCode).send();
-      const snakeResObject = snakecaseKeys(resObject, {
-        deep: true,
-      });
-      res.status(statusCode).json(snakeResObject);
+      if (!resObject) {
+        res.status(statusCode).send();
+      } else {
+        const snakeResObject = snakecaseKeys(resObject, {
+          deep: true,
+        });
+        res.status(statusCode).json(snakeResObject);
+      }
     } catch (error) {
       next(error);
     }

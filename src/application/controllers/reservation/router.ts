@@ -49,8 +49,7 @@ export function ReservationRouter() {
     '/own/host/:id/confirm',
     validateJWT,
     registerHandler(
-      (req: Request<void, any, { status: string }>) =>
-        reservationController.confirmHostReservation(req),
+      (req) => reservationController.confirmHostReservation(req),
       StatusCodes.OK,
     ),
   );
