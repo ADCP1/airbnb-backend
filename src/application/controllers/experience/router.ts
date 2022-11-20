@@ -27,6 +27,11 @@ export function ExperienceRouter() {
     registerHandler((req) => experienceController.partialUpdate(req)),
   );
   router.get(
+    '/owned',
+    validateJWT,
+    registerHandler((req) => experienceController.getUserExperiences(req)),
+  );
+  router.get(
     '/:experienceId',
     registerHandler((req: Request<void, { experienceId: string }>) =>
       experienceController.get(req),

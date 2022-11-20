@@ -18,6 +18,7 @@ interface IExperienceService {
     hostEmail: string,
   ): Promise<ResponseDtos.ExperienceDto>;
   getById(experienceId: string): Promise<ResponseDtos.ExperienceDto>;
+  getMyExperiences(ownerEmail: string): Promise<ResponseDtos.ExperiencesDto>;
 }
 
 class ExperienceService implements IExperienceService {
@@ -71,6 +72,30 @@ class ExperienceService implements IExperienceService {
       throw new NotFoundException('Experience not found');
     }
     return ExperienceFactory.toDto(experience);
+  }
+
+  public async getMyExperiences(
+    ownerEmail: string,
+  ): Promise<ResponseDtos.ExperiencesDto> {
+    const owner = await this.getOwnerFromEmail(ownerEmail);
+    console.log('owner email: ' + ownerEmail);
+    console.log('owner id: ' + owner.id);
+    const experiences = await this.experienceRepository.findByOwnerId(
+      owner.id!,
+    );
+    return {
+      experiences: experiences.map((experience) =>
+        ExperienceFactory.toDto(experience),
+      ),
+    };
+  }
+
+  private async getOwnerFromEmail(email: string): Promise<User> {
+    const owner = await this.userService.findFromEmail(email);
+    if (!owner) {
+      throw new NotFoundException('User creating the property does not exist');
+    }
+    return owner;
   }
 
   private async getUserFromEmail(email: string): Promise<User> {

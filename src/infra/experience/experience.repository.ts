@@ -20,6 +20,12 @@ class ExperienceRepository implements IExperienceRepository {
     if (!experienceDoc) return null;
     return ExperienceFactoryFactory.fromExperienceDoc(experienceDoc);
   }
+  public async findByOwnerId(ownerId: string): Promise<Experience[]> {
+    const experiences = await ExperienceDoc.find({ ownerId }).lean();
+    return experiences.map((experience) =>
+      ExperienceFactoryFactory.fromExperienceDoc(experience),
+    );
+  }
 }
 
 export const experienceRepository: IExperienceRepository =
