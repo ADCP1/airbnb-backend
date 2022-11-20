@@ -12,6 +12,7 @@ interface IReservationController {
   ): Promise<ResponseDtos.PropertyAvailabilityDto>;
   getGuestReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
   getHostReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
+  confirmHostReservation(req: Request): Promise<void>;
   cancelGuestReservation(req: Request): Promise<void>;
   cancelHostReservation(req: Request): Promise<void>;
 }
@@ -40,6 +41,13 @@ class ReservationController implements IReservationController {
   ): Promise<ResponseDtos.ReservationDto[]> {
     const status = getReservationStatusIn(req.query.status as string);
     return this.reservationService.getGuestReservations(req.user.email, status);
+  }
+
+  public async confirmHostReservation(req: Request): Promise<void> {
+    return this.reservationService.confirmHostReservation(
+      req.params.id,
+      req.user.email,
+    );
   }
 
   public async getHostReservations(

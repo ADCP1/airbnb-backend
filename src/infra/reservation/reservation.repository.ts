@@ -79,6 +79,13 @@ class ReservationRepository implements IReservationRepository {
     );
   }
 
+  public async confirm(id: string): Promise<void> {
+    await ReservationDoc.updateOne(
+      { _id: id },
+      { $set: { status: 'confirmed' } },
+    );
+  }
+
   public async cancel(id: string): Promise<void> {
     await ReservationDoc.updateOne(
       { _id: id },

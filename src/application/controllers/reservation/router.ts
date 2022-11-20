@@ -45,6 +45,15 @@ export function ReservationRouter() {
       StatusCodes.OK,
     ),
   );
+  router.post(
+    '/own/host/:reservationId/confirm',
+    validateJWT,
+    registerHandler(
+      (req: Request<void, any, { status: string }>) =>
+        reservationController.confirmHostReservation(req),
+      StatusCodes.OK,
+    ),
+  );
   router.delete(
     '/own/guest/:id',
     validateJWT,

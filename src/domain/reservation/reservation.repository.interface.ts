@@ -16,5 +16,6 @@ export interface IReservationRepository {
     propertyIds: string[],
     status: string[],
   ): Promise<Reservation[]>;
+  confirm(id: string): Promise<void>;
   cancel(id: string): Promise<void>;
 }

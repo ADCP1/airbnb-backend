@@ -29,6 +29,10 @@ interface IReservationService {
     hostEmail: string,
     status: string[],
   ): Promise<ResponseDtos.ReservationDto[]>;
+  confirmHostReservation(
+    reservationId: string,
+    hostEmail: string,
+  ): Promise<void>;
   cancelGuestReservation(id: string, email: string): Promise<void>;
   cancelHostReservation(id: string, email: string): Promise<void>;
 }
@@ -112,6 +116,19 @@ class ReservationService implements IReservationService {
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation),
     );
+  }
+
+  public async confirmHostReservation(
+    reservationId: string,
+    hostEmail: string,
+  ): Promise<void> {
+    const reservation = await this.findById(reservationId);
+    const host = await this.getUserFromEmail(hostEmail, 'Host');
+    const property = await this.getPropertyById(reservation.propertyId);
+    if (property.ownerId !== host.id) {
+      throw new UnauthorizedException('You are not the owner of this property');
+    }
+    await this.reservationRepository.confirm(reservation.id!);
   }
 
   public async cancelGuestReservation(
