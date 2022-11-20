@@ -3,6 +3,7 @@ import {
   UpdateExperienceDto,
 } from '@application/dtos/request';
 import { registerHandler, validateDto, validateJWT } from '@shared';
+import { Request } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -24,6 +25,12 @@ export function ExperienceRouter() {
     validateJWT,
     validateDto(UpdateExperienceDto),
     registerHandler((req) => experienceController.partialUpdate(req)),
+  );
+  router.get(
+    '/:experienceId',
+    registerHandler((req: Request<void, { experienceId: string }>) =>
+      experienceController.get(req),
+    ),
   );
   return router;
 }

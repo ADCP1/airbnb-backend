@@ -25,6 +25,7 @@ interface IExperienceService {
     experienceDto: RequestDtos.UpdateExperienceDto,
     hostEmail: string,
   ): Promise<ResponseDtos.ExperienceDto>;
+  getById(experienceId: string): Promise<ResponseDtos.ExperienceDto>;
 }
 
 class ExperienceService implements IExperienceService {
@@ -77,6 +78,16 @@ class ExperienceService implements IExperienceService {
     });
     await this.experienceRepository.save(updatedExperience);
     return ExperienceFactory.toDto(updatedExperience);
+  }
+
+  public async getById(
+    propertyId: string,
+  ): Promise<ResponseDtos.ExperienceDto> {
+    const experience = await this.experienceRepository.findById(propertyId);
+    if (!experience) {
+      throw new NotFoundException('Experience not found');
+    }
+    return ExperienceFactory.toDto(experience);
   }
 
   private async getUserFromEmail(email: string): Promise<User> {

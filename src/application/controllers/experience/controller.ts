@@ -9,6 +9,9 @@ interface IExperienceController {
   partialUpdate(
     req: Request<RequestDtos.UpdateExperienceDto>,
   ): Promise<ResponseDtos.ExperienceDto>;
+  get(
+    req: Request<void, { experienceId: string }>,
+  ): Promise<ResponseDtos.ExperienceDto>;
 }
 
 class ExperienceController implements IExperienceController {
@@ -32,6 +35,12 @@ class ExperienceController implements IExperienceController {
       req.body,
       req.user.email,
     );
+  }
+
+  public async get(
+    req: Request<void, { experienceId: string }>,
+  ): Promise<ResponseDtos.ExperienceDto> {
+    return this.experienceService.getById(req.params.experienceId);
   }
 }
 
