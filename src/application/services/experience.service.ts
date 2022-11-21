@@ -73,6 +73,9 @@ class ExperienceService implements IExperienceService {
     if (organizer.id !== experience.organizerId) {
       throw new DomainException('Experience does not belong to the user');
     }
+    if (experience.type == ExperienceType.Online) {
+      experienceDto.capacity = -1;
+    }
     const updatedExperience = new Experience({
       ...experience,
       ...experienceDto,
