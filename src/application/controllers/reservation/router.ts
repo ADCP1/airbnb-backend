@@ -1,7 +1,7 @@
 import {
   CreateExperienceReservationDto,
   CreatePropertyReservationDto as CreatePropertyReservationDto,
-  GetPropertyAvailabilityDto,
+  GetAvailabilityDto,
 } from '@application/dtos/request';
 import { registerHandler, Request, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
@@ -32,7 +32,7 @@ export function ReservationRouter() {
   router.post(
     '/property-availability',
     validateJWT,
-    validateDto(GetPropertyAvailabilityDto),
+    validateDto(GetAvailabilityDto),
     registerHandler(
       (req) => reservationController.getPropertyAvailability(req),
       StatusCodes.OK,

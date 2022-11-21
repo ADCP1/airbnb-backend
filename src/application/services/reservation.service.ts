@@ -28,9 +28,9 @@ interface IReservationService {
     reservationDto: RequestDtos.CreateExperienceReservationDto,
     guestEmail: string,
   ): Promise<ResponseDtos.ExperienceReservationDto>;
-  getPropertyAvailability(
-    propertyDto: RequestDtos.GetPropertyAvailabilityDto,
-  ): Promise<ResponseDtos.PropertyAvailabilityDto>;
+  getAvailability(
+    propertyDto: RequestDtos.GetAvailabilityDto,
+  ): Promise<ResponseDtos.AvailabilityDto>;
   getGuestReservations(
     guestEmail: string,
     status: string[],
@@ -117,11 +117,11 @@ class ReservationService implements IReservationService {
     return ReservationFactory.toDto(reservation);
   }
 
-  public async getPropertyAvailability(
-    reservationDto: RequestDtos.GetPropertyAvailabilityDto,
-  ): Promise<ResponseDtos.PropertyAvailabilityDto> {
+  public async getAvailability(
+    reservationDto: RequestDtos.GetAvailabilityDto,
+  ): Promise<ResponseDtos.AvailabilityDto> {
     const reservations = await this.reservationRepository.getManyByReservableId(
-      reservationDto.propertyId,
+      reservationDto.reservableId,
       reservationDto.from,
       reservationDto.to,
     );
@@ -155,11 +155,10 @@ class ReservationService implements IReservationService {
   ): Promise<ResponseDtos.ReservationDto[]> {
     const host = await this.getUserFromEmail(hostEmail, 'Host');
     const properties = await this.propertyRepository.findByOwnerId(host.id!);
-    const reservations =
-      await this.reservationRepository.getPropertiesReservations(
-        properties.map((property) => property.id!),
-        status,
-      );
+    const reservations = await this.reservationRepository.getReservations(
+      properties.map((property) => property.id!),
+      status,
+    );
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation),
     );

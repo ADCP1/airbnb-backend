@@ -11,8 +11,8 @@ interface IReservationController {
     req: Request<RequestDtos.CreateExperienceReservationDto>,
   ): Promise<ResponseDtos.ExperienceReservationDto>;
   getPropertyAvailability(
-    req: Request<RequestDtos.GetPropertyAvailabilityDto>,
-  ): Promise<ResponseDtos.PropertyAvailabilityDto>;
+    req: Request<RequestDtos.GetAvailabilityDto>,
+  ): Promise<ResponseDtos.AvailabilityDto>;
   getGuestReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
   getHostReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
   confirmHostReservation(req: Request): Promise<void>;
@@ -43,9 +43,9 @@ class ReservationController implements IReservationController {
   }
 
   public async getPropertyAvailability(
-    req: Request<RequestDtos.GetPropertyAvailabilityDto>,
-  ): Promise<ResponseDtos.PropertyAvailabilityDto> {
-    return this.reservationService.getPropertyAvailability(req.body);
+    req: Request<RequestDtos.GetAvailabilityDto>,
+  ): Promise<ResponseDtos.AvailabilityDto> {
+    return this.reservationService.getAvailability(req.body);
   }
 
   public async getGuestReservations(

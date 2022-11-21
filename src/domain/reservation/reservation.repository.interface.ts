@@ -4,7 +4,7 @@ export interface IReservationRepository {
   save(reservation: Reservation): Promise<void>;
   findById(id: string): Promise<Reservation | null>;
   getManyByReservableId(
-    propertyId: string,
+    reservableId: string,
     from: Date,
     to: Date,
   ): Promise<Reservation[]>;
@@ -12,8 +12,8 @@ export interface IReservationRepository {
     guestId: string,
     status: string[],
   ): Promise<Reservation[]>;
-  getPropertiesReservations(
-    propertyIds: string[],
+  getReservations(
+    reservableIds: string[],
     status: string[],
   ): Promise<Reservation[]>;
   confirm(id: string): Promise<void>;

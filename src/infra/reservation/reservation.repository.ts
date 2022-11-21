@@ -62,12 +62,12 @@ class ReservationRepository implements IReservationRepository {
     );
   }
 
-  public async getPropertiesReservations(
-    propertyIds: string[],
+  public async getReservations(
+    reservableIds: string[],
     status: string[],
   ): Promise<Reservation[]> {
     const reservations = await ReservationDoc.find({
-      reservableId: { $in: propertyIds },
+      reservableId: { $in: reservableIds },
       status: { $in: status },
     }).lean();
     return reservations.map(
