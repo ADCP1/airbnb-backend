@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsPositive, IsString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class SearchPropertyDto {
   @IsString()

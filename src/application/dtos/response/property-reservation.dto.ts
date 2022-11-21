@@ -1,6 +1,6 @@
 import { PaymentType, ReservationStatus } from '@domain/reservation';
 
-export type PropertyReservationDto = {
+export type ReservationDto = {
   id: string;
   propertyId: string;
   guestId: string;

@@ -23,7 +23,7 @@ interface IReservationService {
   createForProperty(
     reservationDto: RequestDtos.CreatePropertyReservationDto,
     guestEmail: string,
-  ): Promise<ResponseDtos.PropertyReservationDto>;
+  ): Promise<ResponseDtos.ReservationDto>;
   createForExperience(
     reservationDto: RequestDtos.CreateExperienceReservationDto,
     guestEmail: string,
@@ -34,11 +34,15 @@ interface IReservationService {
   getGuestReservations(
     guestEmail: string,
     status: string[],
-  ): Promise<ResponseDtos.PropertyReservationDto[]>;
+  ): Promise<ResponseDtos.ReservationDto[]>;
   getHostReservations(
     hostEmail: string,
     status: string[],
-  ): Promise<ResponseDtos.PropertyReservationDto[]>;
+  ): Promise<ResponseDtos.ReservationDto[]>;
+  confirmHostReservation(
+    reservationId: string,
+    hostEmail: string,
+  ): Promise<void>;
   cancelGuestReservation(id: string, email: string): Promise<void>;
   cancelHostReservation(id: string, email: string): Promise<void>;
 }
@@ -64,7 +68,7 @@ class ReservationService implements IReservationService {
   public async createForProperty(
     reservationDto: RequestDtos.CreatePropertyReservationDto,
     guestEmail: string,
-  ): Promise<ResponseDtos.PropertyReservationDto> {
+  ): Promise<ResponseDtos.ReservationDto> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const reservation = new Reservation({
       ...reservationDto,
@@ -134,7 +138,7 @@ class ReservationService implements IReservationService {
   public async getGuestReservations(
     guestEmail: string,
     status: string[],
-  ): Promise<ResponseDtos.PropertyReservationDto[]> {
+  ): Promise<ResponseDtos.ReservationDto[]> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const reservations = await this.reservationRepository.getGuestReservations(
       guest.id!,
@@ -148,7 +152,7 @@ class ReservationService implements IReservationService {
   public async getHostReservations(
     hostEmail: string,
     status: string[],
-  ): Promise<ResponseDtos.PropertyReservationDto[]> {
+  ): Promise<ResponseDtos.ReservationDto[]> {
     const host = await this.getUserFromEmail(hostEmail, 'Host');
     const properties = await this.propertyRepository.findByOwnerId(host.id!);
     const reservations =
@@ -158,6 +162,24 @@ class ReservationService implements IReservationService {
       );
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation),
+    );
+  }
+
+  public async confirmHostReservation(
+    reservationId: string,
+    hostEmail: string,
+  ): Promise<void> {
+    const reservation = await this.findById(reservationId);
+    const host = await this.getUserFromEmail(hostEmail, 'Host');
+    const property = await this.getPropertyById(reservation.propertyId);
+    if (property.ownerId !== host.id) {
+      throw new UnauthorizedException('You are not the owner of this property');
+    }
+    await this.reservationRepository.confirm(reservation.id!);
+    await this.reservationRepository.cancelPendingReservationsPropertyInBetweenDates(
+      reservation.propertyId,
+      reservation.startDate,
+      reservation.endDate,
     );
   }
 

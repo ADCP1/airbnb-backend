@@ -26,6 +26,17 @@ export function PropertyRouter() {
     validateJWT,
     registerHandler((req) => propertyController.getUserProperties(req)),
   );
+  router.get(
+    '/',
+    validateJWT,
+    registerHandler((req: Request<void, any, { searchText: string }>) =>
+      propertyController.search(req),
+    ),
+  );
+  router.get(
+    '/preview',
+    registerHandler((req) => propertyController.getPreview(req)),
+  );
   router.patch(
     '/:propertyId',
     validateJWT,
@@ -42,7 +53,7 @@ export function PropertyRouter() {
     '/',
     validateJWT,
     registerHandler((req: Request<void, any, { searchText: string }>) =>
-      propertyController.searchByText(req),
+      propertyController.search(req),
     ),
   );
   router.get(

@@ -4,8 +4,11 @@ import {
   PropertyAmenity,
 } from '@domain/property';
 import { loadObjectIdentification } from '@infra/identification';
+import { ReservationDoc } from '@infra/reservation/reservation.doc';
+import { UserDoc } from '@infra/user/user.doc';
 import { DomainException, InternalServerException } from '@shared';
 import cloneDeep from 'clone-deep';
+import mongoose from 'mongoose';
 
 import { PropertyDoc } from './property.doc';
 import { PropertyFactory } from './property.factory';
@@ -71,6 +74,113 @@ class PropertyRepository implements IPropertyRepository {
 
     return properties.map((property) =>
       PropertyFactory.fromPropertyDoc(property),
+    );
+  }
+
+  public async searchByFilters(filters: any): Promise<Property[]> {
+    // TODO agregar filtro por property type
+    const languageMatchingUsersArray: any[] = [];
+    let languagesAsArray = [];
+    if (filters.languages) {
+      const languagesParam = filters.languages;
+      if (languagesParam) {
+        languagesAsArray = languagesParam.split(',');
+      }
+
+      const languageMatchingUsers = await UserDoc.find({
+        languages: {
+          $in: languagesAsArray,
+        },
+      });
+      languageMatchingUsers.map(function (item) {
+        languageMatchingUsersArray.push(item._id);
+      });
+    }
+
+    const unavailableProperties: any[] = [];
+    let availableProperties: any[] = [];
+    if (filters.startDate && filters.endDate) {
+      const unavailableDates = await ReservationDoc.find({
+        $or: [
+          {
+            $and: [
+              { startDate: { $gt: `${filters.startDate}` } },
+              { startDate: { $lt: `${filters.endDate}` } },
+              { status: { $ne: 'cancelled' } },
+            ],
+          },
+          {
+            $and: [
+              { endDate: { $gt: `${filters.startDate}` } },
+              { endDate: { $lt: `${filters.endDate}` } },
+              { status: { $ne: 'cancelled' } },
+            ],
+          },
+        ],
+      });
+
+      unavailableDates.map(function (item) {
+        const objectId = new mongoose.Types.ObjectId(item.reservableId);
+        unavailableProperties.push(objectId);
+      });
+      availableProperties = await PropertyDoc.find({
+        _id: { $nin: unavailableProperties },
+      });
+    }
+
+    const query: { [k: string]: any } = {};
+
+    if (filters.capacity) {
+      query.capacity =
+        filters.capacity === 'more' ? { $gte: 8 } : `${filters.capacity}`;
+    }
+
+    if (filters.minPrice && filters.maxPrice) {
+      query.price = {
+        $gte: `${filters.minPrice}`,
+        $lte: `${filters.maxPrice}`,
+      };
+    }
+
+    if (filters.roomAmount) {
+      query.roomAmount =
+        filters.roomAmount === 'more' ? { $gte: 8 } : `${filters.roomAmount}`;
+    }
+
+    if (filters.toiletAmount) {
+      query.toiletAmount =
+        filters.toiletAmount === 'more'
+          ? { $gte: 8 }
+          : `${filters.toiletAmount}`;
+    }
+
+    if (filters.location) {
+      query.location = {
+        $regex: new RegExp('^' + `${filters.location}`.toLowerCase(), 'i'),
+      };
+    }
+
+    if (filters.amenities) {
+      query.amenities = { $in: filters.amenities.split(',') };
+    }
+
+    if (languagesAsArray.length > 0) {
+      query.ownerId = { $in: languageMatchingUsersArray };
+    }
+
+    if (availableProperties.length > 0) {
+      query._id = { $in: availableProperties };
+    }
+
+    const properties = await PropertyDoc.find(query).sort('_id').skip(0).lean();
+
+    return properties.map(
+      (property) =>
+        new Property({
+          id: property._id.toString(),
+          ...property,
+          amenities: property.amenities as PropertyAmenity[],
+        }),
     );
   }
 }
