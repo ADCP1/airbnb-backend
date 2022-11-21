@@ -4,14 +4,21 @@ import { getReservationStatusIn } from '@domain/reservation';
 import { Request } from '@shared';
 
 interface IReservationController {
-  create(
-    req: Request<RequestDtos.CreateReservationDto>,
-  ): Promise<ResponseDtos.ReservationDto>;
+  createForProperty(
+    req: Request<RequestDtos.CreatePropertyReservationDto>,
+  ): Promise<ResponseDtos.PropertyReservationDto>;
+  createForExperience(
+    req: Request<RequestDtos.CreateExperienceReservationDto>,
+  ): Promise<ResponseDtos.ExperienceReservationDto>;
   getPropertyAvailability(
     req: Request<RequestDtos.GetPropertyAvailabilityDto>,
   ): Promise<ResponseDtos.PropertyAvailabilityDto>;
-  getGuestReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
-  getHostReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
+  getGuestReservations(
+    req: Request,
+  ): Promise<ResponseDtos.PropertyReservationDto[]>;
+  getHostReservations(
+    req: Request,
+  ): Promise<ResponseDtos.PropertyReservationDto[]>;
   cancelGuestReservation(req: Request): Promise<void>;
   cancelHostReservation(req: Request): Promise<void>;
 }
@@ -23,10 +30,19 @@ class ReservationController implements IReservationController {
     this.reservationService = reservationService;
   }
 
-  public async create(
-    req: Request<RequestDtos.CreateReservationDto>,
-  ): Promise<ResponseDtos.ReservationDto> {
-    return this.reservationService.create(req.body, req.user.email);
+  public async createForProperty(
+    req: Request<RequestDtos.CreatePropertyReservationDto>,
+  ): Promise<ResponseDtos.PropertyReservationDto> {
+    return this.reservationService.createForProperty(req.body, req.user.email);
+  }
+
+  public async createForExperience(
+    req: Request<RequestDtos.CreateExperienceReservationDto>,
+  ): Promise<ResponseDtos.ExperienceReservationDto> {
+    return this.reservationService.createForExperience(
+      req.body,
+      req.user.email,
+    );
   }
 
   public async getPropertyAvailability(
@@ -37,14 +53,14 @@ class ReservationController implements IReservationController {
 
   public async getGuestReservations(
     req: Request,
-  ): Promise<ResponseDtos.ReservationDto[]> {
+  ): Promise<ResponseDtos.PropertyReservationDto[]> {
     const status = getReservationStatusIn(req.query.status as string);
     return this.reservationService.getGuestReservations(req.user.email, status);
   }
 
   public async getHostReservations(
     req: Request,
-  ): Promise<ResponseDtos.ReservationDto[]> {
+  ): Promise<ResponseDtos.PropertyReservationDto[]> {
     const status = getReservationStatusIn(req.query.status as string);
     return this.reservationService.getHostReservations(req.user.email, status);
   }

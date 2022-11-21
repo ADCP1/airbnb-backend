@@ -1,8 +1,16 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
-import { Experience, IExperienceRepository } from '@domain/experience';
+import {
+  Experience,
+  ExperienceType,
+  IExperienceRepository,
+} from '@domain/experience';
 import { User } from '@domain/user';
 import { experienceRepository } from '@infra/experience';
-import { DomainException, NotFoundException } from '@shared';
+import {
+  BadRequestException,
+  DomainException,
+  NotFoundException,
+} from '@shared';
 
 import { ExperienceFactory } from './experience.factory';
 import { IUserService, userService } from './user.service';
@@ -35,10 +43,19 @@ class ExperienceService implements IExperienceService {
     experienceDto: RequestDtos.CreateExperienceDto,
     guestEmail: string,
   ): Promise<ResponseDtos.ExperienceDto> {
+    if (
+      experienceDto.type == ExperienceType.InPlace &&
+      !experienceDto.capacity
+    ) {
+      throw new BadRequestException(
+        'capacity is required for and in place experience',
+      );
+    }
     const organizer = await this.getUserFromEmail(guestEmail);
     const experience = new Experience({
       ...experienceDto,
       organizerId: organizer.id!,
+      capacity: experienceDto.capacity ?? -1,
     });
     await this.experienceRepository.save(experience);
     return ExperienceFactory.toDto(experience);

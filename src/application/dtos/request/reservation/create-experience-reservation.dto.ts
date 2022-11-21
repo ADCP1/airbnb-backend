@@ -10,6 +10,7 @@ import {
   IsDate,
   IsIn,
   IsNotEmpty,
+  IsOptional,
   IsPositive,
   IsString,
   Validate,
@@ -18,10 +19,10 @@ import {
 const reservationStatusValues = getReservationStatusValues();
 const paymentTypeValues = getPaymentTypeValues();
 
-export class CreateReservationDto {
+export class CreateExperienceReservationDto {
   @IsString()
   @IsNotEmpty()
-  public propertyId: string;
+  public experienceId: string;
 
   @Type(() => Date)
   @IsDate()
@@ -36,9 +37,9 @@ export class CreateReservationDto {
   @Validate(IsAfterDateArgConstraint, ['startDate'])
   public endDate: Date;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsPositive()
-  public amountOfGuests: number;
+  public amountOfGuests?: number;
 
   @IsIn(reservationStatusValues)
   public status: ReservationStatus;

@@ -42,8 +42,9 @@ export class CreateExperienceDto {
   @IsPositive()
   price: number;
 
+  @IsOptional()
   @IsPositive()
-  capacity: number;
+  capacity?: number;
 
   @IsPositive()
   duration: number;

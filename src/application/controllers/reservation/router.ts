@@ -1,5 +1,6 @@
 import {
-  CreateReservationDto,
+  CreateExperienceReservationDto,
+  CreatePropertyReservationDto as CreatePropertyReservationDto,
   GetPropertyAvailabilityDto,
 } from '@application/dtos/request';
 import { registerHandler, Request, validateDto, validateJWT } from '@shared';
@@ -11,11 +12,20 @@ import { reservationController } from './controller';
 export function ReservationRouter() {
   const router = Router();
   router.post(
-    '/',
+    '/property',
     validateJWT,
-    validateDto(CreateReservationDto),
+    validateDto(CreatePropertyReservationDto),
     registerHandler(
-      (req) => reservationController.create(req),
+      (req) => reservationController.createForProperty(req),
+      StatusCodes.CREATED,
+    ),
+  );
+  router.post(
+    '/experience',
+    validateJWT,
+    validateDto(CreateExperienceReservationDto),
+    registerHandler(
+      (req) => reservationController.createForExperience(req),
       StatusCodes.CREATED,
     ),
   );

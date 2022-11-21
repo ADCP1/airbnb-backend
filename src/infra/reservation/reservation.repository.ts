@@ -25,13 +25,13 @@ class ReservationRepository implements IReservationRepository {
     });
   }
 
-  public async getPropertyReservations(
-    propertyId: string,
+  public async getManyByReservableId(
+    reservableId: string,
     from: Date,
     to: Date,
   ): Promise<Reservation[]> {
     const reservations = await ReservationDoc.find({
-      propertyId,
+      reservableId: reservableId,
       status: { $in: ['confirmed', 'pending'] },
       startDate: { $lt: to },
       endDate: { $gt: from },
@@ -67,7 +67,7 @@ class ReservationRepository implements IReservationRepository {
     status: string[],
   ): Promise<Reservation[]> {
     const reservations = await ReservationDoc.find({
-      propertyId: { $in: propertyIds },
+      reservableId: { $in: propertyIds },
       status: { $in: status },
     }).lean();
     return reservations.map(
@@ -107,7 +107,7 @@ class ReservationRepository implements IReservationRepository {
     endDate: Date,
   ): Promise<Reservation | null> {
     const reservation = await ReservationDoc.findOne({
-      propertyId,
+      reservableId: propertyId,
       status: { $in: ['confirmed', 'pending'] },
       $or: [
         {

@@ -2,7 +2,9 @@ import { ResponseDtos } from '@application/dtos';
 import { Reservation } from '@domain/reservation';
 
 export class ReservationFactory {
-  public static toDto(reservation: Reservation): ResponseDtos.ReservationDto {
+  public static toDto(
+    reservation: Reservation,
+  ): ResponseDtos.PropertyReservationDto {
     return {
       id: reservation.id!,
       propertyId: reservation.propertyId,
