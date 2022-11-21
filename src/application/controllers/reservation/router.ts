@@ -30,7 +30,7 @@ export function ReservationRouter() {
     ),
   );
   router.post(
-    '/property-availability',
+    '/availability',
     validateJWT,
     validateDto(GetAvailabilityDto),
     registerHandler(
