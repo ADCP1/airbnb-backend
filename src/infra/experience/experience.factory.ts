@@ -7,7 +7,7 @@ import {
 } from '@domain/experience';
 import { LeanDocument, Types } from 'mongoose';
 
-export class ExperienceFactoryFactory {
+export class ExperienceFactory {
   public static fromExperienceDoc(
     experienceDoc: LeanDocument<
       Omit<

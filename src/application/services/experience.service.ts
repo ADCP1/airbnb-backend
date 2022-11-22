@@ -27,6 +27,7 @@ interface IExperienceService {
   ): Promise<ResponseDtos.ExperienceDto>;
   getById(experienceId: string): Promise<ResponseDtos.ExperienceDto>;
   getMyExperiences(ownerEmail: string): Promise<ResponseDtos.ExperiencesDto>;
+  getPreview(): Promise<ResponseDtos.ExperienceDto[]>;
 }
 
 class ExperienceService implements IExperienceService {
@@ -108,6 +109,14 @@ class ExperienceService implements IExperienceService {
         ExperienceFactory.toDto(experience),
       ),
     };
+  }
+
+  public async getPreview(): Promise<ResponseDtos.ExperienceDto[]> {
+    const maxPreviewExperienceAmount = 20;
+    const experiences = await this.experienceRepository.findMany(
+      maxPreviewExperienceAmount,
+    );
+    return experiences.map((experience) => ExperienceFactory.toDto(experience));
   }
 
   private async getOwnerFromEmail(email: string): Promise<User> {

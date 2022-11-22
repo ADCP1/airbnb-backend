@@ -35,7 +35,7 @@ export function PropertyRouter() {
   );
   router.get(
     '/preview',
-    registerHandler((req) => propertyController.getPreview(req)),
+    registerHandler((req) => propertyController.getPreview()),
   );
   router.patch(
     '/:propertyId',
@@ -55,10 +55,6 @@ export function PropertyRouter() {
     registerHandler((req: Request<void, any, { searchText: string }>) =>
       propertyController.search(req),
     ),
-  );
-  router.get(
-    '/preview',
-    registerHandler((req) => propertyController.getPreview(req)),
   );
   router.delete(
     '/:propertyId',
