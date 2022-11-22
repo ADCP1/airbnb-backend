@@ -18,8 +18,8 @@ export interface IReservationRepository {
   ): Promise<Reservation[]>;
   confirm(id: string): Promise<void>;
   cancel(id: string): Promise<void>;
-  cancelPendingReservationsPropertyInBetweenDates(
-    propertyId: string,
+  cancelPendingReservationsInBetweenDates(
+    reservableId: string,
     startDate: Date,
     endDate: Date,
   ): Promise<void>;

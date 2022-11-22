@@ -1,6 +1,6 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
 import { IReservationService, reservationService } from '@application/services';
-import { getReservationStatusIn } from '@domain/reservation';
+import { getReservationStatusIn, ReservableType } from '@domain/reservation';
 import { Request } from '@shared';
 
 interface IReservationController {
@@ -13,8 +13,14 @@ interface IReservationController {
   getPropertyAvailability(
     req: Request<RequestDtos.GetAvailabilityDto>,
   ): Promise<ResponseDtos.AvailabilityDto>;
-  getGuestReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
-  getHostReservations(req: Request): Promise<ResponseDtos.ReservationDto[]>;
+  getGuestReservations(
+    req: Request,
+    reservableType: ReservableType,
+  ): Promise<ResponseDtos.ReservationDto[]>;
+  getHostReservations(
+    req: Request,
+    reservableType: ReservableType,
+  ): Promise<ResponseDtos.ReservationDto[]>;
   confirmHostReservation(req: Request): Promise<void>;
   cancelGuestReservation(req: Request): Promise<void>;
   cancelHostReservation(req: Request): Promise<void>;
@@ -50,9 +56,14 @@ class ReservationController implements IReservationController {
 
   public async getGuestReservations(
     req: Request,
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const status = getReservationStatusIn(req.query.status as string);
-    return this.reservationService.getGuestReservations(req.user.email, status);
+    return this.reservationService.getGuestReservations(
+      req.user.email,
+      status,
+      reservableType,
+    );
   }
 
   public async confirmHostReservation(req: Request): Promise<void> {
@@ -64,9 +75,14 @@ class ReservationController implements IReservationController {
 
   public async getHostReservations(
     req: Request,
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const status = getReservationStatusIn(req.query.status as string);
-    return this.reservationService.getHostReservations(req.user.email, status);
+    return this.reservationService.getHostReservations(
+      req.user.email,
+      status,
+      reservableType,
+    );
   }
 
   public async cancelGuestReservation(req: Request): Promise<void> {

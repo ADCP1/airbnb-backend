@@ -5,7 +5,7 @@ export class ReservationFactory {
   public static toDto(reservation: Reservation): ResponseDtos.ReservationDto {
     return {
       id: reservation.id!,
-      propertyId: reservation.propertyId,
+      propertyId: reservation.reservableId,
       guestId: reservation.guestId,
       startDate: reservation.startDate,
       endDate: reservation.endDate,

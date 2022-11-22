@@ -5,13 +5,18 @@ import {
   IExperienceRepository,
 } from '@domain/experience';
 import { IPropertyRepository, Property } from '@domain/property';
-import { IReservationRepository, Reservation } from '@domain/reservation';
+import {
+  IReservationRepository,
+  ReservableType,
+  Reservation,
+} from '@domain/reservation';
 import { User } from '@domain/user';
 import { experienceRepository } from '@infra/experience';
 import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
 import {
   DomainException,
+  filterAsync,
   NotFoundException,
   UnauthorizedException,
 } from '@shared';
@@ -34,10 +39,12 @@ interface IReservationService {
   getGuestReservations(
     guestEmail: string,
     status: string[],
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]>;
   getHostReservations(
     hostEmail: string,
     status: string[],
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]>;
   confirmHostReservation(
     reservationId: string,
@@ -138,25 +145,39 @@ class ReservationService implements IReservationService {
   public async getGuestReservations(
     guestEmail: string,
     status: string[],
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const reservations = await this.reservationRepository.getGuestReservations(
       guest.id!,
       status,
     );
-    return reservations.map((reservation) =>
-      ReservationFactory.toDto(reservation),
-    );
+    const reservableRepository =
+      reservableType === ReservableType.Property
+        ? this.reservationRepository
+        : this.experienceRepository;
+    // I'm ashamed of this code and the amount of queries it produces, but beggars cant be choosers
+    return (
+      await filterAsync(
+        reservations,
+        async (reservation) =>
+          !(await reservableRepository.findById(reservation.reservableId)),
+      )
+    ).map((reservation) => ReservationFactory.toDto(reservation));
   }
 
   public async getHostReservations(
     hostEmail: string,
     status: string[],
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const host = await this.getUserFromEmail(hostEmail, 'Host');
-    const properties = await this.propertyRepository.findByOwnerId(host.id!);
+    const reservables =
+      reservableType === ReservableType.Property
+        ? await this.propertyRepository.findByOwnerId(host.id!)
+        : await this.experienceRepository.findByOwnerId(host.id!);
     const reservations = await this.reservationRepository.getReservations(
-      properties.map((property) => property.id!),
+      reservables.map((reservable) => reservable.id!),
       status,
     );
     return reservations.map((reservation) =>
@@ -170,13 +191,22 @@ class ReservationService implements IReservationService {
   ): Promise<void> {
     const reservation = await this.findById(reservationId);
     const host = await this.getUserFromEmail(hostEmail, 'Host');
-    const property = await this.getPropertyById(reservation.propertyId);
-    if (property.ownerId !== host.id) {
-      throw new UnauthorizedException('You are not the owner of this property');
+    const reservable =
+      (await this.propertyRepository.findById(reservation.reservableId)) ??
+      (await this.experienceRepository.findById(reservation.reservableId));
+    if (!reservable) {
+      throw new NotFoundException(
+        'Failed to find a property or experience for the given reservation',
+      );
+    }
+    if (reservable.ownerId !== host.id) {
+      throw new UnauthorizedException(
+        'You are not the owner of the reservation reservable',
+      );
     }
     await this.reservationRepository.confirm(reservation.id!);
-    await this.reservationRepository.cancelPendingReservationsPropertyInBetweenDates(
-      reservation.propertyId,
+    await this.reservationRepository.cancelPendingReservationsInBetweenDates(
+      reservation.reservableId,
       reservation.startDate,
       reservation.endDate,
     );
@@ -199,8 +229,15 @@ class ReservationService implements IReservationService {
   public async cancelHostReservation(id: string, email: string): Promise<void> {
     const reservation = await this.findById(id);
     const host = await this.getUserFromEmail(email, 'Host');
-    const property = await this.getPropertyById(reservation.propertyId);
-    if (property.ownerId !== host.id) {
+    const reservable =
+      (await this.propertyRepository.findById(id)) ??
+      (await this.experienceRepository.findById(id));
+    if (!reservable) {
+      throw new NotFoundException(
+        'Failed to find a property or experience for the given reservation',
+      );
+    }
+    if (reservable.ownerId !== host.id) {
       throw new UnauthorizedException(
         'You are not allowed to cancel this reservation',
       );

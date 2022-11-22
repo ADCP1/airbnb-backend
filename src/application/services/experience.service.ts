@@ -56,7 +56,7 @@ class ExperienceService implements IExperienceService {
     const organizer = await this.getUserFromEmail(guestEmail);
     const experience = new Experience({
       ...experienceDto,
-      organizerId: organizer.id!,
+      ownerId: organizer.id!,
       capacity: experienceDto.capacity ?? -1,
     });
     await this.experienceRepository.save(experience);
@@ -70,7 +70,7 @@ class ExperienceService implements IExperienceService {
   ): Promise<ResponseDtos.ExperienceDto> {
     const organizer = await this.getUserFromEmail(guestEmail);
     const experience = await this.getExperienceFromId(experienceId);
-    if (organizer.id !== experience.organizerId) {
+    if (organizer.id !== experience.ownerId) {
       throw new DomainException('Experience does not belong to the user');
     }
     if (experience.type == ExperienceType.Online) {

@@ -7,7 +7,7 @@ import { ExperienceType } from './experience-type.enum';
 
 export type ExperienceArgs = {
   id?: string;
-  organizerId: string;
+  ownerId: string;
   type: ExperienceType;
   title: string;
   description: string;
@@ -23,7 +23,7 @@ export type ExperienceArgs = {
 };
 
 export class Experience extends Entity {
-  public organizerId: string;
+  public ownerId: string;
   public type: ExperienceType;
   public title: string;
   public description: string;
@@ -39,7 +39,7 @@ export class Experience extends Entity {
 
   constructor(args: ExperienceArgs) {
     super(args.id);
-    this.organizerId = args.organizerId;
+    this.ownerId = args.ownerId;
     this.type = args.type;
     this.title = args.title;
     this.description = args.description;

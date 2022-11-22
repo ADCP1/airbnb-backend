@@ -3,6 +3,7 @@ import {
   CreatePropertyReservationDto as CreatePropertyReservationDto,
   GetAvailabilityDto,
 } from '@application/dtos/request';
+import { ReservableType } from '@domain/reservation';
 import { registerHandler, Request, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -39,19 +40,47 @@ export function ReservationRouter() {
     ),
   );
   router.get(
-    '/own/guest',
+    '/own/guest/property',
     validateJWT,
     registerHandler(
-      (req) => reservationController.getGuestReservations(req),
+      (req) =>
+        reservationController.getGuestReservations(
+          req,
+          ReservableType.Property,
+        ),
       StatusCodes.OK,
     ),
   );
   router.get(
-    '/own/host',
+    '/own/guest/experience',
+    validateJWT,
+    registerHandler(
+      (req) =>
+        reservationController.getGuestReservations(
+          req,
+          ReservableType.Experience,
+        ),
+      StatusCodes.OK,
+    ),
+  );
+  router.get(
+    '/own/host/property',
     validateJWT,
     registerHandler(
       (req: Request<void, any, { status: string }>) =>
-        reservationController.getHostReservations(req),
+        reservationController.getHostReservations(req, ReservableType.Property),
+      StatusCodes.OK,
+    ),
+  );
+  router.get(
+    '/own/host/experience',
+    validateJWT,
+    registerHandler(
+      (req: Request<void, any, { status: string }>) =>
+        reservationController.getHostReservations(
+          req,
+          ReservableType.Experience,
+        ),
       StatusCodes.OK,
     ),
   );

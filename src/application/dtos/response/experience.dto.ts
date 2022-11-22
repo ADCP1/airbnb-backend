@@ -7,7 +7,7 @@ import {
 
 export type ExperienceDto = {
   id: string;
-  organizerId: string;
+  ownerId: string;
   title: string;
   description: string;
   price: number;

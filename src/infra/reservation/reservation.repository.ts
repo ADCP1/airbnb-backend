@@ -93,14 +93,14 @@ class ReservationRepository implements IReservationRepository {
     );
   }
 
-  public async cancelPendingReservationsPropertyInBetweenDates(
-    propertyId: string,
+  public async cancelPendingReservationsInBetweenDates(
+    reservableId: string,
     startDate: Date,
     endDate: Date,
   ): Promise<void> {
     const reservations =
       await this.findReservationsByReservableIdInBetweenDatesAndStatus(
-        propertyId,
+        reservableId,
         startDate,
         endDate,
         'pending',
@@ -117,7 +117,7 @@ class ReservationRepository implements IReservationRepository {
   ): Promise<void> {
     const reservations =
       await this.findReservationsByReservableIdInBetweenDatesAndStatus(
-        reservation.propertyId,
+        reservation.reservableId,
         reservation.startDate,
         reservation.endDate,
         'confirmed',

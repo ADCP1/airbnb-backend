@@ -5,7 +5,7 @@ import { ReservationStatus } from './reservation-status';
 
 export type ReservationArgs = {
   id?: string;
-  propertyId?: string;
+  reservableId?: string;
   guestId: string;
   startDate: Date;
   endDate: Date;
@@ -15,7 +15,7 @@ export type ReservationArgs = {
 };
 
 export class Reservation extends Entity {
-  public propertyId: string;
+  public reservableId: string;
   public guestId: string;
   public startDate: Date;
   public endDate: Date;
@@ -25,7 +25,7 @@ export class Reservation extends Entity {
 
   constructor(args: ReservationArgs) {
     super(args.id);
-    this.propertyId = args.propertyId!;
+    this.reservableId = args.reservableId!;
     this.guestId = args.guestId;
     this.startDate = args.startDate;
     this.endDate = args.endDate;
