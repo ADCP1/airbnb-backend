@@ -14,6 +14,9 @@ interface IUserController {
     req: Request<RequestDtos.UpdateUserDto>,
   ): Promise<ResponseDtos.UserDto>;
   getProfile(req: Request): Promise<ResponseDtos.UserDto>;
+  getById(
+    req: Request<void, { userId: string }>,
+  ): Promise<ResponseDtos.UserDto>;
 }
 
 class UserController implements IUserController {
@@ -45,8 +48,12 @@ class UserController implements IUserController {
     return this.userService.partialUpdate(req.user.email, req.body);
   }
 
-  public async getProfile(req: Request) {
+  public async getProfile(req: Request): Promise<ResponseDtos.UserDto> {
     return this.userService.getProfile(req.user.email);
+  }
+
+  public async getById(req: Request<void, { userId: string }>) {
+    return this.userService.getById(req.params.userId);
   }
 }
 
