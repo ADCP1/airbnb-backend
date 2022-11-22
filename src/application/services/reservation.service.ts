@@ -32,7 +32,7 @@ interface IReservationService {
   createForExperience(
     reservationDto: RequestDtos.CreateExperienceReservationDto,
     guestEmail: string,
-  ): Promise<ResponseDtos.ExperienceReservationDto>;
+  ): Promise<ResponseDtos.ReservationDto>;
   getAvailability(
     propertyDto: RequestDtos.GetAvailabilityDto,
   ): Promise<ResponseDtos.AvailabilityDto>;
@@ -88,13 +88,13 @@ class ReservationService implements IReservationService {
       );
     }
     await this.reservationRepository.save(reservation);
-    return ReservationFactory.toDto(reservation);
+    return ReservationFactory.toDto(reservation, ReservableType.Property);
   }
 
   public async createForExperience(
     reservationDto: RequestDtos.CreateExperienceReservationDto,
     guestEmail: string,
-  ): Promise<ResponseDtos.ExperienceReservationDto> {
+  ): Promise<ResponseDtos.ReservationDto> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const experience = await this.getExperienceById(
       reservationDto.experienceId,
@@ -121,7 +121,7 @@ class ReservationService implements IReservationService {
       amountOfGuests: reservationDto.amountOfGuests ?? -1,
     });
     await this.reservationRepository.save(reservation);
-    return ReservationFactory.toDto(reservation);
+    return ReservationFactory.toDto(reservation, ReservableType.Experience);
   }
 
   public async getAvailability(
@@ -163,7 +163,9 @@ class ReservationService implements IReservationService {
         async (reservation) =>
           !(await reservableRepository.findById(reservation.reservableId)),
       )
-    ).map((reservation) => ReservationFactory.toDto(reservation));
+    ).map((reservation) =>
+      ReservationFactory.toDto(reservation, reservableType),
+    );
   }
 
   public async getHostReservations(
@@ -181,7 +183,7 @@ class ReservationService implements IReservationService {
       status,
     );
     return reservations.map((reservation) =>
-      ReservationFactory.toDto(reservation),
+      ReservationFactory.toDto(reservation, reservableType),
     );
   }
 

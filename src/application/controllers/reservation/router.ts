@@ -1,6 +1,6 @@
 import {
   CreateExperienceReservationDto,
-  CreatePropertyReservationDto as CreatePropertyReservationDto,
+  CreatePropertyReservationDto,
   GetAvailabilityDto,
 } from '@application/dtos/request';
 import { ReservableType } from '@domain/reservation';

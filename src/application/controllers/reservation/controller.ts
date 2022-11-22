@@ -9,7 +9,7 @@ interface IReservationController {
   ): Promise<ResponseDtos.ReservationDto>;
   createForExperience(
     req: Request<RequestDtos.CreateExperienceReservationDto>,
-  ): Promise<ResponseDtos.ExperienceReservationDto>;
+  ): Promise<ResponseDtos.ReservationDto>;
   getPropertyAvailability(
     req: Request<RequestDtos.GetAvailabilityDto>,
   ): Promise<ResponseDtos.AvailabilityDto>;
@@ -41,7 +41,7 @@ class ReservationController implements IReservationController {
 
   public async createForExperience(
     req: Request<RequestDtos.CreateExperienceReservationDto>,
-  ): Promise<ResponseDtos.ExperienceReservationDto> {
+  ): Promise<ResponseDtos.ReservationDto> {
     return this.reservationService.createForExperience(
       req.body,
       req.user.email,

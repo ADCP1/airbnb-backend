@@ -21,6 +21,7 @@ export type ExperienceDto = {
   accessibility: ExperienceAccessibility[];
   category: ExperienceCategory;
 };
+
 export type ExperiencesDto = {
   experiences: ExperienceDto[];
 };
