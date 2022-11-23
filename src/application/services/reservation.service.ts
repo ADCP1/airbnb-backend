@@ -1,11 +1,22 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
+import {
+  Experience,
+  ExperienceType,
+  IExperienceRepository,
+} from '@domain/experience';
 import { IPropertyRepository, Property } from '@domain/property';
-import { IReservationRepository, Reservation } from '@domain/reservation';
+import {
+  IReservationRepository,
+  ReservableType,
+  Reservation,
+} from '@domain/reservation';
 import { User } from '@domain/user';
+import { experienceRepository } from '@infra/experience';
 import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
 import {
   DomainException,
+  filterAsync,
   NotFoundException,
   UnauthorizedException,
 } from '@shared';
@@ -14,21 +25,31 @@ import { ReservationFactory } from './reservation.factory';
 import { IUserService, userService } from './user.service';
 
 interface IReservationService {
-  create(
-    propertyDto: RequestDtos.CreateReservationDto,
+  createForProperty(
+    reservationDto: RequestDtos.CreatePropertyReservationDto,
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto>;
-  getPropertyAvailability(
-    propertyDto: RequestDtos.GetPropertyAvailabilityDto,
-  ): Promise<ResponseDtos.PropertyAvailabilityDto>;
+  createForExperience(
+    reservationDto: RequestDtos.CreateExperienceReservationDto,
+    guestEmail: string,
+  ): Promise<ResponseDtos.ReservationDto>;
+  getAvailability(
+    propertyDto: RequestDtos.GetAvailabilityDto,
+  ): Promise<ResponseDtos.AvailabilityDto>;
   getGuestReservations(
     guestEmail: string,
     status: string[],
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]>;
   getHostReservations(
     hostEmail: string,
     status: string[],
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]>;
+  confirmHostReservation(
+    reservationId: string,
+    hostEmail: string,
+  ): Promise<void>;
   cancelGuestReservation(id: string, email: string): Promise<void>;
   cancelHostReservation(id: string, email: string): Promise<void>;
 }
@@ -36,20 +57,23 @@ interface IReservationService {
 class ReservationService implements IReservationService {
   private reservationRepository: IReservationRepository;
   private propertyRepository: IPropertyRepository;
+  private experienceRepository: IExperienceRepository;
   private userService: IUserService;
 
   constructor(
     reservationRepository: IReservationRepository,
     propertyRepository: IPropertyRepository,
+    experienceRepository: IExperienceRepository,
     userService: IUserService,
   ) {
     this.reservationRepository = reservationRepository;
     this.propertyRepository = propertyRepository;
+    this.experienceRepository = experienceRepository;
     this.userService = userService;
   }
 
-  public async create(
-    reservationDto: RequestDtos.CreateReservationDto,
+  public async createForProperty(
+    reservationDto: RequestDtos.CreatePropertyReservationDto,
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
@@ -59,21 +83,55 @@ class ReservationService implements IReservationService {
     });
     const property = await this.getPropertyById(reservationDto.propertyId);
     if (reservationDto.amountOfGuests > property.capacity) {
-      throw new DomainException(`Maximum capacity is ${property.capacity}`);
+      throw new DomainException(
+        `Maximum property capacity is ${property.capacity}`,
+      );
     }
     await this.reservationRepository.save(reservation);
-    return ReservationFactory.toDto(reservation);
+    return ReservationFactory.toDto(reservation, ReservableType.Property);
   }
 
-  public async getPropertyAvailability(
-    reservationDto: RequestDtos.GetPropertyAvailabilityDto,
-  ): Promise<ResponseDtos.PropertyAvailabilityDto> {
-    const reservations =
-      await this.reservationRepository.getPropertyReservations(
-        reservationDto.propertyId,
-        reservationDto.from,
-        reservationDto.to,
+  public async createForExperience(
+    reservationDto: RequestDtos.CreateExperienceReservationDto,
+    guestEmail: string,
+  ): Promise<ResponseDtos.ReservationDto> {
+    const guest = await this.getUserFromEmail(guestEmail, 'Guest');
+    const experience = await this.getExperienceById(
+      reservationDto.experienceId,
+    );
+    if (
+      experience.type == ExperienceType.InPlace &&
+      !reservationDto.amountOfGuests
+    ) {
+      throw new DomainException(
+        'amount_of_guests required for an in place experience',
       );
+    }
+    if (
+      experience.type == ExperienceType.InPlace &&
+      reservationDto.amountOfGuests! > experience.capacity
+    ) {
+      throw new DomainException(
+        `Maximum experience capacity is ${experience.capacity}`,
+      );
+    }
+    const reservation = new Reservation({
+      ...reservationDto,
+      guestId: guest.id!,
+      amountOfGuests: reservationDto.amountOfGuests ?? -1,
+    });
+    await this.reservationRepository.save(reservation);
+    return ReservationFactory.toDto(reservation, ReservableType.Experience);
+  }
+
+  public async getAvailability(
+    reservationDto: RequestDtos.GetAvailabilityDto,
+  ): Promise<ResponseDtos.AvailabilityDto> {
+    const reservations = await this.reservationRepository.getManyByReservableId(
+      reservationDto.reservableId,
+      reservationDto.from,
+      reservationDto.to,
+    );
     const availableDates = this.parseReservationsToAvailableDates(
       reservations,
       reservationDto.from,
@@ -87,30 +145,72 @@ class ReservationService implements IReservationService {
   public async getGuestReservations(
     guestEmail: string,
     status: string[],
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
     const reservations = await this.reservationRepository.getGuestReservations(
       guest.id!,
       status,
     );
-    return reservations.map((reservation) =>
-      ReservationFactory.toDto(reservation),
+    const reservableRepository =
+      reservableType === ReservableType.Property
+        ? this.reservationRepository
+        : this.experienceRepository;
+    // I'm ashamed of this code and the amount of queries it produces, but beggars cant be choosers
+    return (
+      await filterAsync(
+        reservations,
+        async (reservation) =>
+          !(await reservableRepository.findById(reservation.reservableId)),
+      )
+    ).map((reservation) =>
+      ReservationFactory.toDto(reservation, reservableType),
     );
   }
 
   public async getHostReservations(
     hostEmail: string,
     status: string[],
+    reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const host = await this.getUserFromEmail(hostEmail, 'Host');
-    const properties = await this.propertyRepository.findByOwnerId(host.id!);
-    const reservations =
-      await this.reservationRepository.getPropertiesReservations(
-        properties.map((property) => property.id!),
-        status,
-      );
+    const reservables =
+      reservableType === ReservableType.Property
+        ? await this.propertyRepository.findByOwnerId(host.id!)
+        : await this.experienceRepository.findByOwnerId(host.id!);
+    const reservations = await this.reservationRepository.getReservations(
+      reservables.map((reservable) => reservable.id!),
+      status,
+    );
     return reservations.map((reservation) =>
-      ReservationFactory.toDto(reservation),
+      ReservationFactory.toDto(reservation, reservableType),
+    );
+  }
+
+  public async confirmHostReservation(
+    reservationId: string,
+    hostEmail: string,
+  ): Promise<void> {
+    const reservation = await this.findById(reservationId);
+    const host = await this.getUserFromEmail(hostEmail, 'Host');
+    const reservable =
+      (await this.propertyRepository.findById(reservation.reservableId)) ??
+      (await this.experienceRepository.findById(reservation.reservableId));
+    if (!reservable) {
+      throw new NotFoundException(
+        'Failed to find a property or experience for the given reservation',
+      );
+    }
+    if (reservable.ownerId !== host.id) {
+      throw new UnauthorizedException(
+        'You are not the owner of the reservation reservable',
+      );
+    }
+    await this.reservationRepository.confirm(reservation.id!);
+    await this.reservationRepository.cancelPendingReservationsInBetweenDates(
+      reservation.reservableId,
+      reservation.startDate,
+      reservation.endDate,
     );
   }
 
@@ -131,8 +231,15 @@ class ReservationService implements IReservationService {
   public async cancelHostReservation(id: string, email: string): Promise<void> {
     const reservation = await this.findById(id);
     const host = await this.getUserFromEmail(email, 'Host');
-    const property = await this.getPropertyById(reservation.propertyId);
-    if (property.ownerId !== host.id) {
+    const reservable =
+      (await this.propertyRepository.findById(id)) ??
+      (await this.experienceRepository.findById(id));
+    if (!reservable) {
+      throw new NotFoundException(
+        'Failed to find a property or experience for the given reservation',
+      );
+    }
+    if (reservable.ownerId !== host.id) {
       throw new UnauthorizedException(
         'You are not allowed to cancel this reservation',
       );
@@ -188,9 +295,19 @@ class ReservationService implements IReservationService {
   private async getPropertyById(id: string): Promise<Property> {
     const property = await this.propertyRepository.findById(id);
     if (!property) {
-      throw new NotFoundException('The reservation property does not exist');
+      throw new NotFoundException('The property to be reserved does not exist');
     }
     return property;
+  }
+
+  private async getExperienceById(id: string): Promise<Experience> {
+    const experience = await this.experienceRepository.findById(id);
+    if (!experience) {
+      throw new NotFoundException(
+        'The experience to be reserved does not exist',
+      );
+    }
+    return experience;
   }
 
   private async findById(id: string): Promise<Reservation> {
@@ -205,6 +322,7 @@ class ReservationService implements IReservationService {
 const reservationService: IReservationService = new ReservationService(
   reservationRepository,
   propertyRepository,
+  experienceRepository,
   userService,
 );
 

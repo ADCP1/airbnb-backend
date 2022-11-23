@@ -37,5 +37,9 @@ export function ExperienceRouter() {
       experienceController.get(req),
     ),
   );
+  router.get(
+    '/preview',
+    registerHandler(() => experienceController.getPreview()),
+  );
   return router;
 }

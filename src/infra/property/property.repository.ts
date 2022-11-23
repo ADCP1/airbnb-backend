@@ -120,7 +120,7 @@ class PropertyRepository implements IPropertyRepository {
       });
 
       unavailableDates.map(function (item) {
-        const objectId = new mongoose.Types.ObjectId(item.propertyId);
+        const objectId = new mongoose.Types.ObjectId(item.reservableId);
         unavailableProperties.push(objectId);
       });
       availableProperties = await PropertyDoc.find({

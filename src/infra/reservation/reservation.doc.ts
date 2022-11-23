@@ -5,7 +5,8 @@ import {
 import mongoose from 'mongoose';
 
 const reservationSchema = new mongoose.Schema({
-  propertyId: {
+  // Can reference either a property or an experience
+  reservableId: {
     type: String,
     required: true,
   },

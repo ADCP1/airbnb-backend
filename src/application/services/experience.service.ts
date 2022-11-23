@@ -1,8 +1,16 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
-import { Experience, IExperienceRepository } from '@domain/experience';
+import {
+  Experience,
+  ExperienceType,
+  IExperienceRepository,
+} from '@domain/experience';
 import { User } from '@domain/user';
 import { experienceRepository } from '@infra/experience';
-import { DomainException, NotFoundException } from '@shared';
+import {
+  BadRequestException,
+  DomainException,
+  NotFoundException,
+} from '@shared';
 
 import { ExperienceFactory } from './experience.factory';
 import { IUserService, userService } from './user.service';
@@ -19,6 +27,7 @@ interface IExperienceService {
   ): Promise<ResponseDtos.ExperienceDto>;
   getById(experienceId: string): Promise<ResponseDtos.ExperienceDto>;
   getMyExperiences(ownerEmail: string): Promise<ResponseDtos.ExperiencesDto>;
+  getPreview(): Promise<ResponseDtos.ExperienceDto[]>;
 }
 
 class ExperienceService implements IExperienceService {
@@ -37,10 +46,19 @@ class ExperienceService implements IExperienceService {
     experienceDto: RequestDtos.CreateExperienceDto,
     guestEmail: string,
   ): Promise<ResponseDtos.ExperienceDto> {
+    if (
+      experienceDto.type == ExperienceType.InPlace &&
+      !experienceDto.capacity
+    ) {
+      throw new BadRequestException(
+        'capacity is required for and in place experience',
+      );
+    }
     const organizer = await this.getUserFromEmail(guestEmail);
     const experience = new Experience({
       ...experienceDto,
-      organizerId: organizer.id!,
+      ownerId: organizer.id!,
+      capacity: experienceDto.capacity ?? -1,
     });
     await this.experienceRepository.save(experience);
     return ExperienceFactory.toDto(experience);
@@ -53,8 +71,11 @@ class ExperienceService implements IExperienceService {
   ): Promise<ResponseDtos.ExperienceDto> {
     const organizer = await this.getUserFromEmail(guestEmail);
     const experience = await this.getExperienceFromId(experienceId);
-    if (organizer.id !== experience.organizerId) {
+    if (organizer.id !== experience.ownerId) {
       throw new DomainException('Experience does not belong to the user');
+    }
+    if (experience.type == ExperienceType.Online) {
+      experienceDto.capacity = -1;
     }
     const updatedExperience = new Experience({
       ...experience,
@@ -88,6 +109,14 @@ class ExperienceService implements IExperienceService {
         ExperienceFactory.toDto(experience),
       ),
     };
+  }
+
+  public async getPreview(): Promise<ResponseDtos.ExperienceDto[]> {
+    const maxPreviewExperienceAmount = 20;
+    const experiences = await this.experienceRepository.findMany(
+      maxPreviewExperienceAmount,
+    );
+    return experiences.map((experience) => ExperienceFactory.toDto(experience));
   }
 
   private async getOwnerFromEmail(email: string): Promise<User> {

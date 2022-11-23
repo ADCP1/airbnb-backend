@@ -12,7 +12,8 @@ interface IExperienceController {
   get(
     req: Request<void, { experienceId: string }>,
   ): Promise<ResponseDtos.ExperienceDto>;
-  getUserExperiences(req: Request<void>): Promise<ResponseDtos.ExperiencesDto>; // TODO return array of properties
+  getUserExperiences(req: Request<void>): Promise<ResponseDtos.ExperiencesDto>;
+  getPreview(): Promise<ResponseDtos.ExperienceDto[]>;
 }
 
 class ExperienceController implements IExperienceController {
@@ -48,6 +49,10 @@ class ExperienceController implements IExperienceController {
     req: Request<void>,
   ): Promise<ResponseDtos.ExperiencesDto> {
     return this.experienceService.getMyExperiences(req.user.email);
+  }
+
+  public async getPreview(): Promise<ResponseDtos.ExperienceDto[]> {
+    return this.experienceService.getPreview();
   }
 }
 

@@ -1,8 +1,13 @@
-import { PaymentType, ReservationStatus } from '@domain/reservation';
+import {
+  PaymentType,
+  ReservableType,
+  ReservationStatus,
+} from '@domain/reservation';
 
 export type ReservationDto = {
   id: string;
-  propertyId: string;
+  reservableId: string;
+  reservableType: ReservableType;
   guestId: string;
   startDate: Date;
   endDate: Date;

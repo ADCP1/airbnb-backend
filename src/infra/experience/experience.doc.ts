@@ -7,7 +7,7 @@ import {
 import mongoose from 'mongoose';
 
 const experienceSchema = new mongoose.Schema({
-  organizerId: {
+  ownerId: {
     type: String,
     required: true,
   },

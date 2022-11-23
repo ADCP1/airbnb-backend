@@ -1,7 +1,6 @@
 import { getPropertyAmenityValues, PropertyAmenity } from '@domain/property';
 import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsBoolean,
   IsIn,
   IsNotEmpty,
