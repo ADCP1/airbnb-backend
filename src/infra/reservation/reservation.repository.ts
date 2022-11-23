@@ -7,6 +7,7 @@ import { ReservationDoc } from './reservation.doc';
 
 class ReservationRepository implements IReservationRepository {
   public async save(reservation: Reservation) {
+    console.log('EN SAVE', reservation);
     await this.validatePropertyAvailability(reservation);
     loadObjectIdentification(reservation);
     await ReservationDoc.updateOne(
@@ -48,10 +49,12 @@ class ReservationRepository implements IReservationRepository {
   public async getGuestReservations(
     guestId: string,
     status: string[],
+    type: string,
   ): Promise<Reservation[]> {
     const reservations = await ReservationDoc.find({
       guestId,
       status: { $in: status },
+      reservableType: { $eq: type },
     }).lean();
     return reservations.map(
       (reservation) =>

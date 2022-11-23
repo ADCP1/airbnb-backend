@@ -12,6 +12,7 @@ export type ReservationArgs = {
   status: ReservationStatus;
   amountOfGuests: number;
   paymentType: PaymentType;
+  reservableType?: string;
 };
 
 export class Reservation extends Entity {
@@ -22,6 +23,7 @@ export class Reservation extends Entity {
   public status: ReservationStatus;
   public amountOfGuests: number;
   public paymentType: PaymentType;
+  public reservableType: string | undefined;
 
   constructor(args: ReservationArgs) {
     super(args.id);
@@ -32,5 +34,6 @@ export class Reservation extends Entity {
     this.status = args.status;
     this.amountOfGuests = args.amountOfGuests;
     this.paymentType = args.paymentType;
+    this.reservableType = args.reservableType;
   }
 }

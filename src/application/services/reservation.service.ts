@@ -87,6 +87,7 @@ class ReservationService implements IReservationService {
       ...reservationDto,
       guestId: guest.id!,
       reservableId: property.id,
+      reservableType: ReservableType.Property,
     });
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation, ReservableType.Property);
@@ -122,6 +123,7 @@ class ReservationService implements IReservationService {
       guestId: guest.id!,
       amountOfGuests: reservationDto.amountOfGuests ?? -1,
       reservableId: experience.id,
+      reservableType: ReservableType.Experience,
     });
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation, ReservableType.Experience);
@@ -151,22 +153,25 @@ class ReservationService implements IReservationService {
     reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
-    const reservations = await this.reservationRepository.getGuestReservations(
-      guest.id!,
-      status,
-    );
     const reservableRepository =
       reservableType === ReservableType.Property
         ? this.reservationRepository
         : this.experienceRepository;
+
+    const reservations = await this.reservationRepository.getGuestReservations(
+      guest.id!,
+      status,
+      reservableType,
+    );
+
     // I'm ashamed of this code and the amount of queries it produces, but beggars cant be choosers
     return (
       await filterAsync(
         reservations,
-        async (reservation) =>
+        async (reservation: any) =>
           !(await reservableRepository.findById(reservation.reservableId)),
       )
-    ).map((reservation) =>
+    ).map((reservation: any) =>
       ReservationFactory.toDto(reservation, reservableType),
     );
   }

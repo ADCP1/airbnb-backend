@@ -36,6 +36,10 @@ const reservationSchema = new mongoose.Schema({
     enum: getPaymentTypeValues(),
     required: true,
   },
+  reservableType: {
+    type: String,
+    required: true,
+  },
 });
 
 export const ReservationDoc = mongoose.model('Reservation', reservationSchema);
