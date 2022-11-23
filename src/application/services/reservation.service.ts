@@ -186,9 +186,11 @@ class ReservationService implements IReservationService {
       reservableType === ReservableType.Property
         ? await this.propertyRepository.findByOwnerId(host.id!)
         : await this.experienceRepository.findByOwnerId(host.id!);
+
     const reservations = await this.reservationRepository.getReservations(
       reservables.map((reservable) => reservable.id!),
       status,
+      reservableType,
     );
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation, reservableType),

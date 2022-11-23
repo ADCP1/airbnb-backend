@@ -16,6 +16,7 @@ export interface IReservationRepository {
   getReservations(
     reservableIds: string[],
     status: string[],
+    type: string,
   ): Promise<Reservation[]>;
   confirm(id: string): Promise<void>;
   cancel(id: string): Promise<void>;
