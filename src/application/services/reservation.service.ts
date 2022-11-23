@@ -77,16 +77,17 @@ class ReservationService implements IReservationService {
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
-    const reservation = new Reservation({
-      ...reservationDto,
-      guestId: guest.id!,
-    });
     const property = await this.getPropertyById(reservationDto.propertyId);
     if (reservationDto.amountOfGuests > property.capacity) {
       throw new DomainException(
         `Maximum property capacity is ${property.capacity}`,
       );
     }
+    const reservation = new Reservation({
+      ...reservationDto,
+      guestId: guest.id!,
+      reservableId: property.id,
+    });
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation, ReservableType.Property);
   }
@@ -115,10 +116,12 @@ class ReservationService implements IReservationService {
         `Maximum experience capacity is ${experience.capacity}`,
       );
     }
+
     const reservation = new Reservation({
       ...reservationDto,
       guestId: guest.id!,
       amountOfGuests: reservationDto.amountOfGuests ?? -1,
+      reservableId: experience.id,
     });
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation, ReservableType.Experience);
