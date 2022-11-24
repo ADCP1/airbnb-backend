@@ -32,14 +32,14 @@ export function ExperienceRouter() {
     registerHandler((req) => experienceController.getUserExperiences(req)),
   );
   router.get(
+    '/preview',
+    registerHandler(() => experienceController.getPreview()),
+  );
+  router.get(
     '/:experienceId',
     registerHandler((req: Request<void, { experienceId: string }>) =>
       experienceController.get(req),
     ),
-  );
-  router.get(
-    '/preview',
-    registerHandler(() => experienceController.getPreview()),
   );
   return router;
 }
