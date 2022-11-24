@@ -236,8 +236,8 @@ class ReservationService implements IReservationService {
     const reservation = await this.findById(id);
     const host = await this.getUserFromEmail(email, 'Host');
     const reservable =
-      (await this.propertyRepository.findById(id)) ??
-      (await this.experienceRepository.findById(id));
+      (await this.propertyRepository.findById(reservation.reservableId)) ??
+      (await this.experienceRepository.findById(reservation.reservableId));
     if (!reservable) {
       throw new NotFoundException(
         'Failed to find a property or experience for the given reservation',
