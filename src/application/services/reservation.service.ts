@@ -9,6 +9,7 @@ import {
   IReservationRepository,
   ReservableType,
   Reservation,
+  ReservationStatus,
 } from '@domain/reservation';
 import { User } from '@domain/user';
 import { experienceRepository } from '@infra/experience';
@@ -196,6 +197,11 @@ class ReservationService implements IReservationService {
     hostEmail: string,
   ): Promise<void> {
     const reservation = await this.findById(reservationId);
+    if (reservation.status !== ReservationStatus.Pending) {
+      throw new DomainException(
+        `Cannot confirm a reservation with status ${reservation.status}`,
+      );
+    }
     const host = await this.getUserFromEmail(hostEmail, 'Host');
     const reservable =
       (await this.propertyRepository.findById(reservation.reservableId)) ??
