@@ -165,13 +165,7 @@ class ReservationService implements IReservationService {
     );
 
     // I'm ashamed of this code and the amount of queries it produces, but beggars cant be choosers
-    return (
-      await filterAsync(
-        reservations,
-        async (reservation: any) =>
-          !(await reservableRepository.findById(reservation.reservableId)),
-      )
-    ).map((reservation: any) =>
+    return reservations.map((reservation: any) =>
       ReservationFactory.toDto(reservation, reservableType),
     );
   }

@@ -27,14 +27,11 @@ export class CreateExperienceReservationDto {
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
-  @Validate(IsAfterNowConstraint)
   public startDate: Date;
 
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
-  @Validate(IsAfterNowConstraint)
-  @Validate(IsAfterDateArgConstraint, ['startDate'])
   public endDate: Date;
 
   @IsOptional()
