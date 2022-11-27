@@ -27,6 +27,14 @@ export function ExperienceRouter() {
     registerHandler((req) => experienceController.partialUpdate(req)),
   );
   router.get(
+    '/',
+    validateJWT,
+    registerHandler((req: Request<void, any, { searchText: string }>) =>
+      experienceController.search(req),
+    ),
+  );
+
+  router.get(
     '/owned',
     validateJWT,
     registerHandler((req) => experienceController.getUserExperiences(req)),
