@@ -1,7 +1,7 @@
 export enum ResourceType {
   Property = 'property',
   Experience = 'experience',
-  Owner = 'owner',
+  Host = 'host',
   Guest = 'guest',
 }
 

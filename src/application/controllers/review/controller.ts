@@ -6,6 +6,10 @@ interface IReviewController {
   create(
     req: Request<RequestDtos.CreateReviewDto>,
   ): Promise<ResponseDtos.ReviewDto>;
+  getPropertyReviews(req: Request): Promise<ResponseDtos.ReviewsDto>;
+  getExperienceReviews(req: Request): Promise<ResponseDtos.ReviewsDto>;
+  getHostReviews(req: Request): Promise<ResponseDtos.ReviewsDto>;
+  getGuestReviews(req: Request): Promise<ResponseDtos.ReviewsDto>;
 }
 
 class ReviewController implements IReviewController {
@@ -21,29 +25,25 @@ class ReviewController implements IReviewController {
     return this.reviewService.create(req.body, req.user.email);
   }
 
-  // public async getGuestReviews(
-  //   req: Request,
-  //   reservableType: ReservableType,
-  // ): Promise<ResponseDtos.ReviewDto[]> {
-  //   const status = getReviewStatusIn(req.query.status as string);
-  //   return this.reviewService.getGuestReviews(
-  //     req.user.email,
-  //     status,
-  //     reservableType,
-  //   );
-  // }
+  public async getPropertyReviews(
+    req: Request,
+  ): Promise<ResponseDtos.ReviewsDto> {
+    return this.reviewService.getPropertyReviews(req.params.propertyId);
+  }
 
-  // public async getHostReviews(
-  //   req: Request,
-  //   reservableType: ReservableType,
-  // ): Promise<ResponseDtos.ReviewDto[]> {
-  //   const status = getReviewStatusIn(req.query.status as string);
-  //   return this.reviewService.getHostReviews(
-  //     req.user.email,
-  //     status,
-  //     reservableType,
-  //   );
-  // }
+  public async getExperienceReviews(
+    req: Request,
+  ): Promise<ResponseDtos.ReviewsDto> {
+    return this.reviewService.getExperienceReviews(req.params.experienceId);
+  }
+
+  public async getHostReviews(req: Request): Promise<ResponseDtos.ReviewsDto> {
+    return this.reviewService.getHostReviews(req.params.hostId);
+  }
+
+  public async getGuestReviews(req: Request): Promise<ResponseDtos.ReviewsDto> {
+    return this.reviewService.getGuestReviews(req.params.guestId);
+  }
 }
 
 const reviewController: IReviewController = new ReviewController(reviewService);

@@ -11,5 +11,5 @@ export type ReviewDto = {
 };
 
 export type ReviewsDto = {
-  properties: ReviewDto[];
+  reviews: ReviewDto[];
 };
