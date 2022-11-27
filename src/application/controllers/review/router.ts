@@ -20,17 +20,17 @@ export function ReviewRouter() {
   );
 
   router.get(
-    'experience/:experienceId',
+    '/experience/:experienceId',
     registerHandler((req) => reviewController.getExperienceReviews(req)),
   );
 
   router.get(
-    'host/:hostId',
+    '/host/:hostId',
     registerHandler((req) => reviewController.getHostReviews(req)),
   );
 
   router.get(
-    'guest/:guestId',
+    '/guest/:guestId',
     registerHandler((req) => reviewController.getGuestReviews(req)),
   );
 
