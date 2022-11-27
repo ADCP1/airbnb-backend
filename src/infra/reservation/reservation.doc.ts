@@ -5,7 +5,8 @@ import {
 import mongoose from 'mongoose';
 
 const reservationSchema = new mongoose.Schema({
-  propertyId: {
+  // Can reference either a property or an experience
+  reservableId: {
     type: String,
     required: true,
   },
@@ -33,6 +34,10 @@ const reservationSchema = new mongoose.Schema({
   paymentType: {
     type: String,
     enum: getPaymentTypeValues(),
+    required: true,
+  },
+  reservableType: {
+    type: String,
     required: true,
   },
 });

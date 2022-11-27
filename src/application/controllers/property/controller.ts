@@ -16,7 +16,7 @@ interface IPropertyController {
   search(
     req: Request<void, any, { searchText: string }>,
   ): Promise<ResponseDtos.PropertyDto[]>;
-  getPreview(req: Request): Promise<ResponseDtos.PropertyDto[]>;
+  getPreview(): Promise<ResponseDtos.PropertyDto[]>;
   delete(req: Request<void, { propertyId: string }>): Promise<void>;
 }
 

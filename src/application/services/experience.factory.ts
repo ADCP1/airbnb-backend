@@ -5,7 +5,7 @@ export class ExperienceFactory {
   public static toDto(experience: Experience): ResponseDtos.ExperienceDto {
     return {
       id: experience.id!,
-      organizerId: experience.organizerId,
+      ownerId: experience.ownerId,
       title: experience.title,
       description: experience.description,
       type: experience.type,

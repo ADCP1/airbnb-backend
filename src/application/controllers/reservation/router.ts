@@ -1,7 +1,9 @@
 import {
-  CreateReservationDto,
-  GetPropertyAvailabilityDto,
+  CreateExperienceReservationDto,
+  CreatePropertyReservationDto,
+  GetAvailabilityDto,
 } from '@application/dtos/request';
+import { ReservableType } from '@domain/reservation';
 import { registerHandler, Request, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -11,37 +13,82 @@ import { reservationController } from './controller';
 export function ReservationRouter() {
   const router = Router();
   router.post(
-    '/',
+    '/property',
     validateJWT,
-    validateDto(CreateReservationDto),
+    validateDto(CreatePropertyReservationDto),
     registerHandler(
-      (req) => reservationController.create(req),
+      (req) => reservationController.createForProperty(req),
       StatusCodes.CREATED,
     ),
   );
   router.post(
-    '/property-availability',
+    '/experience',
     validateJWT,
-    validateDto(GetPropertyAvailabilityDto),
+    validateDto(CreateExperienceReservationDto),
+    registerHandler(
+      (req) => reservationController.createForExperience(req),
+      StatusCodes.CREATED,
+    ),
+  );
+  router.post(
+    '/availability',
+    validateJWT,
+    validateDto(GetAvailabilityDto),
     registerHandler(
       (req) => reservationController.getPropertyAvailability(req),
       StatusCodes.OK,
     ),
   );
   router.get(
-    '/own/guest',
+    '/own/guest/property',
     validateJWT,
     registerHandler(
-      (req) => reservationController.getGuestReservations(req),
+      (req) =>
+        reservationController.getGuestReservations(
+          req,
+          ReservableType.Property,
+        ),
       StatusCodes.OK,
     ),
   );
   router.get(
-    '/own/host',
+    '/own/guest/experience',
+    validateJWT,
+    registerHandler(
+      (req) =>
+        reservationController.getGuestReservations(
+          req,
+          ReservableType.Experience,
+        ),
+      StatusCodes.OK,
+    ),
+  );
+  router.get(
+    '/own/host/property',
     validateJWT,
     registerHandler(
       (req: Request<void, any, { status: string }>) =>
-        reservationController.getHostReservations(req),
+        reservationController.getHostReservations(req, ReservableType.Property),
+      StatusCodes.OK,
+    ),
+  );
+  router.get(
+    '/own/host/experience',
+    validateJWT,
+    registerHandler(
+      (req: Request<void, any, { status: string }>) =>
+        reservationController.getHostReservations(
+          req,
+          ReservableType.Experience,
+        ),
+      StatusCodes.OK,
+    ),
+  );
+  router.post(
+    '/own/host/:id/confirm',
+    validateJWT,
+    registerHandler(
+      (req) => reservationController.confirmHostReservation(req),
       StatusCodes.OK,
     ),
   );

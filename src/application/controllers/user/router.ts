@@ -4,6 +4,7 @@ import {
   UpdateUserDto,
 } from '@application/dtos/request';
 import { registerHandler, validateDto, validateJWT } from '@shared';
+import { Request } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -38,6 +39,11 @@ export function UserRouter() {
     validateJWT,
     registerHandler((req) => userController.getProfile(req)),
   );
-
+  router.get(
+    '/:userId',
+    registerHandler((req: Request<void, { userId: string }>) =>
+      userController.getById(req),
+    ),
+  );
   return router;
 }
