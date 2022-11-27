@@ -6,4 +6,6 @@ export interface IReviewRepository {
     resourceId: string,
     resourceType: string,
   ): Promise<Review[]>;
+  getById(reviewId: string): Promise<Review | null>;
+  delete(reviewId: string): Promise<void>;
 }

@@ -34,5 +34,20 @@ export function ReviewRouter() {
     registerHandler((req) => reviewController.getGuestReviews(req)),
   );
 
+  router.patch(
+    '/:reviewId',
+    validateJWT,
+    registerHandler((req) => reviewController.partialUpdate(req)),
+  );
+
+  router.delete(
+    '/:reviewId',
+    validateJWT,
+    registerHandler(
+      (req) => reviewController.delete(req),
+      StatusCodes.NO_CONTENT,
+    ),
+  );
+
   return router;
 }

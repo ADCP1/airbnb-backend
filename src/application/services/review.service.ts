@@ -18,6 +18,12 @@ interface IReviewService {
   getExperienceReviews(experienceId: string): Promise<ResponseDtos.ReviewsDto>;
   getHostReviews(hostId: string): Promise<ResponseDtos.ReviewsDto>;
   getGuestReviews(guestId: string): Promise<ResponseDtos.ReviewsDto>;
+  partialUpdate(
+    reviewId: string,
+    reviewDto: RequestDtos.UpdateReviewDto,
+    ownerEmail: string,
+  ): Promise<ResponseDtos.ReviewDto>;
+  delete(reviewId: string, ownerEmail: string): Promise<void>;
 }
 
 class ReviewService implements IReviewService {
@@ -43,7 +49,6 @@ class ReviewService implements IReviewService {
     reviewerEmail: string,
   ): Promise<ResponseDtos.ReviewDto> {
     const reviewer = await this.getReviewerFromEmail(reviewerEmail);
-    // validate that resource exists
     await this.validateResourceExistence(
       reviewDto.resourceId,
       reviewDto.resourceType,
@@ -103,6 +108,44 @@ class ReviewService implements IReviewService {
     return {
       reviews: reviews.map((review) => ReviewFactory.toDto(review)),
     };
+  }
+
+  public async partialUpdate(
+    reviewId: string,
+    reviewDto: RequestDtos.UpdateReviewDto,
+    ownerEmail: string,
+  ): Promise<ResponseDtos.ReviewDto> {
+    const owner = await this.getReviewerFromEmail(ownerEmail);
+    const review = await this.getReviewById(reviewId);
+    this.validateReviewOwnership(review, owner);
+    const updatedReview = new Review({
+      ...review,
+      ...reviewDto,
+      updatedAt: new Date(),
+    });
+    await this.reviewRepository.save(updatedReview);
+    return ReviewFactory.toDto(updatedReview);
+  }
+
+  public async delete(reviewId: string, ownerEmail: string): Promise<void> {
+    const owner = await this.getReviewerFromEmail(ownerEmail);
+    const review = await this.getReviewById(reviewId);
+    this.validateReviewOwnership(review, owner);
+    await this.reviewRepository.delete(reviewId);
+  }
+
+  private validateReviewOwnership(review: Review, user: User): void {
+    if (review.reviewerId !== user.id) {
+      throw new Error('You are not allowed to update this review');
+    }
+  }
+
+  private async getReviewById(reviewId: string): Promise<Review> {
+    const review = await this.reviewRepository.getById(reviewId);
+    if (!review) {
+      throw new NotFoundException('Review not found');
+    }
+    return review;
   }
 
   private async getReviewerFromEmail(email: string): Promise<User> {

@@ -26,6 +26,18 @@ class ReviewRepository implements IReviewRepository {
     });
     return reviews.map((review) => ReviewFactory.fromReviewDoc(review));
   }
+
+  public async getById(reviewId: string): Promise<Review | null> {
+    const review = await ReviewDoc.findOne({ _id: reviewId });
+    if (!review) {
+      return null;
+    }
+    return ReviewFactory.fromReviewDoc(review);
+  }
+
+  public async delete(reviewId: string): Promise<void> {
+    await ReviewDoc.deleteOne({ _id: reviewId });
+  }
 }
 
 export const reviewRepository: IReviewRepository = new ReviewRepository();

@@ -10,6 +10,8 @@ interface IReviewController {
   getExperienceReviews(req: Request): Promise<ResponseDtos.ReviewsDto>;
   getHostReviews(req: Request): Promise<ResponseDtos.ReviewsDto>;
   getGuestReviews(req: Request): Promise<ResponseDtos.ReviewsDto>;
+  partialUpdate(req: Request): Promise<ResponseDtos.ReviewDto>;
+  delete(req: Request): Promise<void>;
 }
 
 class ReviewController implements IReviewController {
@@ -43,6 +45,18 @@ class ReviewController implements IReviewController {
 
   public async getGuestReviews(req: Request): Promise<ResponseDtos.ReviewsDto> {
     return this.reviewService.getGuestReviews(req.params.guestId);
+  }
+
+  public async partialUpdate(req: Request): Promise<ResponseDtos.ReviewDto> {
+    return this.reviewService.partialUpdate(
+      req.params.reviewId,
+      req.body,
+      req.user.email,
+    );
+  }
+
+  public async delete(req: Request): Promise<void> {
+    return this.reviewService.delete(req.params.reviewId, req.user.email);
   }
 }
 
