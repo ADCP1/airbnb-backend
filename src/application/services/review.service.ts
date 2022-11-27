@@ -2,8 +2,10 @@ import { RequestDtos, ResponseDtos } from '@application/dtos';
 import { IReviewRepository, ResourceType, Review } from '@domain/review';
 import { User } from '@domain/user';
 import { reviewRepository } from '@infra/review';
-import { DomainException, NotFoundException } from '@shared';
+import { NotFoundException } from '@shared';
 
+import { experienceService, IExperienceService } from './experience.service';
+import { IPropertyService, propertyService } from './property.service';
 import { ReviewFactory } from './review.factory';
 import { IUserService, userService } from './user.service';
 
@@ -21,10 +23,19 @@ interface IReviewService {
 class ReviewService implements IReviewService {
   private reviewRepository: IReviewRepository;
   private userService: IUserService;
+  private propertyService: IPropertyService;
+  private experienceService: IExperienceService;
 
-  constructor(reviewRepository: IReviewRepository, userService: IUserService) {
+  constructor(
+    reviewRepository: IReviewRepository,
+    userService: IUserService,
+    propertyService: IPropertyService,
+    experienceService: IExperienceService,
+  ) {
     this.reviewRepository = reviewRepository;
     this.userService = userService;
+    this.propertyService = propertyService;
+    this.experienceService = experienceService;
   }
 
   public async create(
@@ -33,6 +44,10 @@ class ReviewService implements IReviewService {
   ): Promise<ResponseDtos.ReviewDto> {
     const reviewer = await this.getReviewerFromEmail(reviewerEmail);
     // validate that resource exists
+    await this.validateResourceExistence(
+      reviewDto.resourceId,
+      reviewDto.resourceType,
+    );
     const review = new Review({
       ...reviewDto,
       updatedAt: new Date(),
@@ -97,11 +112,29 @@ class ReviewService implements IReviewService {
     }
     return reviewer;
   }
+
+  private async validateResourceExistence(
+    resourceId: string,
+    resourceType: ResourceType,
+  ): Promise<void> {
+    switch (resourceType) {
+      case ResourceType.Property:
+        await this.propertyService.getById(resourceId);
+        break;
+      case ResourceType.Experience:
+        await this.experienceService.getById(resourceId);
+        break;
+      default:
+        await this.userService.getById(resourceId);
+    }
+  }
 }
 
 const reviewService: IReviewService = new ReviewService(
   reviewRepository,
   userService,
+  propertyService,
+  experienceService,
 );
 
 export { IReviewService, reviewService };

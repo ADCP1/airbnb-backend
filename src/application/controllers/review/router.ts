@@ -1,5 +1,5 @@
 import { CreateReviewDto } from '@application/dtos/request';
-import { registerHandler, Request, validateDto, validateJWT } from '@shared';
+import { registerHandler, validateDto, validateJWT } from '@shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
