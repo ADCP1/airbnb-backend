@@ -26,6 +26,7 @@ interface IExperienceService {
     hostEmail: string,
   ): Promise<ResponseDtos.ExperienceDto>;
   getById(experienceId: string): Promise<ResponseDtos.ExperienceDto>;
+  search(filters: any): Promise<ResponseDtos.ExperienceDto[]>;
   getMyExperiences(ownerEmail: string): Promise<ResponseDtos.ExperiencesDto>;
   getPreview(): Promise<ResponseDtos.ExperienceDto[]>;
 }
@@ -93,6 +94,13 @@ class ExperienceService implements IExperienceService {
       throw new NotFoundException('Experience not found');
     }
     return ExperienceFactory.toDto(experience);
+  }
+
+  public async search(filters: any): Promise<ResponseDtos.ExperienceDto[]> {
+    const experiences = await this.experienceRepository.searchByFilters(
+      filters,
+    );
+    return experiences.map((experience) => ExperienceFactory.toDto(experience));
   }
 
   public async getMyExperiences(
