@@ -58,7 +58,7 @@ class ExperienceService implements IExperienceService {
     const experience = new Experience({
       ...experienceDto,
       ownerId: organizer.id!,
-      capacity: experienceDto.capacity ?? -1,
+      capacity: experienceDto.capacity ?? 0,
     });
     await this.experienceRepository.save(experience);
     return ExperienceFactory.toDto(experience);
@@ -75,7 +75,7 @@ class ExperienceService implements IExperienceService {
       throw new DomainException('Experience does not belong to the user');
     }
     if (experience.type == ExperienceType.Online) {
-      experienceDto.capacity = -1;
+      experienceDto.capacity = 0;
     }
     const updatedExperience = new Experience({
       ...experience,
