@@ -159,6 +159,10 @@ class ReservationRepository implements IReservationRepository {
         {
           endDate: { $gt: startDate, $lte: endDate },
         },
+        {
+          startDate: { $lte: startDate },
+          endDate: { $gt: startDate },
+        },
       ],
     }).lean();
     if (!reservations) return null;
