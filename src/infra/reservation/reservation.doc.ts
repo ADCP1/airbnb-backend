@@ -1,5 +1,6 @@
 import {
   getPaymentTypeValues,
+  getReservableTypeValues,
   getReservationStatusValues,
 } from '@domain/reservation';
 import mongoose from 'mongoose';
@@ -38,6 +39,7 @@ const reservationSchema = new mongoose.Schema({
   },
   reservableType: {
     type: String,
+    enum: getReservableTypeValues(),
     required: true,
   },
 });

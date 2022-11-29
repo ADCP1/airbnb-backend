@@ -43,7 +43,7 @@ interface IReservationService {
   ): Promise<ResponseDtos.ReservationDto[]>;
   getHostReservations(
     hostEmail: string,
-    status: string[],
+    status: ReservationStatus[],
     reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]>;
   confirmHostReservation(
@@ -85,6 +85,7 @@ class ReservationService implements IReservationService {
     }
     const reservation = new Reservation({
       ...reservationDto,
+      status: ReservationStatus.Pending,
       guestId: guest.id!,
       reservableId: property.id,
       reservableType: ReservableType.Property,
@@ -110,21 +111,10 @@ class ReservationService implements IReservationService {
         'amount_of_guests required for an in place experience',
       );
     }
-    const totalAmountOfGuestsReserved =
-      await this.reservationRepository.getTotalGuestAmountForReservationWithReservableId(
-        reservationDto.experienceId,
-      );
-    const remainingExperienceCapacity =
-      experience.capacity - totalAmountOfGuestsReserved;
-    if (
-      experience.type == ExperienceType.InPlace &&
-      reservationDto.amountOfGuests! > remainingExperienceCapacity
-    ) {
-      throw new DomainException(`No more capacity left for this experience`);
-    }
 
     const reservation = new Reservation({
       ...reservationDto,
+      status: ReservationStatus.Pending,
       guestId: guest.id!,
       amountOfGuests: reservationDto.amountOfGuests ?? -1,
       reservableId: experience.id,
@@ -172,7 +162,7 @@ class ReservationService implements IReservationService {
 
   public async getHostReservations(
     hostEmail: string,
-    status: string[],
+    status: ReservationStatus[],
     reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const host = await this.getUserFromEmail(hostEmail, 'Host');
@@ -184,7 +174,6 @@ class ReservationService implements IReservationService {
     const reservations = await this.reservationRepository.getReservations(
       reservables.map((reservable) => reservable.id!),
       status,
-      reservableType,
     );
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation, reservableType),
@@ -216,11 +205,31 @@ class ReservationService implements IReservationService {
       );
     }
     await this.reservationRepository.confirm(reservation.id!);
-    await this.reservationRepository.cancelPendingReservationsInBetweenDates(
-      reservation.reservableId,
-      reservation.startDate,
-      reservation.endDate,
-    );
+    if (reservation.reservableType === ReservableType.Property) {
+      await this.reservationRepository.cancelPendingReservationsInBetweenDates(
+        reservation.reservableId,
+        reservation.startDate,
+        reservation.endDate,
+      );
+    } else {
+      const totalAmountOfGuestsReserved =
+        await this.reservationRepository.getTotalGuestAmountForReservationWithReservableId(
+          reservable.id!,
+        );
+      const remainingExperienceCapacity =
+        reservable.capacity - totalAmountOfGuestsReserved;
+
+      const experienceReservations =
+        await this.reservationRepository.getReservations(
+          [reservation.reservableId],
+          [ReservationStatus.Pending],
+        );
+      experienceReservations.forEach((reservation) => {
+        if (reservation.amountOfGuests > remainingExperienceCapacity) {
+          this.reservationRepository.cancel(reservation.id!);
+        }
+      });
+    }
   }
 
   public async cancelGuestReservation(

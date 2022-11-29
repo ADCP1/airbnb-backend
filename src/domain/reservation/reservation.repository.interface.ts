@@ -1,4 +1,5 @@
 import { Reservation } from './reservation.entity';
+import { ReservationStatus } from './reservation-status';
 
 export interface IReservationRepository {
   save(reservation: Reservation): Promise<void>;
@@ -16,8 +17,7 @@ export interface IReservationRepository {
   ): Promise<Reservation[]>;
   getReservations(
     reservableIds: string[],
-    status: string[],
-    type: string,
+    status: ReservationStatus[],
   ): Promise<Reservation[]>;
   confirm(id: string): Promise<void>;
   cancel(id: string): Promise<void>;
