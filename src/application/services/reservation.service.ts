@@ -17,7 +17,6 @@ import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
 import {
   DomainException,
-  filterAsync,
   NotFoundException,
   UnauthorizedException,
 } from '@shared';
@@ -90,6 +89,7 @@ class ReservationService implements IReservationService {
       reservableId: property.id,
       reservableType: ReservableType.Property,
     });
+    await this.reservationRepository.validatePropertyAvailability(reservation);
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation, ReservableType.Property);
   }
@@ -110,13 +110,17 @@ class ReservationService implements IReservationService {
         'amount_of_guests required for an in place experience',
       );
     }
+    const totalAmountOfGuestsReserved =
+      await this.reservationRepository.getTotalGuestAmountForReservationWithReservableId(
+        reservationDto.experienceId,
+      );
+    const remainingExperienceCapacity =
+      experience.capacity - totalAmountOfGuestsReserved;
     if (
       experience.type == ExperienceType.InPlace &&
-      reservationDto.amountOfGuests! > experience.capacity
+      reservationDto.amountOfGuests! > remainingExperienceCapacity
     ) {
-      throw new DomainException(
-        `Maximum experience capacity is ${experience.capacity}`,
-      );
+      throw new DomainException(`No more capacity left for this experience`);
     }
 
     const reservation = new Reservation({
@@ -154,11 +158,6 @@ class ReservationService implements IReservationService {
     reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
-    const reservableRepository =
-      reservableType === ReservableType.Property
-        ? this.reservationRepository
-        : this.experienceRepository;
-
     const reservations = await this.reservationRepository.getGuestReservations(
       guest.id!,
       status,

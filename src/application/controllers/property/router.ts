@@ -35,7 +35,7 @@ export function PropertyRouter() {
   );
   router.get(
     '/preview',
-    registerHandler((_req) => propertyController.getPreview()),
+    registerHandler(() => propertyController.getPreview()),
   );
   router.patch(
     '/:propertyId',

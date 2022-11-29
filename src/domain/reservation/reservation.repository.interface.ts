@@ -2,6 +2,7 @@ import { Reservation } from './reservation.entity';
 
 export interface IReservationRepository {
   save(reservation: Reservation): Promise<void>;
+  validatePropertyAvailability(reservation: Reservation): Promise<void>;
   findById(id: string): Promise<Reservation | null>;
   getManyByReservableId(
     reservableId: string,
@@ -25,4 +26,7 @@ export interface IReservationRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<void>;
+  getTotalGuestAmountForReservationWithReservableId(
+    reservableId: string,
+  ): Promise<number>;
 }
