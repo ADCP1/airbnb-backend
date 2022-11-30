@@ -1,9 +1,4 @@
-import {
-  getPaymentTypeValues,
-  getReservationStatusValues,
-  PaymentType,
-  ReservationStatus,
-} from '@domain/reservation';
+import { getPaymentTypeValues, PaymentType } from '@domain/reservation';
 import { IsAfterDateArgConstraint, IsAfterNowConstraint } from '@shared';
 import { Type } from 'class-transformer';
 import {
@@ -15,10 +10,9 @@ import {
   Validate,
 } from 'class-validator';
 
-const reservationStatusValues = getReservationStatusValues();
 const paymentTypeValues = getPaymentTypeValues();
 
-export class CreateReservationDto {
+export class CreatePropertyReservationDto {
   @IsString()
   @IsNotEmpty()
   public propertyId: string;
@@ -39,9 +33,6 @@ export class CreateReservationDto {
   @IsNotEmpty()
   @IsPositive()
   public amountOfGuests: number;
-
-  @IsIn(reservationStatusValues)
-  public status: ReservationStatus;
 
   @IsIn(paymentTypeValues)
   public paymentType: PaymentType;

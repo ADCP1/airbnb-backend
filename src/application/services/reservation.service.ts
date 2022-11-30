@@ -1,67 +1,149 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
-import { IPropertyRepository } from '@domain/property';
-import { IReservationRepository, Reservation } from '@domain/reservation';
+import {
+  Experience,
+  ExperienceType,
+  IExperienceRepository,
+} from '@domain/experience';
+import { IPropertyRepository, Property } from '@domain/property';
+import {
+  IReservationRepository,
+  ReservableType,
+  Reservation,
+  ReservationStatus,
+} from '@domain/reservation';
+import { ResourceType } from '@domain/review';
 import { User } from '@domain/user';
+import { experienceRepository } from '@infra/experience';
 import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
-import { NotFoundException } from '@shared';
+import {
+  DomainException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@shared';
 
 import { ReservationFactory } from './reservation.factory';
 import { IUserService, userService } from './user.service';
 
 interface IReservationService {
-  create(
-    propertyDto: RequestDtos.CreateReservationDto,
+  createForProperty(
+    reservationDto: RequestDtos.CreatePropertyReservationDto,
     guestEmail: string,
   ): Promise<ResponseDtos.ReservationDto>;
-  getPropertyAvailability(
-    propertyDto: RequestDtos.GetPropertyAvailabilityDto,
-  ): Promise<ResponseDtos.PropertyAvailabilityDto>;
+  createForExperience(
+    reservationDto: RequestDtos.CreateExperienceReservationDto,
+    guestEmail: string,
+  ): Promise<ResponseDtos.ReservationDto>;
+  getAvailability(
+    propertyDto: RequestDtos.GetAvailabilityDto,
+  ): Promise<ResponseDtos.AvailabilityDto>;
+  getGuestReservations(
+    guestEmail: string,
+    status: string[],
+    reservableType: ReservableType,
+  ): Promise<ResponseDtos.ReservationDto[]>;
+  getHostReservations(
+    hostEmail: string,
+    status: ReservationStatus[],
+    reservableType: ReservableType,
+  ): Promise<ResponseDtos.ReservationDto[]>;
+  confirmHostReservation(
+    reservationId: string,
+    hostEmail: string,
+  ): Promise<void>;
+  cancelGuestReservation(id: string, email: string): Promise<void>;
+  cancelHostReservation(id: string, email: string): Promise<void>;
+  review(id: string, type: ResourceType): Promise<void>;
 }
 
 class ReservationService implements IReservationService {
   private reservationRepository: IReservationRepository;
   private propertyRepository: IPropertyRepository;
+  private experienceRepository: IExperienceRepository;
   private userService: IUserService;
 
   constructor(
     reservationRepository: IReservationRepository,
     propertyRepository: IPropertyRepository,
+    experienceRepository: IExperienceRepository,
     userService: IUserService,
   ) {
     this.reservationRepository = reservationRepository;
     this.propertyRepository = propertyRepository;
+    this.experienceRepository = experienceRepository;
     this.userService = userService;
   }
 
-  public async create(
-    reservationDto: RequestDtos.CreateReservationDto,
-    guestEmail: string,
-  ): Promise<ResponseDtos.ReservationDto> {
-    const guest = await this.getGuestFromEmail(guestEmail);
-    const reservation = new Reservation({
-      ...reservationDto,
-      guestId: guest.id!,
-    });
-    const property = await this.propertyRepository.findById(
-      reservationDto.propertyId,
-    );
-    if (!property) {
-      throw new NotFoundException('The reservation property does not exist');
-    }
-    await this.reservationRepository.save(reservation);
-    return ReservationFactory.toDto(reservation);
+  public async review(id: string, type: ResourceType): Promise<void> {
+    await this.reservationRepository.review(id, type);
   }
 
-  public async getPropertyAvailability(
-    reservationDto: RequestDtos.GetPropertyAvailabilityDto,
-  ): Promise<ResponseDtos.PropertyAvailabilityDto> {
-    const reservations =
-      await this.reservationRepository.getPropertyReservations(
-        reservationDto.propertyId,
-        reservationDto.from,
-        reservationDto.to,
+  public async createForProperty(
+    reservationDto: RequestDtos.CreatePropertyReservationDto,
+    guestEmail: string,
+  ): Promise<ResponseDtos.ReservationDto> {
+    const guest = await this.getUserFromEmail(guestEmail, 'Guest');
+    const property = await this.getPropertyById(reservationDto.propertyId);
+    if (reservationDto.amountOfGuests > property.capacity) {
+      throw new DomainException(
+        `Maximum property capacity is ${property.capacity}`,
       );
+    }
+    const reservation = new Reservation({
+      ...reservationDto,
+      status: ReservationStatus.Pending,
+      guestId: guest.id!,
+      reservableId: property.id,
+      reservableType: ReservableType.Property,
+      reservableReviewed: false,
+      hostReviewed: false,
+      guestReviewed: false,
+    });
+    await this.reservationRepository.validatePropertyAvailability(reservation);
+    await this.reservationRepository.save(reservation);
+    return ReservationFactory.toDto(reservation, ReservableType.Property);
+  }
+
+  public async createForExperience(
+    reservationDto: RequestDtos.CreateExperienceReservationDto,
+    guestEmail: string,
+  ): Promise<ResponseDtos.ReservationDto> {
+    const guest = await this.getUserFromEmail(guestEmail, 'Guest');
+    const experience = await this.getExperienceById(
+      reservationDto.experienceId,
+    );
+    if (
+      experience.type == ExperienceType.InPlace &&
+      !reservationDto.amountOfGuests
+    ) {
+      throw new DomainException(
+        'amount_of_guests required for an in place experience',
+      );
+    }
+
+    const reservation = new Reservation({
+      ...reservationDto,
+      status: ReservationStatus.Pending,
+      guestId: guest.id!,
+      amountOfGuests: reservationDto.amountOfGuests ?? -1,
+      reservableId: experience.id,
+      reservableType: ReservableType.Experience,
+      reservableReviewed: false,
+      guestReviewed: false,
+      hostReviewed: false,
+    });
+    await this.reservationRepository.save(reservation);
+    return ReservationFactory.toDto(reservation, ReservableType.Experience);
+  }
+
+  public async getAvailability(
+    reservationDto: RequestDtos.GetAvailabilityDto,
+  ): Promise<ResponseDtos.AvailabilityDto> {
+    const reservations = await this.reservationRepository.getManyByReservableId(
+      reservationDto.reservableId,
+      reservationDto.from,
+      reservationDto.to,
+    );
     const availableDates = this.parseReservationsToAvailableDates(
       reservations,
       reservationDto.from,
@@ -70,6 +152,141 @@ class ReservationService implements IReservationService {
     return {
       dates: availableDates,
     };
+  }
+
+  public async getGuestReservations(
+    guestEmail: string,
+    status: string[],
+    reservableType: ReservableType,
+  ): Promise<ResponseDtos.ReservationDto[]> {
+    const guest = await this.getUserFromEmail(guestEmail, 'Guest');
+    const reservations = await this.reservationRepository.getGuestReservations(
+      guest.id!,
+      status,
+      reservableType,
+    );
+
+    // I'm ashamed of this code and the amount of queries it produces, but beggars cant be choosers
+    return reservations.map((reservation: any) =>
+      ReservationFactory.toDto(reservation, reservableType),
+    );
+  }
+
+  public async getHostReservations(
+    hostEmail: string,
+    status: ReservationStatus[],
+    reservableType: ReservableType,
+  ): Promise<ResponseDtos.ReservationDto[]> {
+    const host = await this.getUserFromEmail(hostEmail, 'Host');
+    const reservables =
+      reservableType === ReservableType.Property
+        ? await this.propertyRepository.findByOwnerId(host.id!)
+        : await this.experienceRepository.findByOwnerId(host.id!);
+
+    const reservations = await this.reservationRepository.getReservations(
+      reservables.map((reservable) => reservable.id!),
+      status,
+    );
+    return reservations.map((reservation) =>
+      ReservationFactory.toDto(reservation, reservableType),
+    );
+  }
+
+  public async confirmHostReservation(
+    reservationId: string,
+    hostEmail: string,
+  ): Promise<void> {
+    const reservation = await this.findById(reservationId);
+    if (reservation.status !== ReservationStatus.Pending) {
+      throw new DomainException(
+        `Cannot confirm a reservation with status ${reservation.status}`,
+      );
+    }
+    const host = await this.getUserFromEmail(hostEmail, 'Host');
+    const reservable =
+      (await this.propertyRepository.findById(reservation.reservableId)) ??
+      (await this.experienceRepository.findById(reservation.reservableId));
+    if (!reservable) {
+      throw new NotFoundException(
+        'Failed to find a property or experience for the given reservation',
+      );
+    }
+    if (reservable.ownerId !== host.id) {
+      throw new UnauthorizedException(
+        'You are not the owner of the reservation reservable',
+      );
+    }
+    await this.reservationRepository.confirm(reservation.id!);
+    if (reservation.reservableType === ReservableType.Property) {
+      await this.reservationRepository.cancelPendingReservationsInBetweenDates(
+        reservation.reservableId,
+        reservation.startDate,
+        reservation.endDate,
+      );
+    } else {
+      const totalAmountOfGuestsReserved =
+        await this.reservationRepository.getTotalGuestAmountForReservationWithReservableId(
+          reservable.id!,
+        );
+      const remainingExperienceCapacity =
+        reservable.capacity - totalAmountOfGuestsReserved;
+
+      const experienceReservations =
+        await this.reservationRepository.getReservations(
+          [reservation.reservableId],
+          [ReservationStatus.Pending],
+        );
+      experienceReservations.forEach((reservation) => {
+        if (reservation.amountOfGuests > remainingExperienceCapacity) {
+          this.reservationRepository.cancel(reservation.id!);
+        }
+      });
+      const experience = await this.experienceRepository.findById(
+        reservable.id!,
+      );
+      experience!.consumedCapacity += reservation.amountOfGuests;
+      await this.experienceRepository.save(experience!);
+    }
+  }
+
+  public async cancelGuestReservation(
+    id: string,
+    email: string,
+  ): Promise<void> {
+    const reservation = await this.findById(id);
+    const guest = await this.getUserFromEmail(email, 'Guest');
+    if (reservation.guestId !== guest.id) {
+      throw new UnauthorizedException(
+        'You are not allowed to cancel this reservation',
+      );
+    }
+    if (reservation.reservableType === ReservableType.Experience) {
+      const experience = await this.experienceRepository.findById(
+        reservation.reservableId!,
+      );
+      experience!.consumedCapacity -= reservation.amountOfGuests;
+      await this.experienceRepository.save(experience!);
+    }
+    await this.reservationRepository.cancel(reservation.id!);
+  }
+
+  public async cancelHostReservation(id: string, email: string): Promise<void> {
+    const reservation = await this.findById(id);
+    const host = await this.getUserFromEmail(email, 'Host');
+    const reservable =
+      (await this.propertyRepository.findById(reservation.reservableId)) ??
+      (await this.experienceRepository.findById(reservation.reservableId));
+    if (!reservable) {
+      throw new NotFoundException(
+        'Failed to find a property or experience for the given reservation',
+      );
+    }
+    if (reservable.ownerId !== host.id) {
+      throw new UnauthorizedException(
+        'You are not allowed to cancel this reservation',
+      );
+    }
+    await this.reservationRepository.cancel(reservation.id!);
   }
 
   private parseReservationsToAvailableDates(
@@ -106,18 +323,48 @@ class ReservationService implements IReservationService {
     return availableDates;
   }
 
-  private async getGuestFromEmail(email: string): Promise<User> {
-    const guest = await this.userService.findFromEmail(email);
-    if (!guest) {
-      throw new NotFoundException('Guest does not exist');
+  private async getUserFromEmail(
+    email: string,
+    userType: string,
+  ): Promise<User> {
+    const user = await this.userService.findFromEmail(email);
+    if (!user) {
+      throw new NotFoundException(`${userType} does not exist`);
     }
-    return guest;
+    return user;
+  }
+
+  private async getPropertyById(id: string): Promise<Property> {
+    const property = await this.propertyRepository.findById(id);
+    if (!property) {
+      throw new NotFoundException('The property to be reserved does not exist');
+    }
+    return property;
+  }
+
+  private async getExperienceById(id: string): Promise<Experience> {
+    const experience = await this.experienceRepository.findById(id);
+    if (!experience) {
+      throw new NotFoundException(
+        'The experience to be reserved does not exist',
+      );
+    }
+    return experience;
+  }
+
+  private async findById(id: string): Promise<Reservation> {
+    const reservation = await this.reservationRepository.findById(id);
+    if (!reservation) {
+      throw new NotFoundException('The reservation does not exist');
+    }
+    return reservation;
   }
 }
 
 const reservationService: IReservationService = new ReservationService(
   reservationRepository,
   propertyRepository,
+  experienceRepository,
   userService,
 );
 

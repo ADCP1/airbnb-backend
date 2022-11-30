@@ -1,4 +1,4 @@
-import { IUserRepository, User } from '@domain/user';
+import { CreditCardInfo, IUserRepository, User } from '@domain/user';
 import { loadObjectIdentification } from '@infra/identification';
 import cloneDeep from 'clone-deep';
 
@@ -22,6 +22,20 @@ class UserRepository implements IUserRepository {
     return new User({
       id: user.id,
       ...user.toObject(),
+    });
+  }
+
+  public async findOneById(id: string): Promise<User | null> {
+    const user = await UserDoc.findById(id).lean();
+    if (!user) return null;
+    return new User({
+      id,
+      ...user,
+      creditCardInfo: user.creditCardInfo
+        ? new CreditCardInfo({
+            ...user.creditCardInfo,
+          })
+        : undefined,
     });
   }
 }

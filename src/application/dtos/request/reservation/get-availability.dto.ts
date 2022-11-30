@@ -2,10 +2,10 @@ import { IsAfterDateArgConstraint, IsAfterNowConstraint } from '@shared';
 import { Type } from 'class-transformer';
 import { IsDate, IsNotEmpty, IsString, Validate } from 'class-validator';
 
-export class GetPropertyAvailabilityDto {
+export class GetAvailabilityDto {
   @IsString()
   @IsNotEmpty()
-  public propertyId: string;
+  public reservableId: string;
 
   @Type(() => Date)
   @IsDate()
