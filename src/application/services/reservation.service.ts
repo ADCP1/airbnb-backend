@@ -248,6 +248,13 @@ class ReservationService implements IReservationService {
         'You are not allowed to cancel this reservation',
       );
     }
+    if (reservation.reservableType === ReservableType.Experience) {
+      const experience = await this.experienceRepository.findById(
+        reservation.reservableId!,
+      );
+      experience!.consumedCapacity -= reservation.amountOfGuests;
+      await this.experienceRepository.save(experience!);
+    }
     await this.reservationRepository.cancel(reservation.id!);
   }
 
