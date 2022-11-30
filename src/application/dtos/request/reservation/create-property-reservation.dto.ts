@@ -15,7 +15,6 @@ import {
   Validate,
 } from 'class-validator';
 
-const reservationStatusValues = getReservationStatusValues();
 const paymentTypeValues = getPaymentTypeValues();
 
 export class CreatePropertyReservationDto {
@@ -39,9 +38,6 @@ export class CreatePropertyReservationDto {
   @IsNotEmpty()
   @IsPositive()
   public amountOfGuests: number;
-
-  @IsIn(reservationStatusValues)
-  public status: ReservationStatus;
 
   @IsIn(paymentTypeValues)
   public paymentType: PaymentType;

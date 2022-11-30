@@ -85,6 +85,7 @@ class ReservationService implements IReservationService {
     }
     const reservation = new Reservation({
       ...reservationDto,
+      status: ReservationStatus.Pending,
       guestId: guest.id!,
       reservableId: property.id,
       reservableType: ReservableType.Property,
@@ -125,6 +126,7 @@ class ReservationService implements IReservationService {
 
     const reservation = new Reservation({
       ...reservationDto,
+      status: ReservationStatus.Pending,
       guestId: guest.id!,
       amountOfGuests: reservationDto.amountOfGuests ?? -1,
       reservableId: experience.id,
