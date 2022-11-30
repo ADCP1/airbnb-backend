@@ -1,10 +1,4 @@
-import {
-  getPaymentTypeValues,
-  getReservationStatusValues,
-  PaymentType,
-  ReservationStatus,
-} from '@domain/reservation';
-import { IsAfterDateArgConstraint, IsAfterNowConstraint } from '@shared';
+import { getPaymentTypeValues, PaymentType } from '@domain/reservation';
 import { Type } from 'class-transformer';
 import {
   IsDate,
@@ -13,10 +7,8 @@ import {
   IsOptional,
   IsPositive,
   IsString,
-  Validate,
 } from 'class-validator';
 
-const reservationStatusValues = getReservationStatusValues();
 const paymentTypeValues = getPaymentTypeValues();
 
 export class CreateExperienceReservationDto {
@@ -37,9 +29,6 @@ export class CreateExperienceReservationDto {
   @IsOptional()
   @IsPositive()
   public amountOfGuests?: number;
-
-  @IsIn(reservationStatusValues)
-  public status: ReservationStatus;
 
   @IsIn(paymentTypeValues)
   public paymentType: PaymentType;

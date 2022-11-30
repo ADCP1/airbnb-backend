@@ -1,4 +1,9 @@
-import { IReservationRepository, Reservation } from '@domain/reservation';
+import {
+  IReservationRepository,
+  ReservableType,
+  Reservation,
+  ReservationStatus,
+} from '@domain/reservation';
 import { loadObjectIdentification } from '@infra/identification';
 import { DomainException } from '@shared';
 import cloneDeep from 'clone-deep';
@@ -7,8 +12,6 @@ import { ReservationDoc } from './reservation.doc';
 
 class ReservationRepository implements IReservationRepository {
   public async save(reservation: Reservation) {
-    console.log('EN SAVE', reservation);
-    await this.validatePropertyAvailability(reservation);
     loadObjectIdentification(reservation);
     await ReservationDoc.updateOne(
       { _id: reservation.id },
@@ -67,13 +70,11 @@ class ReservationRepository implements IReservationRepository {
 
   public async getReservations(
     reservableIds: string[],
-    status: string[],
-    type: string,
+    status: ReservationStatus[],
   ): Promise<Reservation[]> {
     const reservations = await ReservationDoc.find({
       reservableId: { $in: reservableIds },
       status: { $in: status },
-      type: { $eq: type },
     }).lean();
     return reservations.map(
       (reservation) =>
@@ -117,7 +118,7 @@ class ReservationRepository implements IReservationRepository {
     );
   }
 
-  private async validatePropertyAvailability(
+  public async validatePropertyAvailability(
     reservation: Reservation,
   ): Promise<void> {
     const reservations =
@@ -132,6 +133,20 @@ class ReservationRepository implements IReservationRepository {
         'Property is not available for the selected dates.',
       );
     }
+  }
+
+  public async getTotalGuestAmountForReservationWithReservableId(
+    reservableId: string,
+  ): Promise<number> {
+    const reservations = await ReservationDoc.find({
+      reservableId,
+      status: ReservationStatus.Confirmed,
+    })
+      .select({ amountOfGuests: 1 })
+      .lean();
+    return reservations
+      .map((reservation) => reservation.amountOfGuests)
+      .reduce((accum, next) => accum + next, 0);
   }
 
   private async findReservationsByReservableIdInBetweenDatesAndStatus(
@@ -149,6 +164,10 @@ class ReservationRepository implements IReservationRepository {
         },
         {
           endDate: { $gt: startDate, $lte: endDate },
+        },
+        {
+          startDate: { $lte: startDate },
+          endDate: { $gt: startDate },
         },
       ],
     }).lean();

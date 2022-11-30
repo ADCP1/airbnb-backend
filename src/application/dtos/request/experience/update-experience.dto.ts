@@ -8,6 +8,8 @@ import {
   getExperienceLanguagesValues,
   getExperienceTypesValues,
 } from '@domain/experience';
+import { IsAfterNowConstraint } from '@shared';
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsIn,
@@ -16,6 +18,7 @@ import {
   IsPositive,
   IsString,
   IsUrl,
+  Validate,
 } from 'class-validator';
 
 const experienceTypes = getExperienceTypesValues();
@@ -52,10 +55,10 @@ export class UpdateExperienceDto {
   @IsUrl(undefined, { each: true })
   imagesUrls?: string[];
 
-  @IsOptional()
-  @IsNotEmpty()
-  @IsDate({ each: true })
-  dates?: Date[];
+  @Type(() => Date)
+  @IsDate()
+  @Validate(IsAfterNowConstraint)
+  date?: Date;
 
   @IsOptional()
   @IsIn(experienceTypes)

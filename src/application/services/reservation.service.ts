@@ -17,7 +17,6 @@ import { propertyRepository } from '@infra/property';
 import { reservationRepository } from '@infra/reservation';
 import {
   DomainException,
-  filterAsync,
   NotFoundException,
   UnauthorizedException,
 } from '@shared';
@@ -44,7 +43,7 @@ interface IReservationService {
   ): Promise<ResponseDtos.ReservationDto[]>;
   getHostReservations(
     hostEmail: string,
-    status: string[],
+    status: ReservationStatus[],
     reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]>;
   confirmHostReservation(
@@ -86,10 +85,12 @@ class ReservationService implements IReservationService {
     }
     const reservation = new Reservation({
       ...reservationDto,
+      status: ReservationStatus.Pending,
       guestId: guest.id!,
       reservableId: property.id,
       reservableType: ReservableType.Property,
     });
+    await this.reservationRepository.validatePropertyAvailability(reservation);
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation, ReservableType.Property);
   }
@@ -110,17 +111,10 @@ class ReservationService implements IReservationService {
         'amount_of_guests required for an in place experience',
       );
     }
-    if (
-      experience.type == ExperienceType.InPlace &&
-      reservationDto.amountOfGuests! > experience.capacity
-    ) {
-      throw new DomainException(
-        `Maximum experience capacity is ${experience.capacity}`,
-      );
-    }
 
     const reservation = new Reservation({
       ...reservationDto,
+      status: ReservationStatus.Pending,
       guestId: guest.id!,
       amountOfGuests: reservationDto.amountOfGuests ?? -1,
       reservableId: experience.id,
@@ -154,11 +148,6 @@ class ReservationService implements IReservationService {
     reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const guest = await this.getUserFromEmail(guestEmail, 'Guest');
-    const reservableRepository =
-      reservableType === ReservableType.Property
-        ? this.reservationRepository
-        : this.experienceRepository;
-
     const reservations = await this.reservationRepository.getGuestReservations(
       guest.id!,
       status,
@@ -173,7 +162,7 @@ class ReservationService implements IReservationService {
 
   public async getHostReservations(
     hostEmail: string,
-    status: string[],
+    status: ReservationStatus[],
     reservableType: ReservableType,
   ): Promise<ResponseDtos.ReservationDto[]> {
     const host = await this.getUserFromEmail(hostEmail, 'Host');
@@ -185,7 +174,6 @@ class ReservationService implements IReservationService {
     const reservations = await this.reservationRepository.getReservations(
       reservables.map((reservable) => reservable.id!),
       status,
-      reservableType,
     );
     return reservations.map((reservation) =>
       ReservationFactory.toDto(reservation, reservableType),
@@ -217,11 +205,31 @@ class ReservationService implements IReservationService {
       );
     }
     await this.reservationRepository.confirm(reservation.id!);
-    await this.reservationRepository.cancelPendingReservationsInBetweenDates(
-      reservation.reservableId,
-      reservation.startDate,
-      reservation.endDate,
-    );
+    if (reservation.reservableType === ReservableType.Property) {
+      await this.reservationRepository.cancelPendingReservationsInBetweenDates(
+        reservation.reservableId,
+        reservation.startDate,
+        reservation.endDate,
+      );
+    } else {
+      const totalAmountOfGuestsReserved =
+        await this.reservationRepository.getTotalGuestAmountForReservationWithReservableId(
+          reservable.id!,
+        );
+      const remainingExperienceCapacity =
+        reservable.capacity - totalAmountOfGuestsReserved;
+
+      const experienceReservations =
+        await this.reservationRepository.getReservations(
+          [reservation.reservableId],
+          [ReservationStatus.Pending],
+        );
+      experienceReservations.forEach((reservation) => {
+        if (reservation.amountOfGuests > remainingExperienceCapacity) {
+          this.reservationRepository.cancel(reservation.id!);
+        }
+      });
+    }
   }
 
   public async cancelGuestReservation(
