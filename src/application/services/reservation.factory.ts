@@ -16,6 +16,9 @@ export class ReservationFactory {
       status: reservation.status,
       amountOfGuests: reservation.amountOfGuests,
       paymentType: reservation.paymentType,
+      reservableReviewed: reservation.reservableReviewed,
+      guestReviewed: reservation.guestReviewed,
+      hostReviewed: reservation.hostReviewed,
     };
   }
 }

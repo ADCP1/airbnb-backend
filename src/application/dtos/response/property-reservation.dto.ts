@@ -14,4 +14,7 @@ export type ReservationDto = {
   status: ReservationStatus;
   amountOfGuests: number;
   paymentType: PaymentType;
+  hostReviewed: boolean;
+  guestReviewed: boolean;
+  reservableReviewed: boolean;
 };
