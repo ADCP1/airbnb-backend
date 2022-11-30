@@ -26,4 +26,8 @@ export class CreateReviewDto {
   @Min(0)
   @Max(5)
   public rating: number;
+
+  @IsString()
+  @IsNotEmpty()
+  public reservationId: string;
 }

@@ -1,4 +1,8 @@
 import { RequestDtos, ResponseDtos } from '@application/dtos';
+import {
+  IReservationService,
+  reservationService,
+} from '@application/services/reservation.service';
 import { IReviewRepository, ResourceType, Review } from '@domain/review';
 import { User } from '@domain/user';
 import { reviewRepository } from '@infra/review';
@@ -31,17 +35,20 @@ class ReviewService implements IReviewService {
   private userService: IUserService;
   private propertyService: IPropertyService;
   private experienceService: IExperienceService;
+  private reservationService: IReservationService;
 
   constructor(
     reviewRepository: IReviewRepository,
     userService: IUserService,
     propertyService: IPropertyService,
     experienceService: IExperienceService,
+    reservationService: IReservationService,
   ) {
     this.reviewRepository = reviewRepository;
     this.userService = userService;
     this.propertyService = propertyService;
     this.experienceService = experienceService;
+    this.reservationService = reservationService;
   }
 
   public async create(
@@ -53,11 +60,18 @@ class ReviewService implements IReviewService {
       reviewDto.resourceId,
       reviewDto.resourceType,
     );
+
     const review = new Review({
       ...reviewDto,
       updatedAt: new Date(),
       reviewerId: reviewer.id!,
     });
+
+    await this.reservationService.review(
+      reviewDto.reservationId,
+      reviewDto.resourceType,
+    );
+
     await this.reviewRepository.save(review);
     return ReviewFactory.toDto(review);
   }
@@ -178,6 +192,7 @@ const reviewService: IReviewService = new ReviewService(
   userService,
   propertyService,
   experienceService,
+  reservationService,
 );
 
 export { IReviewService, reviewService };

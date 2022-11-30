@@ -1,9 +1,9 @@
 import {
   IReservationRepository,
-  ReservableType,
   Reservation,
   ReservationStatus,
 } from '@domain/reservation';
+import { ResourceType } from '@domain/review';
 import { loadObjectIdentification } from '@infra/identification';
 import { DomainException } from '@shared';
 import cloneDeep from 'clone-deep';
@@ -178,6 +178,24 @@ class ReservationRepository implements IReservationRepository {
           id: reservation._id.toString(),
           ...reservation,
         }),
+    );
+  }
+
+  public async review(reservationId: any, type: ResourceType): Promise<void> {
+    let updateField;
+    switch (type) {
+      case ResourceType.Host:
+        updateField = { hostReviewed: true };
+        break;
+      case ResourceType.Guest:
+        updateField = { guestReviewed: true };
+        break;
+      default:
+        updateField = { reservableReviewed: true };
+    }
+    await ReservationDoc.updateOne(
+      { _id: reservationId },
+      { $set: updateField },
     );
   }
 }

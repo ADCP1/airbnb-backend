@@ -1,3 +1,5 @@
+import { ResourceType } from '@domain/review';
+
 import { Reservation } from './reservation.entity';
 import { ReservationStatus } from './reservation-status';
 
@@ -29,4 +31,5 @@ export interface IReservationRepository {
   getTotalGuestAmountForReservationWithReservableId(
     reservableId: string,
   ): Promise<number>;
+  review(reservationId: any, type: ResourceType): Promise<void>;
 }
