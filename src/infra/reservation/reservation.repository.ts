@@ -1,4 +1,9 @@
-import { IReservationRepository, Reservation } from '@domain/reservation';
+import {
+  IReservationRepository,
+  ReservableType,
+  Reservation,
+  ReservationStatus,
+} from '@domain/reservation';
 import { loadObjectIdentification } from '@infra/identification';
 import { DomainException } from '@shared';
 import cloneDeep from 'clone-deep';
@@ -65,13 +70,11 @@ class ReservationRepository implements IReservationRepository {
 
   public async getReservations(
     reservableIds: string[],
-    status: string[],
-    type: string,
+    status: ReservationStatus[],
   ): Promise<Reservation[]> {
     const reservations = await ReservationDoc.find({
       reservableId: { $in: reservableIds },
       status: { $in: status },
-      type: { $eq: type },
     }).lean();
     return reservations.map(
       (reservation) =>
@@ -135,7 +138,10 @@ class ReservationRepository implements IReservationRepository {
   public async getTotalGuestAmountForReservationWithReservableId(
     reservableId: string,
   ): Promise<number> {
-    const reservations = await ReservationDoc.find({ reservableId })
+    const reservations = await ReservationDoc.find({
+      reservableId,
+      status: ReservationStatus.Confirmed,
+    })
       .select({ amountOfGuests: 1 })
       .lean();
     return reservations

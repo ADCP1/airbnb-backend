@@ -1,9 +1,4 @@
-import {
-  getPaymentTypeValues,
-  getReservationStatusValues,
-  PaymentType,
-  ReservationStatus,
-} from '@domain/reservation';
+import { getPaymentTypeValues, PaymentType } from '@domain/reservation';
 import { IsAfterDateArgConstraint, IsAfterNowConstraint } from '@shared';
 import { Type } from 'class-transformer';
 import {

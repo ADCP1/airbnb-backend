@@ -1,6 +1,7 @@
 import { Entity } from '@domain';
 
 import { PaymentType } from './payment-type';
+import { ReservableType } from './reservable-type';
 import { ReservationStatus } from './reservation-status';
 
 export type ReservationArgs = {
@@ -12,7 +13,7 @@ export type ReservationArgs = {
   status: ReservationStatus;
   amountOfGuests: number;
   paymentType: PaymentType;
-  reservableType?: string;
+  reservableType: ReservableType;
 };
 
 export class Reservation extends Entity {
@@ -23,7 +24,7 @@ export class Reservation extends Entity {
   public status: ReservationStatus;
   public amountOfGuests: number;
   public paymentType: PaymentType;
-  public reservableType: string | undefined;
+  public reservableType: ReservableType;
 
   constructor(args: ReservationArgs) {
     super(args.id);
