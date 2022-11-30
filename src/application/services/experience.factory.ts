@@ -11,6 +11,7 @@ export class ExperienceFactory {
       type: experience.type,
       price: experience.price,
       capacity: experience.capacity,
+      consumedCapacity: experience.consumedCapacity,
       location: experience.location!,
       duration: experience.duration,
       imagesUrls: experience.imagesUrls,

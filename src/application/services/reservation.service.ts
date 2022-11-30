@@ -229,6 +229,11 @@ class ReservationService implements IReservationService {
           this.reservationRepository.cancel(reservation.id!);
         }
       });
+      const experience = await this.experienceRepository.findById(
+        reservable.id!,
+      );
+      experience!.consumedCapacity += reservation.amountOfGuests;
+      await this.experienceRepository.save(experience!);
     }
   }
 

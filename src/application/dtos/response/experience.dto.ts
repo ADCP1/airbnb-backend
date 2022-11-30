@@ -17,6 +17,7 @@ export type ExperienceDto = {
   date: Date;
   type: ExperienceType;
   capacity: number;
+  consumedCapacity: number;
   languages: ExperienceLanguage[];
   accessibility: ExperienceAccessibility[];
   category: ExperienceCategory;

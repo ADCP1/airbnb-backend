@@ -32,6 +32,10 @@ const experienceSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  consumedCapacity: {
+    type: Number,
+    required: true,
+  },
   location: {
     type: String,
   },

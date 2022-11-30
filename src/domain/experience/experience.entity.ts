@@ -13,6 +13,7 @@ export type ExperienceArgs = {
   description: string;
   price: number;
   capacity: number;
+  consumedCapacity: number;
   location?: string;
   duration: number; // in hours
   imagesUrls: string[];
@@ -29,6 +30,7 @@ export class Experience extends Entity {
   public description: string;
   public price: number;
   public capacity: number;
+  public consumedCapacity: number;
   public location?: string;
   public duration: number;
   public imagesUrls: string[];
@@ -45,6 +47,7 @@ export class Experience extends Entity {
     this.description = args.description;
     this.price = args.price;
     this.capacity = args.capacity;
+    this.consumedCapacity = args.consumedCapacity;
     this.location = args.location;
     this.duration = args.duration;
     this.imagesUrls = args.imagesUrls;

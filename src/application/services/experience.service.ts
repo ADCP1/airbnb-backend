@@ -60,6 +60,7 @@ class ExperienceService implements IExperienceService {
       ...experienceDto,
       ownerId: organizer.id!,
       capacity: experienceDto.capacity ?? 0,
+      consumedCapacity: 0,
     });
     await this.experienceRepository.save(experience);
     return ExperienceFactory.toDto(experience);
@@ -77,6 +78,14 @@ class ExperienceService implements IExperienceService {
     }
     if (experience.type == ExperienceType.Online) {
       experienceDto.capacity = 0;
+    }
+    if (
+      experienceDto.capacity &&
+      experienceDto.capacity < experience.consumedCapacity
+    ) {
+      throw new DomainException(
+        'This experience has more confirmed reservations than the new capacity, invalid change',
+      );
     }
     const updatedExperience = new Experience({
       ...experience,
