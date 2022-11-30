@@ -42,6 +42,18 @@ const reservationSchema = new mongoose.Schema({
     enum: getReservableTypeValues(),
     required: true,
   },
+  reservableReviewed: {
+    type: Boolean,
+    required: true,
+  },
+  hostReviewed: {
+    type: Boolean,
+    required: true,
+  },
+  guestReviewed: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 export const ReservationDoc = mongoose.model('Reservation', reservationSchema);

@@ -14,6 +14,9 @@ export type ReservationArgs = {
   amountOfGuests: number;
   paymentType: PaymentType;
   reservableType: ReservableType;
+  reservableReviewed: boolean;
+  hostReviewed: boolean;
+  guestReviewed: boolean;
 };
 
 export class Reservation extends Entity {
@@ -25,6 +28,9 @@ export class Reservation extends Entity {
   public amountOfGuests: number;
   public paymentType: PaymentType;
   public reservableType: ReservableType;
+  public reservableReviewed: boolean;
+  public hostReviewed: boolean;
+  public guestReviewed: boolean;
 
   constructor(args: ReservationArgs) {
     super(args.id);
@@ -36,5 +42,8 @@ export class Reservation extends Entity {
     this.amountOfGuests = args.amountOfGuests;
     this.paymentType = args.paymentType;
     this.reservableType = args.reservableType;
+    this.reservableReviewed = args.reservableReviewed;
+    this.hostReviewed = args.hostReviewed;
+    this.guestReviewed = args.guestReviewed;
   }
 }

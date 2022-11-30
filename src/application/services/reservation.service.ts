@@ -11,6 +11,7 @@ import {
   Reservation,
   ReservationStatus,
 } from '@domain/reservation';
+import { ResourceType } from '@domain/review';
 import { User } from '@domain/user';
 import { experienceRepository } from '@infra/experience';
 import { propertyRepository } from '@infra/property';
@@ -52,6 +53,7 @@ interface IReservationService {
   ): Promise<void>;
   cancelGuestReservation(id: string, email: string): Promise<void>;
   cancelHostReservation(id: string, email: string): Promise<void>;
+  review(id: string, type: ResourceType): Promise<void>;
 }
 
 class ReservationService implements IReservationService {
@@ -72,6 +74,10 @@ class ReservationService implements IReservationService {
     this.userService = userService;
   }
 
+  public async review(id: string, type: ResourceType): Promise<void> {
+    await this.reservationRepository.review(id, type);
+  }
+
   public async createForProperty(
     reservationDto: RequestDtos.CreatePropertyReservationDto,
     guestEmail: string,
@@ -89,6 +95,9 @@ class ReservationService implements IReservationService {
       guestId: guest.id!,
       reservableId: property.id,
       reservableType: ReservableType.Property,
+      reservableReviewed: false,
+      hostReviewed: false,
+      guestReviewed: false,
     });
     await this.reservationRepository.validatePropertyAvailability(reservation);
     await this.reservationRepository.save(reservation);
@@ -119,6 +128,9 @@ class ReservationService implements IReservationService {
       amountOfGuests: reservationDto.amountOfGuests ?? -1,
       reservableId: experience.id,
       reservableType: ReservableType.Experience,
+      reservableReviewed: false,
+      guestReviewed: false,
+      hostReviewed: false,
     });
     await this.reservationRepository.save(reservation);
     return ReservationFactory.toDto(reservation, ReservableType.Experience);
